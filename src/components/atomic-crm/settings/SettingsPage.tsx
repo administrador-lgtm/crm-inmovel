@@ -168,7 +168,7 @@ const SettingsFormFields = () => {
             <TextInput source="title" label="crm.settings.app_title" />
             <AutocompleteInput
               source="currency"
-              label="crm.settings.deals.currency"
+              label={translate("crm.settings.currency", { _: "Currency" })}
               choices={currencyChoices}
               inputText={(choice) => choice?.id}
               modal
@@ -234,7 +234,7 @@ const SettingsFormFields = () => {
               })}
             </h2>
             <h3 className="text-lg font-medium text-muted-foreground">
-              {translate("crm.settings.deals.stages", { _: "Pipeline stages" })}
+              {translate("crm.settings.leads.stages", { _: "Pipeline stages" })}
             </h3>
             <ArrayInput source="leadStages" label={false} helperText={false}>
               <SimpleFormIterator disableClear>

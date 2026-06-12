@@ -190,50 +190,6 @@ export const englishCrmMessages = {
         title: "Hot Contacts",
       },
     },
-    deals: {
-      name: "Deal |||| Deals",
-      fields: {
-        name: "Name",
-        description: "Description",
-        company_id: "Company",
-        contact_ids: "Contacts",
-        category: "Category",
-        amount: "Budget",
-        expected_closing_date: "Expected closing date",
-        stage: "Stage",
-      },
-      action: {
-        back_to_deal: "Back to deal",
-        create: "Create deal",
-        new: "New Deal",
-      },
-      field_categories: {
-        misc: "Misc",
-      },
-      archived: {
-        action: "Archive",
-        error: "Error: deal not archived",
-        list_title: "Archived Deals",
-        success: "Deal archived",
-        title: "Archived Deal",
-        view: "View archived deals",
-      },
-      inputs: {
-        linked_to: "Linked to",
-      },
-      unarchived: {
-        action: "Send back to the board",
-        error: "Error: deal not unarchived",
-        success: "Deal unarchived",
-      },
-      updated: "Deal updated",
-      empty: {
-        before_create: "before creating a deal.",
-        description: "It seems your deal list is empty.",
-        title: "No deals found",
-      },
-      invalid_date: "Invalid date",
-    },
     notes: {
       name: "Note |||| Notes",
       forcedCaseName: "Note",
@@ -242,7 +198,6 @@ export const englishCrmMessages = {
         date: "Date",
         attachments: "Attachments",
         contact_id: "Contact",
-        deal_id: "Deal",
       },
       action: {
         add: "Add note",
@@ -416,17 +371,11 @@ export const englishCrmMessages = {
       you_added_contact: "You added",
       added_note: "%{name} added a note about",
       you_added_note: "You added a note about",
-      added_note_about_deal: "%{name} added a note about deal",
-      you_added_note_about_deal: "You added a note about deal",
-      added_deal: "%{name} added deal",
-      you_added_deal: "You added deal",
       at_company: "at",
       to: "to",
       load_more: "Load more activity",
     },
     dashboard: {
-      deals_chart: "Upcoming Deal Revenue",
-      deals_pipeline: "Deals Pipeline",
       latest_activity: "Latest Activity",
       latest_activity_error: "Error loading latest activity",
       latest_notes: "My Latest Notes",
@@ -481,13 +430,9 @@ export const englishCrmMessages = {
         sectors: "Sectors",
       },
       dark_mode_logo: "Dark Mode Logo",
-      deals: {
-        categories: "Categories",
-        currency: "Currency",
-        pipeline_help:
-          "Select which deal stages should count as pipeline deals.",
-        pipeline_statuses: "Pipeline Statuses",
-        stages: "Stages",
+      currency: "Currency",
+      leads: {
+        stages: "Pipeline stages",
       },
       light_mode_logo: "Light Mode Logo",
       notes: {
@@ -505,16 +450,6 @@ export const englishCrmMessages = {
       app_title: "App Title",
       sections: {
         branding: "Branding",
-      },
-      validation: {
-        duplicate: "Duplicate %{display_name}: %{items}",
-        in_use:
-          "Cannot remove %{display_name} that are still used by deals: %{items}",
-        validating: "Validating\u2026",
-        entities: {
-          categories: "categories",
-          stages: "stages",
-        },
       },
     },
     theme: {
