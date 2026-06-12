@@ -174,7 +174,6 @@ export const createDataProvider = ({
         const { filter = {}, pagination } = params;
         const all = await getActivityLog(
           withSupabaseFilterAdapter(baseDataProvider),
-          filter.company_id,
           filter.sales_id,
         );
         const { page, perPage } = pagination;

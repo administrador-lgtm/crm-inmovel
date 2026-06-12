@@ -14,8 +14,8 @@ export const Avatar = (props: {
   title?: string;
 }) => {
   const record = useRecordContext<Contact>(props);
-  // If we come from company page, the record is defined (to pass the company as a prop),
-  // but neither of those fields are and this lead to an error when creating contact.
+  // The record may be defined while its fields are not (e.g. when creating a
+  // contact), which would otherwise lead to an error.
   if (!record?.avatar && !record?.first_name && !record?.last_name) {
     return null;
   }

@@ -1,11 +1,9 @@
 import { type RaRecord, useGetIdentity, useTranslate } from "ra-core";
 
 import { ReferenceField } from "@/components/admin/reference-field";
-import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { RelativeDate } from "../misc/RelativeDate";
 import { useGetSalesName } from "../sales/useGetSalesName";
 import type { ActivityDealNoteCreated } from "../types";
-import { useActivityLogContext } from "./ActivityLogContext";
 import { ActivityLogNote } from "./ActivityLogNote";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -16,7 +14,6 @@ type ActivityLogDealNoteCreatedProps = {
 export function ActivityLogDealNoteCreated({
   activity,
 }: ActivityLogDealNoteCreatedProps) {
-  const context = useActivityLogContext();
   const isMobile = useIsMobile();
   const translate = useTranslate();
   const { identity } = useGetIdentity();
@@ -29,21 +26,6 @@ export function ActivityLogDealNoteCreated({
     <ActivityLogNote
       header={
         <div className="flex flex-row items-start gap-2 flex-grow">
-          <ReferenceField
-            source="deal_id"
-            reference="deals"
-            record={dealNote}
-            link={false}
-          >
-            <ReferenceField
-              source="company_id"
-              reference="companies"
-              link={false}
-            >
-              <CompanyAvatar width={20} height={20} />
-            </ReferenceField>
-          </ReferenceField>
-
           <span className="text-muted-foreground text-sm flex-grow">
             {translate(
               isCurrentUser
@@ -56,33 +38,9 @@ export function ActivityLogDealNoteCreated({
               reference="deals"
               record={dealNote}
               link={isMobile ? false : "show"}
-            />
-            {context !== "company" && (
-              <>
-                {" "}
-                {translate("crm.activity.at_company")}{" "}
-                <ReferenceField
-                  source="deal_id"
-                  reference="deals"
-                  record={dealNote}
-                  link={false}
-                >
-                  <ReferenceField
-                    source="company_id"
-                    reference="companies"
-                    link="show"
-                  />
-                </ReferenceField>{" "}
-                <RelativeDate date={activity.date} />
-              </>
-            )}
+            />{" "}
+            <RelativeDate date={activity.date} />
           </span>
-
-          {context === "company" && (
-            <span className="text-muted-foreground text-sm">
-              <RelativeDate date={activity.date} />
-            </span>
-          )}
         </div>
       }
       text={dealNote.text}
