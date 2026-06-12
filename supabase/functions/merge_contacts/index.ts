@@ -58,7 +58,6 @@ function mergeContactData(winner: Contact, loser: Contact) {
     first_name: winner.first_name ?? loser.first_name,
     last_name: winner.last_name ?? loser.last_name,
     title: winner.title ?? loser.title,
-    company_id: winner.company_id ?? loser.company_id,
     email_jsonb: JSON.stringify(mergedEmails) as any,
     phone_jsonb: JSON.stringify(mergedPhones) as any,
     linkedin_url: winner.linkedin_url || loser.linkedin_url,

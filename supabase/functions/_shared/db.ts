@@ -32,7 +32,6 @@ export interface ContactsTable {
   has_newsletter: boolean | null;
   status: string | null;
   tags: number[] | null;
-  company_id: number | null;
   sales_id: number | null;
   linkedin_url: string | null;
 }
@@ -60,7 +59,6 @@ interface ContactNotesTable {
 interface DealsTable {
   id: Generated<number>;
   name: string;
-  company_id: number | null;
   contact_ids: number[];
   category: string | null;
   stage: string;
