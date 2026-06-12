@@ -181,7 +181,6 @@ export const englishCrmMessages = {
         this_week: "This week",
         today: "Today",
         tags: "Tags",
-        tasks: "Tasks",
       },
       hot: {
         empty_change_status:
@@ -308,49 +307,6 @@ export const englishCrmMessages = {
         new: "New user",
       },
     },
-    tasks: {
-      name: "Task |||| Tasks",
-      forcedCaseName: "Task",
-      fields: {
-        text: "Description",
-        due_date: "Due date",
-        type: "Type",
-        contact_id: "Contact",
-        due_short: "due",
-      },
-      action: {
-        add: "Add task",
-        create: "Create task",
-        edit: "Edit task",
-      },
-      actions: {
-        postpone_next_week: "Postpone to next week",
-        postpone_tomorrow: "Postpone to tomorrow",
-        title: "task actions",
-      },
-      added: "Task added",
-      deleted: "Task deleted successfully",
-      dialog: {
-        create: "Create task",
-        create_for: "Create task for %{name}",
-      },
-      sheet: {
-        edit: "Edit task",
-        edit_for: "Edit task for %{name}",
-      },
-      empty: "No tasks yet",
-      empty_list_hint: "Tasks added to your contacts will appear here.",
-      filters: {
-        later: "Later",
-        overdue: "Overdue",
-        this_week: "This week",
-        today: "Today",
-        tomorrow: "Tomorrow",
-        with_pending: "With pending tasks",
-      },
-      regarding_contact: "(Re: %{name})",
-      updated: "Task updated",
-    },
     tags: {
       name: "Tag |||| Tags",
       action: {
@@ -404,7 +360,6 @@ export const englishCrmMessages = {
       copy: "Copy",
       loading: "Loading...",
       me: "Me",
-      task_count: "%{smart_count} task |||| %{smart_count} tasks",
     },
     changelog: {
       title: "Changelog",
@@ -436,7 +391,6 @@ export const englishCrmMessages = {
         progress: "%{step}/3 done",
         whats_next: "What's next?",
       },
-      upcoming_tasks: "Upcoming Tasks",
     },
     header: {
       import_data: "Import data",
@@ -459,7 +413,7 @@ export const englishCrmMessages = {
       },
       idle: {
         description_1:
-          "You can import sales, companies, contacts, companies, notes, and tasks.",
+          "You can import sales, companies, contacts, companies, and notes.",
         description_2:
           "Data must be in a JSON file matching the following sample:",
       },
@@ -497,9 +451,6 @@ export const englishCrmMessages = {
       save_error: "Failed to save configuration",
       saved: "Configuration saved successfully",
       saving: "Saving...",
-      tasks: {
-        types: "Types",
-      },
       preferences: "Preferences",
       title: "Settings",
       app_title: "App Title",

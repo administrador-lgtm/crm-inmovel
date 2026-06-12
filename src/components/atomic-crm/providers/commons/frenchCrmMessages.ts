@@ -186,7 +186,6 @@ export const frenchCrmMessages = {
         this_week: "Cette semaine",
         today: "Aujourd'hui",
         tags: "Étiquettes",
-        tasks: "Tâches",
       },
       hot: {
         empty_change_status:
@@ -314,49 +313,6 @@ export const frenchCrmMessages = {
         new: "Nouvel utilisateur",
       },
     },
-    tasks: {
-      name: "Tâche |||| Tâches",
-      forcedCaseName: "Tâche",
-      fields: {
-        text: "Description",
-        due_date: "Date d'échéance",
-        type: "Type",
-        contact_id: "Contact",
-        due_short: "échéance",
-      },
-      action: {
-        add: "Ajouter une tâche",
-        create: "Créer une tâche",
-        edit: "Modifier la tâche",
-      },
-      actions: {
-        postpone_next_week: "Reporté à la semaine prochaine",
-        postpone_tomorrow: "Reporter à demain",
-        title: "Actions de tâche",
-      },
-      added: "Tâche ajoutée",
-      deleted: "Tâche supprimée avec succès",
-      dialog: {
-        create: "Créer une tâche",
-        create_for: "Créer une tâche pour %{name}",
-      },
-      sheet: {
-        edit: "Modifier la tâche",
-        edit_for: "Modifier la tâche pour %{name}",
-      },
-      empty: "Aucune tâche pour l'instant",
-      empty_list_hint: "Les tâches ajoutées à vos contacts apparaîtront ici.",
-      filters: {
-        later: "Plus tard",
-        overdue: "En retard",
-        this_week: "Cette semaine",
-        today: "Aujourd'hui",
-        tomorrow: "Demain",
-        with_pending: "Avec des tâches en attente",
-      },
-      regarding_contact: "(Concernant : %{name})",
-      updated: "Tâche mise à jour",
-    },
     tags: {
       name: "Étiquette |||| Étiquettes",
       action: {
@@ -406,7 +362,6 @@ export const frenchCrmMessages = {
       read_more: "En savoir plus",
       retry: "Réessayer",
       show_less: "Afficher moins",
-      task_count: "%{smart_count} tâche |||| %{smart_count} tâches",
       copied: "Copié !",
       copy: "Copier",
       loading: "Chargement...",
@@ -443,7 +398,6 @@ export const frenchCrmMessages = {
         progress: "%{step}/3 terminé",
         whats_next: "Et ensuite ?",
       },
-      upcoming_tasks: "Tâches à venir",
     },
     header: {
       import_data: "Importer des données",
@@ -467,7 +421,7 @@ export const frenchCrmMessages = {
       },
       idle: {
         description_1:
-          "Vous pouvez importer des ventes, des entreprises, des contacts, des entreprises, des notes et des tâches.",
+          "Vous pouvez importer des ventes, des entreprises, des contacts, des entreprises et des notes.",
         description_2:
           "Les données doivent se trouver dans un fichier JSON correspondant à l'exemple suivant :",
       },
@@ -504,9 +458,6 @@ export const frenchCrmMessages = {
       save_error: "Échec de l'enregistrement de la configuration",
       saved: "Configuration enregistrée avec succès",
       saving: "Enregistrement...",
-      tasks: {
-        types: "Types",
-      },
       preferences: "Préférences",
       title: "Paramètres",
       app_title: "Titre de l'application",
