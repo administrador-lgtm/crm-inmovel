@@ -15,13 +15,11 @@ import {
 import { DeleteButton } from "@/components/admin/delete-button";
 import { EditButton } from "@/components/admin/edit-button";
 import { ReferenceArrayField } from "@/components/admin/reference-array-field";
-import { ReferenceField } from "@/components/admin/reference-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 
-import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { NoteCreate } from "../notes/NoteCreate";
 import { NotesIterator } from "../notes/NotesIterator";
 import { useConfigurationContext } from "../root/ConfigurationContext";
@@ -61,13 +59,6 @@ const DealShowContent = () => {
         <div className="flex-1">
           <div className="flex justify-between items-start mb-8">
             <div className="flex items-center gap-4">
-              <ReferenceField
-                source="company_id"
-                reference="companies"
-                link="show"
-              >
-                <CompanyAvatar />
-              </ReferenceField>
               <h2 className="text-2xl font-semibold">{record.name}</h2>
             </div>
             <div className={`flex gap-2 ${record.archived_at ? "" : "pr-12"}`}>
