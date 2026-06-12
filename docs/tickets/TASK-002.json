@@ -34,5 +34,5 @@
   "parallel_safe": true,
   "branch_name": "fix/remove-task-entity",
   "visual_customization": false,
-  "status": "in_progress"
+  "status": "merged"
 }

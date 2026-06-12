@@ -19,42 +19,241 @@
       "base_entity": "contact",
       "notes": "1 lead = 1 person = 1 opportunity. The lead IS the opportunity: pipeline stage lives on the lead, not on a separate deal. Fields below mirror the Google Sheet Leads tab (sync-owned) plus 3 CRM-only fields. Source of truth for Sheet fields: ~/inmovel/code/src/lib/schema.js.",
       "fields": [
-        { "name": "id", "type": "text", "required": true, "source": "sheet_sync" },
-        { "name": "canal", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "fuente", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "nombre", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "nombre_completo", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "telefono", "type": "text", "required": true, "source": "sheet_sync" },
-        { "name": "estado", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "desarrollos", "type": "json", "required": false, "source": "sheet_sync" },
-        { "name": "desarrollo_activo", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "ad_id", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "zona_interes", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "presupuesto", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "tipo_busqueda", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "total_mensajes", "type": "number", "required": false, "source": "sheet_sync" },
-        { "name": "historial_json", "type": "json", "required": false, "source": "sheet_sync" },
-        { "name": "ventana_compra", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "forma_compra", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "credito_status", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "fecha_visita_propuesta", "type": "date", "required": false, "source": "sheet_sync" },
-        { "name": "intencion_visita", "type": "boolean", "required": false, "source": "sheet_sync" },
-        { "name": "asesor_asignado", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "mensajes_post_handoff", "type": "number", "required": false, "source": "sheet_sync" },
-        { "name": "resumen_sales", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "renta_seleccion_pendiente", "type": "number", "required": false, "source": "sheet_sync" },
-        { "name": "renta_seleccion_confirmada", "type": "boolean", "required": false, "source": "sheet_sync" },
-        { "name": "propiedad_interes", "type": "json", "required": false, "source": "sheet_sync" },
-        { "name": "asesor_externo", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "asesor_externo_tel", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "alerta_broker_externo_enviada", "type": "boolean", "required": false, "source": "sheet_sync" },
-        { "name": "fecha_transicion_consultor", "type": "date", "required": false, "source": "sheet_sync" },
-        { "name": "fecha_ultimo_contacto", "type": "date", "required": false, "source": "sheet_sync" },
-        { "name": "created_at", "type": "date", "required": false, "source": "sheet_sync" },
-        { "name": "updated_at", "type": "date", "required": false, "source": "sheet_sync" },
-        { "name": "stage", "type": "list", "required": true, "source": "crm", "options": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "descartado"], "notes": "Sync-computed while <= S5; CRM-owned from S6 onward (stage-ownership frontier)." },
-        { "name": "handoff_trigger", "type": "list", "required": false, "source": "crm", "options": ["perfil_completo", "visita_detectada"] },
-        { "name": "motivo_descarte", "type": "text", "required": false, "source": "crm", "notes": "Required when stage = descartado. Enum TBD; free text for now." }
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "canal",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "fuente",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "nombre",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "nombre_completo",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "telefono",
+          "type": "text",
+          "required": true,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "estado",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "desarrollos",
+          "type": "json",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "desarrollo_activo",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "ad_id",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "zona_interes",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "presupuesto",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "tipo_busqueda",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "total_mensajes",
+          "type": "number",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "historial_json",
+          "type": "json",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "ventana_compra",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "forma_compra",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "credito_status",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "fecha_visita_propuesta",
+          "type": "date",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "intencion_visita",
+          "type": "boolean",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "asesor_asignado",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "mensajes_post_handoff",
+          "type": "number",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "resumen_sales",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "renta_seleccion_pendiente",
+          "type": "number",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "renta_seleccion_confirmada",
+          "type": "boolean",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "propiedad_interes",
+          "type": "json",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "asesor_externo",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "asesor_externo_tel",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "alerta_broker_externo_enviada",
+          "type": "boolean",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "fecha_transicion_consultor",
+          "type": "date",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "fecha_ultimo_contacto",
+          "type": "date",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "created_at",
+          "type": "date",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "updated_at",
+          "type": "date",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "stage",
+          "type": "list",
+          "required": true,
+          "source": "crm",
+          "options": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7",
+            "S8",
+            "S9",
+            "S10",
+            "descartado"
+          ],
+          "notes": "Sync-computed while <= S5; CRM-owned from S6 onward (stage-ownership frontier)."
+        },
+        {
+          "name": "handoff_trigger",
+          "type": "list",
+          "required": false,
+          "source": "crm",
+          "options": [
+            "perfil_completo",
+            "visita_detectada"
+          ]
+        },
+        {
+          "name": "motivo_descarte",
+          "type": "text",
+          "required": false,
+          "source": "crm",
+          "notes": "Required when stage = descartado. Enum TBD; free text for now."
+        }
       ]
     },
     {
@@ -63,61 +262,295 @@
       "base_entity": null,
       "notes": "Property inventory: own developments + shared/broker (NocNok) listings. 58 fields mirroring the Sheet Propiedades tab. Source: ~/inmovel/code/src/lib/schema.js PROPIEDADES_SCHEMA.",
       "fields": [
-        { "name": "id", "type": "text", "required": true },
-        { "name": "tipo", "type": "list", "required": true, "options": ["propia", "compartida"] },
-        { "name": "nombre", "type": "text", "required": true },
-        { "name": "estatus", "type": "text", "required": false },
-        { "name": "operacion", "type": "list", "required": false, "options": ["venta", "renta"] },
-        { "name": "direccion", "type": "text", "required": false },
-        { "name": "colonia", "type": "text", "required": false },
-        { "name": "alcaldia", "type": "text", "required": false },
-        { "name": "precio", "type": "number", "required": false },
-        { "name": "metros", "type": "number", "required": false },
-        { "name": "recamaras", "type": "number", "required": false },
-        { "name": "banos", "type": "number", "required": false },
-        { "name": "estacionamiento", "type": "number", "required": false },
-        { "name": "pet_friendly", "type": "text", "required": false },
-        { "name": "argumento1", "type": "text", "required": false },
-        { "name": "argumento2", "type": "text", "required": false },
-        { "name": "argumento3", "type": "text", "required": false },
-        { "name": "lista_precios", "type": "text", "required": false },
-        { "name": "url_anuncio", "type": "text", "required": false },
-        { "name": "url_maps", "type": "text", "required": false },
-        { "name": "tipos_unidades", "type": "text", "required": false },
-        { "name": "precios_por_tipo", "type": "text", "required": false },
-        { "name": "caracteristicas", "type": "text", "required": false },
-        { "name": "amenidades", "type": "text", "required": false },
-        { "name": "argumentos_zona", "type": "text", "required": false },
-        { "name": "esquema_pago", "type": "text", "required": false },
-        { "name": "creditos", "type": "text", "required": false },
-        { "name": "objeciones", "type": "text", "required": false },
-        { "name": "precio_desde", "type": "number", "required": false },
-        { "name": "precio_hasta", "type": "number", "required": false },
-        { "name": "m2_desde", "type": "number", "required": false },
-        { "name": "m2_hasta", "type": "number", "required": false },
-        { "name": "recamaras_min", "type": "number", "required": false },
-        { "name": "recamaras_max", "type": "number", "required": false },
-        { "name": "unidades_disponibles", "type": "text", "required": false },
-        { "name": "fecha_entrega", "type": "text", "required": false },
-        { "name": "enganche_minimo_pct", "type": "text", "required": false },
-        { "name": "features", "type": "text", "required": false },
-        { "name": "destacado", "type": "text", "required": false },
-        { "name": "url_ficha", "type": "text", "required": false },
-        { "name": "codigo_fuente", "type": "text", "required": false },
-        { "name": "fuente", "type": "list", "required": false, "options": ["manual", "nocnok", "broker_directo", "bolsa"] },
-        { "name": "broker_nombre", "type": "text", "required": false },
-        { "name": "broker_telefono", "type": "text", "required": false },
-        { "name": "broker_wa", "type": "text", "required": false },
-        { "name": "comision", "type": "text", "required": false },
-        { "name": "activa", "type": "boolean", "required": false },
-        { "name": "orden", "type": "number", "required": false },
-        { "name": "fecha_carga", "type": "date", "required": false },
-        { "name": "account_name", "type": "text", "required": false },
-        { "name": "account_id", "type": "text", "required": false },
-        { "name": "shared_commission", "type": "text", "required": false },
-        { "name": "status_days", "type": "text", "required": false },
-        { "name": "is_exclusive", "type": "boolean", "required": false },
-        { "name": "share_type", "type": "text", "required": false }
+        {
+          "name": "id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "tipo",
+          "type": "list",
+          "required": true,
+          "options": [
+            "propia",
+            "compartida"
+          ]
+        },
+        {
+          "name": "nombre",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "estatus",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "operacion",
+          "type": "list",
+          "required": false,
+          "options": [
+            "venta",
+            "renta"
+          ]
+        },
+        {
+          "name": "direccion",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "colonia",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "alcaldia",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "precio",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "metros",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "recamaras",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "banos",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "estacionamiento",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "pet_friendly",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "argumento1",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "argumento2",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "argumento3",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "lista_precios",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "url_anuncio",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "url_maps",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tipos_unidades",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "precios_por_tipo",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "caracteristicas",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "amenidades",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "argumentos_zona",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "esquema_pago",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "creditos",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "objeciones",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "precio_desde",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "precio_hasta",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "m2_desde",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "m2_hasta",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "recamaras_min",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "recamaras_max",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "unidades_disponibles",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "fecha_entrega",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "enganche_minimo_pct",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "features",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "destacado",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "url_ficha",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "codigo_fuente",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "fuente",
+          "type": "list",
+          "required": false,
+          "options": [
+            "manual",
+            "nocnok",
+            "broker_directo",
+            "bolsa"
+          ]
+        },
+        {
+          "name": "broker_nombre",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "broker_telefono",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "broker_wa",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "comision",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "activa",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "orden",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "fecha_carga",
+          "type": "date",
+          "required": false
+        },
+        {
+          "name": "account_name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "account_id",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "shared_commission",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "status_days",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "is_exclusive",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "share_type",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -126,10 +559,34 @@
       "base_entity": "sales",
       "notes": "Advisors map onto Atomic CRM's sales/users (auth.users <-> sales trigger). Extended with Sheet Asesores tab fields. RLS keys off lead.asesor_asignado <-> user.",
       "fields": [
-        { "name": "telefono", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "calendario", "type": "text", "required": false, "source": "sheet_sync" },
-        { "name": "linea_negocio", "type": "list", "required": false, "options": ["exclusiva", "compartida"], "source": "sheet_sync" },
-        { "name": "activo", "type": "boolean", "required": false, "source": "sheet_sync" }
+        {
+          "name": "telefono",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "calendario",
+          "type": "text",
+          "required": false,
+          "source": "sheet_sync"
+        },
+        {
+          "name": "linea_negocio",
+          "type": "list",
+          "required": false,
+          "options": [
+            "exclusiva",
+            "compartida"
+          ],
+          "source": "sheet_sync"
+        },
+        {
+          "name": "activo",
+          "type": "boolean",
+          "required": false,
+          "source": "sheet_sync"
+        }
       ]
     },
     {
@@ -138,11 +595,31 @@
       "base_entity": null,
       "notes": "Advisor-recorded visit. Never touched by sync.",
       "fields": [
-        { "name": "lead_id", "type": "text", "required": true },
-        { "name": "propiedad_id", "type": "text", "required": true },
-        { "name": "fecha", "type": "date", "required": true },
-        { "name": "resultado", "type": "text", "required": false },
-        { "name": "notas", "type": "text", "required": false }
+        {
+          "name": "lead_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "propiedad_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "fecha",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "resultado",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "notas",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -151,9 +628,26 @@
       "base_entity": null,
       "notes": "M:N lead <-> property relation.",
       "fields": [
-        { "name": "lead_id", "type": "text", "required": true },
-        { "name": "propiedad_id", "type": "text", "required": true },
-        { "name": "relacion", "type": "list", "required": true, "options": ["match_bot", "pregunto", "visito"] }
+        {
+          "name": "lead_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "propiedad_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "relacion",
+          "type": "list",
+          "required": true,
+          "options": [
+            "match_bot",
+            "pregunto",
+            "visito"
+          ]
+        }
       ]
     },
     {
@@ -169,12 +663,40 @@
       "base_entity": null,
       "notes": "Bot transcript, append-only, read-only in CRM (activity log). Synced from Sheet.",
       "fields": [
-        { "name": "id", "type": "number", "required": true },
-        { "name": "lead_id", "type": "text", "required": true },
-        { "name": "rol", "type": "list", "required": true, "options": ["lead", "bot"] },
-        { "name": "texto", "type": "text", "required": true },
-        { "name": "timestamp", "type": "date", "required": true },
-        { "name": "nombre_lead", "type": "text", "required": false }
+        {
+          "name": "id",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "lead_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "rol",
+          "type": "list",
+          "required": true,
+          "options": [
+            "lead",
+            "bot"
+          ]
+        },
+        {
+          "name": "texto",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "timestamp",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "nombre_lead",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -183,11 +705,31 @@
       "base_entity": null,
       "notes": "Read-only synced reference: Meta ad -> property mapping.",
       "fields": [
-        { "name": "ad_id", "type": "text", "required": true },
-        { "name": "ad_name", "type": "text", "required": false },
-        { "name": "propiedad_id", "type": "text", "required": false },
-        { "name": "activo", "type": "boolean", "required": false },
-        { "name": "created_at", "type": "date", "required": false }
+        {
+          "name": "ad_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "ad_name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "propiedad_id",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "activo",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "created_at",
+          "type": "date",
+          "required": false
+        }
       ]
     },
     {
@@ -217,15 +759,49 @@
     "stage_ownership_frontier": "S1-S5 are read-only in the CRM (computed/overwritten by sync). From S6 onward the stage is CRM-owned and the sync MUST NOT overwrite it (guard in sync). S6 is set via a manual CRM button.",
     "transitions": "Stages can be skipped. S7 <-> S8 is bidirectional (multiple visits). Descartado requires motivo_descarte. S10 Cierre is admin-set.",
     "stage_owners": {
-      "S1": "auto_bot", "S2": "auto_bot", "S3": "auto_bot", "S4": "auto_bot",
-      "S5": "auto_system", "S6": "manual_crm_button", "S7": "manual", "S8": "manual",
-      "S9": "manual", "S10": "manual_admin", "Descartado": "manual"
+      "S1": "auto_bot",
+      "S2": "auto_bot",
+      "S3": "auto_bot",
+      "S4": "auto_bot",
+      "S5": "auto_system",
+      "S6": "manual_crm_button",
+      "S7": "manual",
+      "S8": "manual",
+      "S9": "manual",
+      "S10": "manual_admin",
+      "Descartado": "manual"
     }
   },
   "user_roles": [
-    { "name": "admin", "permissions": ["read_all", "write", "reassign_leads", "global_config", "set_stage_s6_s10", "set_cierre"] },
-    { "name": "manager", "permissions": ["read_own_and_team", "write", "reassign_within_team", "set_stage_s6_s10"] },
-    { "name": "asesor", "permissions": ["read_own", "set_stage_s6_s10", "write_notes", "write_visits"] }
+    {
+      "name": "admin",
+      "permissions": [
+        "read_all",
+        "write",
+        "reassign_leads",
+        "global_config",
+        "set_stage_s6_s10",
+        "set_cierre"
+      ]
+    },
+    {
+      "name": "manager",
+      "permissions": [
+        "read_own_and_team",
+        "write",
+        "reassign_within_team",
+        "set_stage_s6_s10"
+      ]
+    },
+    {
+      "name": "asesor",
+      "permissions": [
+        "read_own",
+        "set_stage_s6_s10",
+        "write_notes",
+        "write_visits"
+      ]
+    }
   ],
   "multi_tenant": true,
   "multi_tenant_notes": "Per-advisor isolation enforced via Supabase RLS (asesor_asignado <-> user), not frontend filters.",
@@ -235,7 +811,14 @@
       "type": "custom",
       "direction": "one_way_sheet_to_supabase",
       "frequency": "cron every 1-2 min",
-      "synced_tables": ["leads", "propiedades", "conversaciones", "anuncios", "asesores", "nocnok_raw"],
+      "synced_tables": [
+        "leads",
+        "propiedades",
+        "conversaciones",
+        "anuncios",
+        "asesores",
+        "nocnok_raw"
+      ],
       "rules": [
         "The WhatsApp bot keeps writing to Google Sheets; the Sheet stays the bot's source of truth.",
         "Never sync Supabase -> Sheet. No bidirectionality CRM -> bot.",
@@ -248,7 +831,11 @@
     "language": "es",
     "theme": "light",
     "theme_notes": "Light only — advisors use phones in daylight. No dark mode.",
-    "palette": { "primary": "#4f46e5", "secondary": "#764ba2", "light": "#667eea" },
+    "palette": {
+      "primary": "#4f46e5",
+      "secondary": "#764ba2",
+      "light": "#667eea"
+    },
     "dashboards": "none for now (post-validation)"
   },
   "auth": {
@@ -256,8 +843,16 @@
     "domain_restriction": "@inmovel.net"
   },
   "cleanup": {
-    "entities_to_remove": ["company", "deal", "task", "tag"],
-    "features_to_disable": ["analytics_dashboard", "csv_import_export"],
+    "entities_to_remove": [
+      "company",
+      "deal",
+      "task",
+      "tag"
+    ],
+    "features_to_disable": [
+      "analytics_dashboard",
+      "csv_import_export"
+    ],
     "notes": "Remove the deal ENTITY but KEEP the kanban view, retargeted onto leads (stage lives on the lead). Tag removal initially declined by mis-click; user corrected to YES remove tags (TASK-016)."
   },
   "out_of_scope": [
@@ -277,28 +872,102 @@
     "domain_8": "done"
   },
   "phase_status": {
-    "spec": { "status": "pending" },
-    "fork": { "status": "pending" },
-    "supabase": { "status": "pending" },
-    "env": { "status": "pending" },
-    "deploy": { "status": "pending" }
+    "spec": {
+      "status": "pending"
+    },
+    "fork": {
+      "status": "pending"
+    },
+    "supabase": {
+      "status": "pending"
+    },
+    "env": {
+      "status": "pending"
+    },
+    "deploy": {
+      "status": "pending"
+    }
   },
   "tickets": [
-    { "ticket_id": "TASK-001", "title": "Remove unused company entity from default CRM", "status": "pending" },
-    { "ticket_id": "TASK-002", "title": "Remove unused task entity from default CRM", "status": "pending" },
-    { "ticket_id": "TASK-003", "title": "Remove deal entity and retarget Kanban board onto lead", "status": "pending" },
-    { "ticket_id": "TASK-004", "title": "Remove analytics dashboard and CSV import/export features", "status": "pending" },
-    { "ticket_id": "TASK-005", "title": "Lead schema extensions: types, DB schema, and FakeRest generator", "status": "pending" },
-    { "ticket_id": "TASK-006", "title": "Propiedad schema, types, and FakeRest generator", "status": "pending" },
-    { "ticket_id": "TASK-007", "title": "Asesor schema extensions: sales table, types, and FakeRest generator", "status": "pending" },
-    { "ticket_id": "TASK-008", "title": "Support tables schema and types: visita, lead_propiedad, conversacion, anuncio, nocnok_raw", "status": "pending" },
-    { "ticket_id": "TASK-009", "title": "Lead list, show, and edit UI with pipeline stage controls", "status": "pending" },
-    { "ticket_id": "TASK-010", "title": "Propiedad list and show views", "status": "pending" },
-    { "ticket_id": "TASK-011", "title": "Asesor extended fields in sales list and edit", "status": "pending" },
-    { "ticket_id": "TASK-012", "title": "Visita create/list panel and conversacion activity log on lead show", "status": "pending" },
-    { "ticket_id": "TASK-013", "title": "Google Sheet to Supabase one-way sync Edge Function (cron)", "status": "pending" },
-    { "ticket_id": "TASK-014", "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction", "status": "pending" },
-    { "ticket_id": "TASK-015", "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette", "status": "pending" },
-    { "ticket_id": "TASK-016", "title": "Remove unused tag entity from default CRM", "status": "pending" }
+    {
+      "ticket_id": "TASK-001",
+      "title": "Remove unused company entity from default CRM",
+      "status": "merged"
+    },
+    {
+      "ticket_id": "TASK-002",
+      "title": "Remove unused task entity from default CRM",
+      "status": "merged"
+    },
+    {
+      "ticket_id": "TASK-003",
+      "title": "Remove deal entity and retarget Kanban board onto lead",
+      "status": "merged"
+    },
+    {
+      "ticket_id": "TASK-004",
+      "title": "Remove analytics dashboard and CSV import/export features",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-005",
+      "title": "Lead schema extensions: types, DB schema, and FakeRest generator",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-006",
+      "title": "Propiedad schema, types, and FakeRest generator",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-007",
+      "title": "Asesor schema extensions: sales table, types, and FakeRest generator",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-008",
+      "title": "Support tables schema and types: visita, lead_propiedad, conversacion, anuncio, nocnok_raw",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-009",
+      "title": "Lead list, show, and edit UI with pipeline stage controls",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-010",
+      "title": "Propiedad list and show views",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-011",
+      "title": "Asesor extended fields in sales list and edit",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-012",
+      "title": "Visita create/list panel and conversacion activity log on lead show",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-013",
+      "title": "Google Sheet to Supabase one-way sync Edge Function (cron)",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-014",
+      "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-015",
+      "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette",
+      "status": "pending"
+    },
+    {
+      "ticket_id": "TASK-016",
+      "title": "Remove unused tag entity from default CRM",
+      "status": "pending"
+    }
   ]
 }

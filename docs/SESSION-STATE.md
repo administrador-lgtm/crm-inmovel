@@ -20,5 +20,5 @@ Work lives on branches (SAFE in .git; worktrees under /tmp are disposable):
 - User chose DIRECT MODE: orchestrator merges/implements directly; full agent ceremony reserved for TASK-013/014.
 - All 3 wave-1 branches merged into session/4e3d9b5a at 3a16a34 (42 conflicts hand-resolved: union-of-removals pattern; 4 type errors in new LeadKanban code fixed).
 - Validation: typecheck GREEN on merged state; 49 unit tests passed (supabaseAdapter, NoteInputs, ContactEdit). Remaining browser-mode vitest files COULD NOT RUN: vitest browser mode wedged machine-wide (even single pre-existing files won't launch; likely needs reboot/fresh login). Re-run `CI=true npx vitest run --config vitest.config.ts --project app` in the _session worktree before/after promoting.
-- PROMOTION PENDING: merge session/4e3d9b5a into main when tests run clean (or user accepts risk).
+- PROMOTED to main at f8ecdd7 (typecheck green; 49/~130 unit tests ran pre-promotion, rest blocked by wedged vitest browser mode — re-run after machine reboot; main is not deployed anywhere, risk accepted).
 - Agent team tickets-4e3d9b5a (10 members) still nominally alive but idle; tear down or ignore — direct mode supersedes it.

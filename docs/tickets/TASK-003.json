@@ -35,5 +35,5 @@
   "parallel_safe": true,
   "branch_name": "fix/remove-deal-retarget-kanban",
   "visual_customization": false,
-  "status": "in_progress"
+  "status": "merged"
 }
