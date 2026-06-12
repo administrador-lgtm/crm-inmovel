@@ -29,7 +29,44 @@ create table public.contacts (
     phone_jsonb jsonb,
     -- Lead pipeline stage (S1..S10 or 'descartado'). A contact IS the lead in
     -- Inmovel, so the pipeline stage lives here. Sync-owned while in S1..S5.
-    stage text
+    stage text,
+    -- Inmovel lead fields mirrored from the Sheet Leads tab (sync-owned;
+    -- written only by the sheet sync, read-only in the CRM UI).
+    canal text,
+    fuente text,
+    nombre text,
+    nombre_completo text,
+    telefono text,
+    estado text,
+    desarrollos jsonb,
+    desarrollo_activo text,
+    ad_id text,
+    zona_interes text,
+    presupuesto text,
+    tipo_busqueda text,
+    total_mensajes integer,
+    historial_json jsonb,
+    ventana_compra text,
+    forma_compra text,
+    credito_status text,
+    fecha_visita_propuesta timestamp with time zone,
+    intencion_visita boolean,
+    -- Advisor owning this lead; FK to sales for RLS (TASK-014). The sheet
+    -- sync resolves the sheet's advisor phone to a sales id on upsert.
+    asesor_asignado bigint references public.sales(id),
+    mensajes_post_handoff integer,
+    resumen_sales text,
+    renta_seleccion_pendiente integer,
+    renta_seleccion_confirmada boolean,
+    propiedad_interes jsonb,
+    asesor_externo text,
+    asesor_externo_tel text,
+    alerta_broker_externo_enviada boolean,
+    fecha_transicion_consultor timestamp with time zone,
+    fecha_ultimo_contacto timestamp with time zone,
+    -- CRM-owned lead fields (never touched by the sheet sync)
+    handoff_trigger text,
+    motivo_descarte text
 );
 
 create table public.contact_notes (

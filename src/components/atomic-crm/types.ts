@@ -1,10 +1,7 @@
 import type { Identifier, RaRecord } from "ra-core";
 import type { ComponentType } from "react";
 
-import type {
-  CONTACT_CREATED,
-  CONTACT_NOTE_CREATED,
-} from "./consts";
+import type { CONTACT_CREATED, CONTACT_NOTE_CREATED } from "./consts";
 
 export type SignUpData = {
   email: string;
@@ -78,7 +75,53 @@ export type Contact = {
    * Owned by the bot sync while in S1..S5; advisor-set from S6 onward.
    */
   stage?: string;
+
+  // Inmovel lead fields mirrored from the Sheet Leads tab. Sync-owned:
+  // written only by the sheet sync, rendered read-only in the CRM UI.
+  canal?: string;
+  fuente?: string;
+  nombre?: string;
+  nombre_completo?: string;
+  telefono?: string;
+  estado?: string;
+  desarrollos?: string[];
+  desarrollo_activo?: string;
+  ad_id?: string;
+  zona_interes?: string;
+  presupuesto?: string;
+  tipo_busqueda?: string;
+  total_mensajes?: number;
+  historial_json?: unknown[];
+  ventana_compra?: string;
+  forma_compra?: string;
+  credito_status?: string;
+  fecha_visita_propuesta?: string;
+  intencion_visita?: boolean;
+  /** Advisor (sales id) owning this lead; RLS keys off this column. */
+  asesor_asignado?: Identifier | null;
+  mensajes_post_handoff?: number;
+  resumen_sales?: string;
+  renta_seleccion_pendiente?: number;
+  renta_seleccion_confirmada?: boolean;
+  propiedad_interes?: Record<string, unknown>;
+  asesor_externo?: string;
+  asesor_externo_tel?: string;
+  alerta_broker_externo_enviada?: boolean;
+  fecha_transicion_consultor?: string;
+  fecha_ultimo_contacto?: string;
+
+  // CRM-owned lead fields (never touched by the sheet sync)
+  handoff_trigger?: "perfil_completo" | "visita_detectada" | null;
+  /** Required (enforced in the UI layer) when stage = "descartado". */
+  motivo_descarte?: string;
 } & Pick<RaRecord, "id">;
+
+/**
+ * In Inmovel a lead IS a contact (1 lead = 1 person = 1 opportunity), so the
+ * Lead type is the extended Contact. Exported for UI components that speak
+ * the domain language.
+ */
+export type Lead = Contact;
 
 export type ContactNote = {
   contact_id: Identifier;
@@ -110,10 +153,7 @@ export type ActivityContactNoteCreated = {
 } & Pick<RaRecord, "id">;
 
 export type Activity = RaRecord &
-  (
-    | ActivityContactCreated
-    | ActivityContactNoteCreated
-  );
+  (ActivityContactCreated | ActivityContactNoteCreated);
 
 export interface RAFile {
   src: string;
