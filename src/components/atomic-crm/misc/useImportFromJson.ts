@@ -19,7 +19,6 @@ export type ImportFromJsonStats = {
   companies: number;
   contacts: number;
   notes: number;
-  tasks: number;
 };
 
 export type ImportFromJsonFailures = {
@@ -27,7 +26,6 @@ export type ImportFromJsonFailures = {
   companies: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
   contacts: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
   notes: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
-  tasks: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
 };
 
 export type ImportFromJsonIdleState = {
@@ -74,7 +72,6 @@ const defaultFailedImports = {
   companies: [],
   contacts: [],
   notes: [],
-  tasks: [],
 };
 
 const defaultStats = {
@@ -82,7 +79,6 @@ const defaultStats = {
   companies: 0,
   contacts: 0,
   notes: 0,
-  tasks: 0,
 };
 
 /**
@@ -512,96 +508,12 @@ export const useImportFromJson = (): [
       }
     };
 
-    const importTask = async (
-      dataToImport: JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined,
-    ) => {
-      if (!isTask(dataToImport)) {
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          failedImports: {
-            ...old.failedImports,
-            tasks: [
-              ...old.failedImports.tasks,
-              { ...(dataToImport as any), error: "Invalid format" },
-            ],
-          },
-          error: null,
-        }));
-        return;
-      }
-      try {
-        if (idsMaps.sales[dataToImport.sales_id] == null) {
-          console.error(
-            `task ${dataToImport.text} has an invalid sales ID: ${dataToImport.sales_id}. Fallback to default sale`,
-          );
-        }
-        if (idsMaps.contacts[dataToImport.contact_id] == null) {
-          setState((old) => ({
-            ...old,
-            status: "importing",
-            failedImports: {
-              ...old.failedImports,
-              tasks: [
-                ...old.failedImports.tasks,
-                {
-                  ...(dataToImport as any),
-                  error: `Invalid contact_id ${dataToImport.contact_id}`,
-                },
-              ],
-            },
-            error: null,
-          }));
-          return;
-        }
-
-        await dataProvider.create("tasks", {
-          data: {
-            contact_id: idsMaps.contacts[dataToImport.contact_id],
-            sales_id: idsMaps.sales[dataToImport.sales_id] ?? currentSale.id,
-            text: dataToImport.text,
-            due_date: dataToImport.due_date || undefined,
-            done_date: dataToImport.done_date || undefined,
-          },
-        });
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          stats: {
-            ...old.stats,
-            tasks: old.stats.tasks + 1,
-          },
-          error: null,
-        }));
-      } catch (err) {
-        console.error(err);
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          failedImports: {
-            ...old.failedImports,
-            tasks: [
-              ...old.failedImports.tasks,
-              { ...(dataToImport as any), error: (err as Error).message },
-            ],
-          },
-          error: null,
-        }));
-      }
-    };
-
     let currentTask: Promise<any> | null = null;
     let currentBatch: Array<Promise<void>> = [];
     const BATCH_SIZE = 50;
 
     const parser = new JSONParser({
-      paths: [
-        "$.sales.*",
-        "$.companies.*",
-        "$.contacts.*",
-        "$.notes.*",
-        "$.tasks.*",
-      ],
+      paths: ["$.sales.*", "$.companies.*", "$.contacts.*", "$.notes.*"],
       keepStack: false,
     });
     const stream = file.stream();
@@ -655,10 +567,6 @@ export const useImportFromJson = (): [
           currentBatch.push(importNote(value));
           break;
         }
-        case "tasks": {
-          currentBatch.push(importTask(value));
-          break;
-        }
       }
       try {
         await proccesBatchIfPossible();
@@ -686,7 +594,7 @@ export const useImportFromJson = (): [
   return [state, importFile, reset];
 };
 
-const TYPES = ["sales", "companies", "contacts", "notes", "tasks"] as const;
+const TYPES = ["sales", "companies", "contacts", "notes"] as const;
 type Types = (typeof TYPES)[number];
 
 const getType = (value: string | undefined): Types | undefined => {
@@ -783,24 +691,6 @@ const isNote = (data: any): data is NoteImport =>
   data.contact_id != null &&
   data.text != null &&
   data.date != null;
-
-type TaskImport = {
-  contact_id: number;
-  sales_id: number;
-  text: string;
-  due_date?: string;
-  done_date?: string;
-  created_at?: string;
-  updated_at?: string;
-};
-
-const isTask = (data: any): data is TaskImport =>
-  data != null &&
-  typeof data === "object" &&
-  !Array.isArray(data) &&
-  data.sales_id != null &&
-  data.contact_id != null &&
-  data.text != null;
 
 /**
  * Maps a company size number to the appropriate size category.
