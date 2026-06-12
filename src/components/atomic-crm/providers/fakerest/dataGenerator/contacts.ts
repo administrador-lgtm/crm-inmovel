@@ -94,7 +94,6 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
         .arrayElements(db.tags, random.arrayElement([0, 0, 0, 1, 1, 2]))
         .map((tag) => tag.id), // finalize
       sales_id: company.sales_id!,
-      nb_tasks: 0,
       linkedin_url: null,
     };
   });
