@@ -116,6 +116,68 @@ export type Contact = {
   motivo_descarte?: string;
 } & Pick<RaRecord, "id">;
 
+export type Propiedad = {
+  /** Sheet/external id, e.g. "P-001" or a NocNok code. */
+  id: string;
+  tipo: "propia" | "compartida";
+  nombre: string;
+  estatus?: string;
+  operacion?: "venta" | "renta";
+  direccion?: string;
+  colonia?: string;
+  alcaldia?: string;
+  precio?: number;
+  metros?: number;
+  recamaras?: number;
+  banos?: number;
+  estacionamiento?: number;
+  pet_friendly?: string;
+  argumento1?: string;
+  argumento2?: string;
+  argumento3?: string;
+  lista_precios?: string;
+  url_anuncio?: string;
+  url_maps?: string;
+  // Dossier fields (advisor-facing sales material)
+  tipos_unidades?: string;
+  precios_por_tipo?: string;
+  caracteristicas?: string;
+  amenidades?: string;
+  argumentos_zona?: string;
+  esquema_pago?: string;
+  creditos?: string;
+  objeciones?: string;
+  precio_desde?: number;
+  precio_hasta?: number;
+  m2_desde?: number;
+  m2_hasta?: number;
+  recamaras_min?: number;
+  recamaras_max?: number;
+  unidades_disponibles?: string;
+  fecha_entrega?: string;
+  enganche_minimo_pct?: string;
+  // Shared/broker listing fields
+  features?: string;
+  destacado?: string;
+  url_ficha?: string;
+  codigo_fuente?: string;
+  fuente?: "manual" | "nocnok" | "broker_directo" | "bolsa";
+  broker_nombre?: string;
+  broker_telefono?: string;
+  broker_wa?: string;
+  comision?: string;
+  activa?: boolean;
+  orden?: number;
+  fecha_carga?: string;
+  // NocNok metadata (external broker feed)
+  account_name?: string;
+  account_id?: string;
+  shared_commission?: string;
+  status_days?: string;
+  is_exclusive?: boolean;
+  share_type?: string;
+};
+
 /**
  * In Inmovel a lead IS a contact (1 lead = 1 person = 1 opportunity), so the
  * Lead type is the extended Contact. Exported for UI components that speak

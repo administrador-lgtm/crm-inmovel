@@ -95,3 +95,18 @@ select count(sub.id) as is_initialized
 from (
     select sales.id from public.sales limit 1
 ) sub;
+
+create or replace view public.propiedades_summary with (security_invoker = on) as
+select
+    p.id,
+    p.nombre,
+    p.tipo,
+    p.operacion,
+    p.colonia,
+    p.alcaldia,
+    p.precio,
+    p.recamaras,
+    p.activa,
+    p.fuente,
+    p.broker_nombre
+from public.propiedades p;

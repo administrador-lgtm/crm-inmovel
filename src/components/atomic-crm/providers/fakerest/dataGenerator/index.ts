@@ -1,5 +1,6 @@
 import { generateContactNotes } from "./contactNotes";
 import { generateContacts } from "./contacts";
+import { generatePropiedades } from "./propiedades";
 import { finalize } from "./finalize";
 import { generateSales } from "./sales";
 import { generateTags } from "./tags";
@@ -10,6 +11,7 @@ export default (): Db => {
   db.sales = generateSales(db);
   db.tags = generateTags(db);
   db.contacts = generateContacts(db);
+  db.propiedades = generatePropiedades(db);
   db.contact_notes = generateContactNotes(db);
   db.configuration = [
     {
