@@ -7,7 +7,10 @@ import {
   random,
 } from "faker/locale/en_US";
 
-import { defaultNoteStatuses } from "../../../root/defaultConfiguration";
+import {
+  defaultLeadStages,
+  defaultNoteStatuses,
+} from "../../../root/defaultConfiguration";
 import { contactGender } from "../../../contacts/contactModel";
 import type { Company, Contact } from "../../../types";
 import type { Db } from "./types";
@@ -90,6 +93,7 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       last_seen: last_seen,
       has_newsletter: weightedBoolean(30),
       status: random.arrayElement(defaultNoteStatuses).value,
+      stage: random.arrayElement(defaultLeadStages).value,
       tags: random
         .arrayElements(db.tags, random.arrayElement([0, 0, 0, 1, 1, 2]))
         .map((tag) => tag.id), // finalize
