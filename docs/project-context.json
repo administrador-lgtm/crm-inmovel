@@ -256,9 +256,9 @@
     "domain_restriction": "@inmovel.net"
   },
   "cleanup": {
-    "entities_to_remove": ["company", "deal", "task"],
+    "entities_to_remove": ["company", "deal", "task", "tag"],
     "features_to_disable": ["analytics_dashboard", "csv_import_export"],
-    "notes": "Remove the deal ENTITY but KEEP the kanban view, retargeted onto leads (stage lives on the lead). User confirmed keeping the tag feature."
+    "notes": "Remove the deal ENTITY but KEEP the kanban view, retargeted onto leads (stage lives on the lead). Tag removal initially declined by mis-click; user corrected to YES remove tags (TASK-016)."
   },
   "out_of_scope": [
     "Bot writing directly to Supabase (would kill the sync; the Sheet dies in a later phase)",
@@ -298,6 +298,7 @@
     { "ticket_id": "TASK-012", "title": "Visita create/list panel and conversacion activity log on lead show", "status": "pending" },
     { "ticket_id": "TASK-013", "title": "Google Sheet to Supabase one-way sync Edge Function (cron)", "status": "pending" },
     { "ticket_id": "TASK-014", "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction", "status": "pending" },
-    { "ticket_id": "TASK-015", "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette", "status": "pending" }
+    { "ticket_id": "TASK-015", "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette", "status": "pending" },
+    { "ticket_id": "TASK-016", "title": "Remove unused tag entity from default CRM", "status": "pending" }
   ]
 }
