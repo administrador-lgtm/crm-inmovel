@@ -98,7 +98,6 @@ export type Contact = {
   status: string;
   background: string;
   phone_jsonb: PhoneNumberAndType[];
-  nb_tasks?: number;
   company_name?: string;
 } & Pick<RaRecord, "id">;
 
@@ -143,15 +142,6 @@ export type Tag = {
   name: string;
   color: string;
 };
-
-export type Task = {
-  contact_id: Identifier;
-  type: string;
-  text: string;
-  due_date: string;
-  done_date?: string | null;
-  sales_id?: Identifier;
-} & Pick<RaRecord, "id">;
 
 export type ActivityCompanyCreated = {
   type: typeof COMPANY_CREATED;

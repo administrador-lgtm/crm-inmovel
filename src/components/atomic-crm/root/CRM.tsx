@@ -48,13 +48,11 @@ import {
   defaultDealStages,
   defaultLightModeLogo,
   defaultNoteStatuses,
-  defaultTaskTypes,
   defaultTitle,
 } from "./defaultConfiguration";
 import { i18nProvider as defaulti18nProvider } from "../providers/commons/i18nProvider";
 import { StartPage } from "../login/StartPage.tsx";
 import { useIsMobile } from "@/hooks/use-mobile.ts";
-import { MobileTasksList } from "../tasks/MobileTasksList.tsx";
 import { ContactListMobile } from "../contacts/ContactList.tsx";
 import { ContactShow } from "../contacts/ContactShow.tsx";
 import { CompanyShow } from "../companies/CompanyShow.tsx";
@@ -88,7 +86,6 @@ export type CRMProps = {
  * @param {RaThemeOptions} lightTheme - The theme to use when the application is in light mode.
  * @param {string} logo - The logo used in the CRM application.
  * @param {NoteStatus[]} noteStatuses - The statuses of notes used in the application.
- * @param {LabeledValue[]} taskTypes - The types of tasks used in the application.
  * @param {string} title - The title of the CRM application.
  *
  * @returns {JSX.Element} The rendered CRM application.
@@ -121,7 +118,6 @@ export const CRM = ({
   darkModeLogo = defaultDarkModeLogo,
   lightModeLogo = defaultLightModeLogo,
   noteStatuses = defaultNoteStatuses,
-  taskTypes = defaultTaskTypes,
   title = defaultTitle,
   dataProvider = defaultDataProviderBuilder(),
   authProvider = defaultAuthProviderBuilder(),
@@ -158,7 +154,6 @@ export const CRM = ({
         dealPipelineStatuses,
         dealStages,
         noteStatuses,
-        taskTypes,
         title,
         darkModeLogo,
         lightModeLogo,
@@ -270,7 +265,6 @@ const DesktopAdmin = (
       <Resource name="companies" {...companies} />
       <Resource name="contact_notes" />
       <Resource name="deal_notes" />
-      <Resource name="tasks" />
       <Resource name="sales" {...sales} />
       <Resource name="tags" />
     </Admin>
@@ -338,7 +332,6 @@ const MobileAdmin = (
           <Route path=":id/notes/:noteId" element={<NoteShowPage />} />
         </Resource>
         <Resource name="companies" show={CompanyShow} />
-        <Resource name="tasks" list={MobileTasksList} />
       </Admin>
     </PersistQueryClientProvider>
   );
