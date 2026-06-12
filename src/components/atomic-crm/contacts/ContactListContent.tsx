@@ -131,7 +131,7 @@ const ContactItemContent = ({
           <div className="font-medium">
             {`${contact.first_name} ${contact.last_name ?? ""}`}
           </div>
-          {contact.title || contact.company_id != null || contact.nb_tasks ? (
+          {contact.title || contact.company_id != null ? (
             <div className="text-sm text-muted-foreground">
               {contact.title && contact.company_id != null
                 ? `${translate("resources.contacts.position_at", {
@@ -147,11 +147,6 @@ const ContactItemContent = ({
                   <TextField source="name" />
                 </ReferenceField>
               )}
-              {contact.nb_tasks
-                ? ` - ${translate("crm.common.task_count", {
-                    smart_count: contact.nb_tasks,
-                  })}`
-                : ""}
               &nbsp;&nbsp;
               <TagsList />
             </div>
@@ -281,13 +276,6 @@ const ContactItemContentMobile = ({ contact }: { contact: Contact }) => {
                   </ReferenceField>
                 )}
               </span>
-              {contact.nb_tasks ? (
-                <span>
-                  {translate("crm.common.task_count", {
-                    smart_count: contact.nb_tasks,
-                  })}
-                </span>
-              ) : null}
             </div>
           </div>
         </div>

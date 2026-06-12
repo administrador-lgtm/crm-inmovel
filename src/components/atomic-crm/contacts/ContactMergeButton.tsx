@@ -91,16 +91,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
 
   // Get counts of items to be merged
   const canFetchCounts = open && !!loserContact && !!winnerId;
-  const { total: tasksCount } = useGetManyReference(
-    "tasks",
-    {
-      target: "contact_id",
-      id: loserContact?.id,
-      pagination: { page: 1, perPage: 1 },
-    },
-    { enabled: canFetchCounts },
-  );
-
   const { total: notesCount } = useGetManyReference(
     "contact_notes",
     {
@@ -232,12 +222,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                       {notesCount !== 1 ? "s" : ""} will be reassigned
                     </li>
                   )}
-                  {tasksCount != null && tasksCount > 0 && (
-                    <li>
-                      • {tasksCount} task
-                      {tasksCount !== 1 ? "s" : ""} will be reassigned
-                    </li>
-                  )}
                   {dealsCount != null && dealsCount > 0 && (
                     <li>
                       • {dealsCount} deal
@@ -259,7 +243,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                     </li>
                   )}
                   {!notesCount &&
-                    !tasksCount &&
                     !dealsCount &&
                     !loserContact.email_jsonb?.length &&
                     !loserContact.phone_jsonb?.length && (
