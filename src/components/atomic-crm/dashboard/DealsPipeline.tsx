@@ -1,11 +1,9 @@
 import { DollarSign } from "lucide-react";
 import { useGetIdentity, useGetList, useTranslate } from "ra-core";
 import { Link } from "react-router";
-import { ReferenceField } from "@/components/admin/reference-field";
 import { Card } from "@/components/ui/card";
 
 import { SimpleList } from "../simple-list/SimpleList";
-import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { findDealLabel } from "../deals/dealUtils";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Deal } from "../types";
@@ -74,17 +72,6 @@ export const DealsPipeline = () => {
               minimumSignificantDigits: 3,
             })} , ${findDealLabel(dealStages, deal.stage)}`
           }
-          leftAvatar={(deal) => (
-            <ReferenceField
-              source="company_id"
-              record={deal}
-              reference="companies"
-              resource="deals"
-              link={false}
-            >
-              <CompanyAvatar width={20} height={20} />
-            </ReferenceField>
-          )}
         />
       </Card>
     </>
