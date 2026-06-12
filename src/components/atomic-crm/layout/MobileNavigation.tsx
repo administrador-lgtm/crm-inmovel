@@ -27,8 +27,6 @@ export const MobileNavigation = () => {
     currentPath = "/companies";
   } else if (matchPath("/tasks/*", location.pathname)) {
     currentPath = "/tasks";
-  } else if (matchPath("/deals/*", location.pathname)) {
-    currentPath = "/deals";
   } else {
     currentPath = false;
   }

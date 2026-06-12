@@ -1,10 +1,8 @@
-import { Handshake } from "lucide-react";
 import { Link } from "react-router";
 import {
   useCreatePath,
   useListContext,
   useRecordContext,
-  useTranslate,
 } from "ra-core";
 import { ReferenceManyField } from "@/components/admin/reference-many-field";
 import { Card } from "@/components/ui/card";
@@ -17,7 +15,6 @@ import { CompanyAvatar } from "./CompanyAvatar";
 export const CompanyCard = (props: { record?: Company }) => {
   const createPath = useCreatePath();
   const record = useRecordContext<Company>(props);
-  const translate = useTranslate();
   const { companySectors } = useConfigurationContext();
   if (!record) return null;
 
@@ -49,18 +46,6 @@ export const CompanyCard = (props: { record?: Company }) => {
               </ReferenceManyField>
             ) : null}
           </div>
-          {record.nb_deals ? (
-            <div className="flex items-center ml-2 gap-0.5">
-              <Handshake className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{record.nb_deals}</span>
-              <span className="text-xs text-muted-foreground">
-                {translate("resources.deals.name", {
-                  smart_count: record.nb_deals ?? 0,
-                  _: "Deal |||| Deals",
-                })}
-              </span>
-            </div>
-          ) : null}
         </div>
       </Card>
     </Link>

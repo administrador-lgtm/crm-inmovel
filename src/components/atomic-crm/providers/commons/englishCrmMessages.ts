@@ -461,6 +461,7 @@ export const englishCrmMessages = {
     language: "Language",
     navigation: {
       label: "CRM navigation",
+      leads: "Leads",
     },
     profile: {
       inbound: {
