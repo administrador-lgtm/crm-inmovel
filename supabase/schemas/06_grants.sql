@@ -94,10 +94,6 @@ grant all on table public.tags to anon;
 grant all on table public.tags to authenticated;
 grant all on table public.tags to service_role;
 
-grant all on table public.tasks to anon;
-grant all on table public.tasks to authenticated;
-grant all on table public.tasks to service_role;
-
 grant all on table public.configuration to anon;
 grant all on table public.configuration to authenticated;
 grant all on table public.configuration to service_role;
@@ -155,10 +151,6 @@ grant all on sequence public.sales_id_seq to service_role;
 grant all on sequence public.tags_id_seq to anon;
 grant all on sequence public.tags_id_seq to authenticated;
 grant all on sequence public.tags_id_seq to service_role;
-
-grant all on sequence public.tasks_id_seq to anon;
-grant all on sequence public.tasks_id_seq to authenticated;
-grant all on sequence public.tasks_id_seq to service_role;
 
 -- Default privileges
 alter default privileges for role postgres in schema public grant all on sequences to postgres;

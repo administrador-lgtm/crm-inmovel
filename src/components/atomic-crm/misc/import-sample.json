@@ -95,19 +95,5 @@
         }
       ]
     }
-  ],
-  "tasks": [
-    {
-      "contact_id": 456,
-      "sales_id": 123,
-      "text": "Send crowbar maintenance kit"
-    },
-    {
-      "contact_id": 567,
-      "sales_id": 123,
-      "text": "Schedule moon rock conversion demo",
-      "due_date": "2025-03-26T16:15:00Z",
-      "done_date": "2025-04-01T09:00:00"
-    }
   ]
 }

@@ -9,7 +9,6 @@ const adminSupabase = createClient(
 
 // Tables in FK-safe deletion order (children before parents)
 const TABLES = [
-  "tasks",
   "contact_notes",
   "deal_notes",
   "deals",

@@ -214,11 +214,6 @@ const ContactsIterator = () => {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {contact.title}
-                  {contact.nb_tasks
-                    ? ` - ${translate("crm.common.task_count", {
-                        smart_count: contact.nb_tasks ?? 0,
-                      })}`
-                    : ""}
                   &nbsp; &nbsp;
                   <TagsList />
                 </div>

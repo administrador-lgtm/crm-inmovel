@@ -1,11 +1,8 @@
 import { useRecordContext, useTranslate } from "ra-core";
 import { EditButton } from "@/components/admin/edit-button";
 import { DeleteButton } from "@/components/admin";
-import { ReferenceManyField } from "@/components/admin/reference-many-field";
 import { ShowButton } from "@/components/admin/show-button";
 
-import { AddTask } from "../tasks/AddTask";
-import { TasksIterator } from "../tasks/TasksIterator";
 import { TagsListEdit } from "./TagsListEdit";
 import { ContactStatusSelector } from "./ContactInputs";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
@@ -51,20 +48,6 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
         title={translate("resources.tags.name", { smart_count: 2 })}
       >
         <TagsListEdit />
-      </AsideSection>
-
-      <AsideSection
-        title={translate("resources.tasks.name", { smart_count: 2 })}
-      >
-        <ReferenceManyField
-          target="contact_id"
-          reference="tasks"
-          sort={{ field: "due_date", order: "ASC" }}
-          perPage={1000}
-        >
-          <TasksIterator />
-        </ReferenceManyField>
-        <AddTask />
       </AsideSection>
 
       {link !== "edit" && (

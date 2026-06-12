@@ -41,7 +41,6 @@ const SECTIONS = [
   },
   { id: "deals", label: "resources.deals.name", fallback: "Deals" },
   { id: "notes", label: "resources.notes.name", fallback: "Notes" },
-  { id: "tasks", label: "resources.tasks.name", fallback: "Tasks" },
 ];
 
 /** Ensure every item in a { value, label } array has a value (slug from label). */
@@ -124,7 +123,6 @@ const transformFormValues = (data: Record<string, any>) => ({
     currency: data.currency,
     companySectors: ensureValues(data.companySectors),
     dealCategories: ensureValues(data.dealCategories),
-    taskTypes: ensureValues(data.taskTypes),
     dealStages: ensureValues(data.dealStages),
     dealPipelineStatuses: data.dealPipelineStatuses,
     noteStatuses: ensureValues(data.noteStatuses),
@@ -172,7 +170,6 @@ const SettingsForm = () => {
       currency: config.currency,
       companySectors: config.companySectors,
       dealCategories: config.dealCategories,
-      taskTypes: config.taskTypes,
       dealStages: config.dealStages,
       dealPipelineStatuses: config.dealPipelineStatuses,
       noteStatuses: config.noteStatuses,
@@ -439,25 +436,6 @@ const SettingsFormFields = () => {
               <SimpleFormIterator inline disableReordering disableClear>
                 <TextInput source="label" label={false} className="flex-1" />
                 <ColorInput source="color" />
-              </SimpleFormIterator>
-            </ArrayInput>
-          </CardContent>
-        </Card>
-
-        {/* Tasks */}
-        <Card id="tasks">
-          <CardContent className="space-y-4">
-            <h2 className="text-xl font-semibold text-muted-foreground">
-              {translate("resources.tasks.name", {
-                smart_count: 2,
-              })}
-            </h2>
-            <h3 className="text-lg font-medium text-muted-foreground">
-              {translate("crm.settings.tasks.types")}
-            </h3>
-            <ArrayInput source="taskTypes" label={false} helperText={false}>
-              <SimpleFormIterator disableReordering disableClear>
-                <TextInput source="label" label={false} />
               </SimpleFormIterator>
             </ArrayInput>
           </CardContent>

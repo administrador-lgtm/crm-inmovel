@@ -37,16 +37,6 @@ export interface ContactsTable {
   linkedin_url: string | null;
 }
 
-interface TasksTable {
-  id: Generated<number>;
-  contact_id: number;
-  type: string | null;
-  text: string | null;
-  due_date: Date;
-  done_date: Date | null;
-  sales_id: number | null;
-}
-
 interface ContactNotesTable {
   id: Generated<number>;
   contact_id: number;
@@ -76,7 +66,6 @@ interface DealsTable {
 
 interface Database {
   contacts: ContactsTable;
-  tasks: TasksTable;
   contact_notes: ContactNotesTable;
   deals: DealsTable;
 }
