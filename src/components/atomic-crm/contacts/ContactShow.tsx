@@ -8,8 +8,6 @@ import {
 } from "ra-core";
 import type { ShowBaseProps } from "ra-core";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ReferenceField } from "@/components/admin/reference-field";
-import { TextField } from "@/components/admin/text-field";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,6 @@ import { Link } from "react-router";
 
 import MobileHeader from "../layout/MobileHeader";
 import { MobileContent } from "../layout/MobileContent";
-import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { NoteCreate, NotesIterator, NotesIteratorMobile } from "../notes";
 import { NoteCreateSheet } from "../notes/NoteCreateSheet";
 import { TagsListEdit } from "./TagsListEdit";
@@ -104,31 +101,8 @@ const ContactShowContentMobile = () => {
                 <RecordRepresentation />
               </h2>
               <div className="text-sm text-muted-foreground">
-                {record.title && record.company_id != null
-                  ? `${translate("resources.contacts.position_at", {
-                      title: record.title,
-                    })} `
-                  : record.title}
-                {record.company_id != null && (
-                  <ReferenceField
-                    source="company_id"
-                    reference="companies"
-                    link="show"
-                  >
-                    <TextField source="name" className="underline" />
-                  </ReferenceField>
-                )}
+                {record.title}
               </div>
-            </div>
-            <div>
-              <ReferenceField
-                source="company_id"
-                reference="companies"
-                link="show"
-                className="no-underline"
-              >
-                <CompanyAvatar />
-              </ReferenceField>
             </div>
           </div>
         </div>
@@ -252,32 +226,8 @@ const ContactShowContent = () => {
                   <RecordRepresentation />
                 </h5>
                 <div className="inline-flex text-sm text-muted-foreground">
-                  {record.title && record.company_id != null
-                    ? `${translate("resources.contacts.position_at", {
-                        title: record.title,
-                      })} `
-                    : record.title}
-                  {record.company_id != null && (
-                    <ReferenceField
-                      source="company_id"
-                      reference="companies"
-                      link="show"
-                    >
-                      &nbsp;
-                      <TextField source="name" />
-                    </ReferenceField>
-                  )}
+                  {record.title}
                 </div>
-              </div>
-              <div>
-                <ReferenceField
-                  source="company_id"
-                  reference="companies"
-                  link="show"
-                  className="no-underline"
-                >
-                  <CompanyAvatar />
-                </ReferenceField>
               </div>
             </div>
             <InfiniteListBase

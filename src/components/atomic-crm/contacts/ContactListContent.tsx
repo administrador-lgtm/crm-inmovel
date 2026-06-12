@@ -10,8 +10,6 @@ import {
 } from "ra-core";
 import { type MouseEvent, useCallback, useRef } from "react";
 import { Link } from "react-router";
-import { ReferenceField } from "@/components/admin/reference-field";
-import { TextField } from "@/components/admin/text-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -131,22 +129,9 @@ const ContactItemContent = ({
           <div className="font-medium">
             {`${contact.first_name} ${contact.last_name ?? ""}`}
           </div>
-          {contact.title || contact.company_id != null || contact.nb_tasks ? (
+          {contact.title || contact.nb_tasks ? (
             <div className="text-sm text-muted-foreground">
-              {contact.title && contact.company_id != null
-                ? `${translate("resources.contacts.position_at", {
-                    title: contact.title,
-                  })} `
-                : contact.title}
-              {contact.company_id != null && (
-                <ReferenceField
-                  source="company_id"
-                  reference="companies"
-                  link={false}
-                >
-                  <TextField source="name" />
-                </ReferenceField>
-              )}
+              {contact.title}
               {contact.nb_tasks
                 ? ` - ${translate("crm.common.task_count", {
                     smart_count: contact.nb_tasks,
@@ -265,22 +250,7 @@ const ContactItemContentMobile = ({ contact }: { contact: Contact }) => {
           </div>
           <div className="text-sm text-muted-foreground">
             <div className="flex flex-col gap-1">
-              <span>
-                {contact.title && contact.company_id != null
-                  ? `${translate("resources.contacts.position_at", {
-                      title: contact.title,
-                    })} `
-                  : contact.title}
-                {contact.company_id != null && (
-                  <ReferenceField
-                    source="company_id"
-                    reference="companies"
-                    link={false}
-                  >
-                    <TextField source="name" />
-                  </ReferenceField>
-                )}
-              </span>
+              <span>{contact.title}</span>
               {contact.nb_tasks ? (
                 <span>
                   {translate("crm.common.task_count", {
