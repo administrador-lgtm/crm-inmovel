@@ -9,10 +9,7 @@ const adminSupabase = createClient(
 
 // Tables in FK-safe deletion order (children before parents)
 const TABLES = [
-  "tasks",
   "contact_notes",
-  "deal_notes",
-  "deals",
   "contacts",
   "companies",
   "tags",
@@ -146,6 +143,8 @@ async function createContact({
   title = "",
   company_id = null,
   sales_id,
+  stage,
+  phone,
   notes = [],
 }: {
   first_name: string;
@@ -153,6 +152,8 @@ async function createContact({
   title?: string;
   company_id?: string | number | null;
   sales_id: string | number;
+  stage?: string;
+  phone?: string;
   notes?: {
     text: string;
     date?: string;
@@ -167,6 +168,7 @@ async function createContact({
       title,
       company_id,
       sales_id,
+      stage,
       first_seen: new Date().toISOString(),
       last_seen: new Date().toISOString(),
       has_newsletter: false,
@@ -175,7 +177,7 @@ async function createContact({
       status: "cold",
       background: "",
       email_jsonb: [],
-      phone_jsonb: [],
+      phone_jsonb: phone ? [{ number: phone, type: "Work" }] : [],
     })
     .select("id")
     .single();

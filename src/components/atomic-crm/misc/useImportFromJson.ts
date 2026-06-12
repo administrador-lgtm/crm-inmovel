@@ -11,23 +11,18 @@ import mime from "mime/lite";
 import type { CrmDataProvider } from "../providers/types";
 import type { RAFile, Tag } from "../types";
 import { colors } from "../tags/colors";
-import { useConfigurationContext } from "../root/ConfigurationContext";
 import { contactGender } from "../contacts/contactModel";
 
 export type ImportFromJsonStats = {
   sales: number;
-  companies: number;
   contacts: number;
   notes: number;
-  tasks: number;
 };
 
 export type ImportFromJsonFailures = {
   sales: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
-  companies: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
   contacts: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
   notes: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
-  tasks: Array<JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined>;
 };
 
 export type ImportFromJsonIdleState = {
@@ -71,18 +66,14 @@ type ResetFunction = () => void;
 
 const defaultFailedImports = {
   sales: [],
-  companies: [],
   contacts: [],
   notes: [],
-  tasks: [],
 };
 
 const defaultStats = {
   sales: 0,
-  companies: 0,
   contacts: 0,
   notes: 0,
-  tasks: 0,
 };
 
 /**
@@ -97,7 +88,6 @@ export const useImportFromJson = (): [
   const { data: currentSale } = useGetIdentity();
   const dataProvider = useDataProvider<CrmDataProvider>();
   const refresh = useRefresh();
-  const { companySectors } = useConfigurationContext();
   const [state, setState] = useState<ImportFromJsonState>({
     status: "idle",
     error: null,
@@ -129,12 +119,10 @@ export const useImportFromJson = (): [
 
     const idsMaps: {
       sales: Record<number, Identifier>;
-      companies: Record<number, Identifier>;
       contacts: Record<number, Identifier>;
       tags: Record<string, Identifier>;
     } = {
       sales: {},
-      companies: {},
       contacts: {},
       tags: {},
     };
@@ -202,102 +190,6 @@ export const useImportFromJson = (): [
             ],
           },
           duration,
-        }));
-      }
-    };
-
-    const importCompany = async (
-      dataToImport: JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined,
-    ) => {
-      if (!isCompany(dataToImport)) {
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          error: null,
-          failedImports: {
-            ...old.failedImports,
-            companies: [
-              ...old.failedImports.companies,
-              { ...(dataToImport as any), error: "Invalid format" },
-            ],
-          },
-        }));
-        return;
-      }
-      try {
-        // Validate sector against configuration
-        const sector = dataToImport.sector?.trim();
-        if (sector && !companySectors.some((s) => s.value === sector)) {
-          setState((old) => ({
-            ...old,
-            status: "importing",
-            error: null,
-            failedImports: {
-              ...old.failedImports,
-              companies: [
-                ...old.failedImports.companies,
-                {
-                  ...(dataToImport as any),
-                  error: `Invalid sector "${sector}". Must be one of: ${companySectors.map((s) => s.value).join(", ")}`,
-                },
-              ],
-            },
-          }));
-          return;
-        }
-
-        const { data } = await dataProvider.create("companies", {
-          data: {
-            name: dataToImport.name.trim(),
-            description: dataToImport.description?.trim(),
-            city: dataToImport.city?.trim(),
-            country: dataToImport.country?.trim(),
-            address: dataToImport.address?.trim(),
-            zipcode: dataToImport.zipcode?.trim(),
-            state_abbr: dataToImport.state_abbr?.trim(),
-            sector: sector || undefined,
-            size: dataToImport.size
-              ? mapSizeToCategory(dataToImport.size)
-              : undefined,
-            linkedin_url: dataToImport.linkedin_url?.trim(),
-            website: dataToImport.website?.trim(),
-            phone_number: dataToImport.phone_number?.trim(),
-            revenue: dataToImport.revenue?.trim(),
-            tax_identifier: dataToImport.tax_identifier?.trim(),
-            context_links: Array.isArray(dataToImport.context_links)
-              ? dataToImport.context_links
-              : undefined,
-            sales_id: dataToImport.sales_id
-              ? idsMaps.sales[dataToImport.sales_id]
-              : currentSale.id,
-            created_at: dataToImport.created_at,
-          },
-        });
-
-        idsMaps.companies[dataToImport.id] = data.id;
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          stats: {
-            ...old.stats,
-            companies: old.stats.companies + 1,
-          },
-          error: null,
-        }));
-        return data;
-      } catch (err) {
-        console.error(err);
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          error: null,
-          failedImports: {
-            ...old.failedImports,
-            companies: [
-              ...old.failedImports.companies,
-              { ...(dataToImport as any), error: (err as Error).message },
-            ],
-          },
         }));
       }
     };
@@ -371,9 +263,6 @@ export const useImportFromJson = (): [
             linkedin_url: dataToImport.linkedin_url?.trim(),
             gender: gender || undefined,
             has_newsletter: !!dataToImport.has_newsletter,
-            company_id: dataToImport.company_id
-              ? idsMaps.companies[dataToImport.company_id]
-              : undefined,
             email_jsonb: Array.isArray(dataToImport.emails)
               ? dataToImport.emails
               : undefined,
@@ -512,96 +401,12 @@ export const useImportFromJson = (): [
       }
     };
 
-    const importTask = async (
-      dataToImport: JsonTypes.JsonPrimitive | JsonTypes.JsonStruct | undefined,
-    ) => {
-      if (!isTask(dataToImport)) {
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          failedImports: {
-            ...old.failedImports,
-            tasks: [
-              ...old.failedImports.tasks,
-              { ...(dataToImport as any), error: "Invalid format" },
-            ],
-          },
-          error: null,
-        }));
-        return;
-      }
-      try {
-        if (idsMaps.sales[dataToImport.sales_id] == null) {
-          console.error(
-            `task ${dataToImport.text} has an invalid sales ID: ${dataToImport.sales_id}. Fallback to default sale`,
-          );
-        }
-        if (idsMaps.contacts[dataToImport.contact_id] == null) {
-          setState((old) => ({
-            ...old,
-            status: "importing",
-            failedImports: {
-              ...old.failedImports,
-              tasks: [
-                ...old.failedImports.tasks,
-                {
-                  ...(dataToImport as any),
-                  error: `Invalid contact_id ${dataToImport.contact_id}`,
-                },
-              ],
-            },
-            error: null,
-          }));
-          return;
-        }
-
-        await dataProvider.create("tasks", {
-          data: {
-            contact_id: idsMaps.contacts[dataToImport.contact_id],
-            sales_id: idsMaps.sales[dataToImport.sales_id] ?? currentSale.id,
-            text: dataToImport.text,
-            due_date: dataToImport.due_date || undefined,
-            done_date: dataToImport.done_date || undefined,
-          },
-        });
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          stats: {
-            ...old.stats,
-            tasks: old.stats.tasks + 1,
-          },
-          error: null,
-        }));
-      } catch (err) {
-        console.error(err);
-        setState((old) => ({
-          ...old,
-          status: "importing",
-          failedImports: {
-            ...old.failedImports,
-            tasks: [
-              ...old.failedImports.tasks,
-              { ...(dataToImport as any), error: (err as Error).message },
-            ],
-          },
-          error: null,
-        }));
-      }
-    };
-
     let currentTask: Promise<any> | null = null;
     let currentBatch: Array<Promise<void>> = [];
     const BATCH_SIZE = 50;
 
     const parser = new JSONParser({
-      paths: [
-        "$.sales.*",
-        "$.companies.*",
-        "$.contacts.*",
-        "$.notes.*",
-        "$.tasks.*",
-      ],
+      paths: ["$.sales.*", "$.contacts.*", "$.notes.*"],
       keepStack: false,
     });
     const stream = file.stream();
@@ -643,20 +448,12 @@ export const useImportFromJson = (): [
           currentBatch.push(importSale(value));
           break;
         }
-        case "companies": {
-          currentBatch.push(importCompany(value));
-          break;
-        }
         case "contacts": {
           currentBatch.push(importContact(value));
           break;
         }
         case "notes": {
           currentBatch.push(importNote(value));
-          break;
-        }
-        case "tasks": {
-          currentBatch.push(importTask(value));
           break;
         }
       }
@@ -686,7 +483,7 @@ export const useImportFromJson = (): [
   return [state, importFile, reset];
 };
 
-const TYPES = ["sales", "companies", "contacts", "notes", "tasks"] as const;
+const TYPES = ["sales", "contacts", "notes"] as const;
 type Types = (typeof TYPES)[number];
 
 const getType = (value: string | undefined): Types | undefined => {
@@ -711,39 +508,9 @@ const isSale = (data: any): data is SaleImport =>
   data.first_name !== null &&
   data.last_name != null;
 
-type CompanyImport = {
-  id: number;
-  name: string;
-  sales_id?: number;
-  description?: string;
-  city?: string;
-  country?: string;
-  address?: string;
-  zipcode?: string;
-  state_abbr?: string;
-  sector?: string;
-  size?: number;
-  linkedin_url?: string;
-  website?: string;
-  phone_number?: string;
-  revenue?: string;
-  tax_identifier?: string;
-  context_links?: string[];
-  created_at?: string;
-  updated_at?: string;
-};
-
-const isCompany = (data: any): data is CompanyImport =>
-  data != null &&
-  typeof data === "object" &&
-  !Array.isArray(data) &&
-  data.id != null &&
-  data.name != null;
-
 type ContactImport = {
   id: number;
   sales_id: number;
-  company_id?: number;
   first_name: string;
   last_name: string;
   title?: string;
@@ -783,33 +550,3 @@ const isNote = (data: any): data is NoteImport =>
   data.contact_id != null &&
   data.text != null &&
   data.date != null;
-
-type TaskImport = {
-  contact_id: number;
-  sales_id: number;
-  text: string;
-  due_date?: string;
-  done_date?: string;
-  created_at?: string;
-  updated_at?: string;
-};
-
-const isTask = (data: any): data is TaskImport =>
-  data != null &&
-  typeof data === "object" &&
-  !Array.isArray(data) &&
-  data.sales_id != null &&
-  data.contact_id != null &&
-  data.text != null;
-
-/**
- * Maps a company size number to the appropriate size category.
- * Categories: 1, 10, 50, 250, 500
- */
-const mapSizeToCategory = (size: number): 1 | 10 | 50 | 250 | 500 => {
-  if (size === 1) return 1;
-  if (size < 10) return 10;
-  if (size < 50) return 50;
-  if (size < 250) return 250;
-  return 500;
-};

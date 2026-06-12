@@ -24,7 +24,7 @@ export const NoteCreate = ({
   showStatus,
   className,
 }: {
-  reference: "contacts" | "deals";
+  reference: "contacts";
   showStatus?: boolean;
   className?: string;
 }) => {
@@ -58,7 +58,7 @@ const NoteCreateButton = ({
   record,
 }: {
   defaultStatus?: string;
-  reference: "contacts" | "deals";
+  reference: "contacts";
   record: RaRecord<Identifier>;
 }) => {
   const [update] = useUpdate();

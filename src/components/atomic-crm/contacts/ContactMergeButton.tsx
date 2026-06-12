@@ -91,30 +91,11 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
 
   // Get counts of items to be merged
   const canFetchCounts = open && !!loserContact && !!winnerId;
-  const { total: tasksCount } = useGetManyReference(
-    "tasks",
-    {
-      target: "contact_id",
-      id: loserContact?.id,
-      pagination: { page: 1, perPage: 1 },
-    },
-    { enabled: canFetchCounts },
-  );
-
   const { total: notesCount } = useGetManyReference(
     "contact_notes",
     {
       target: "contact_id",
       id: loserContact?.id,
-      pagination: { page: 1, perPage: 1 },
-    },
-    { enabled: canFetchCounts },
-  );
-
-  const { total: dealsCount } = useGetList(
-    "deals",
-    {
-      filter: { "contact_ids@cs": `{${loserContact?.id}}` },
       pagination: { page: 1, perPage: 1 },
     },
     { enabled: canFetchCounts },
@@ -232,18 +213,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                       {notesCount !== 1 ? "s" : ""} will be reassigned
                     </li>
                   )}
-                  {tasksCount != null && tasksCount > 0 && (
-                    <li>
-                      • {tasksCount} task
-                      {tasksCount !== 1 ? "s" : ""} will be reassigned
-                    </li>
-                  )}
-                  {dealsCount != null && dealsCount > 0 && (
-                    <li>
-                      • {dealsCount} deal
-                      {dealsCount !== 1 ? "s" : ""} will be updated
-                    </li>
-                  )}
                   {loserContact.email_jsonb?.length > 0 && (
                     <li>
                       • {loserContact.email_jsonb.length} email address
@@ -259,8 +228,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                     </li>
                   )}
                   {!notesCount &&
-                    !tasksCount &&
-                    !dealsCount &&
                     !loserContact.email_jsonb?.length &&
                     !loserContact.phone_jsonb?.length && (
                       <li className="text-muted-foreground/60">

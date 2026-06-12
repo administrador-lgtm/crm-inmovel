@@ -8,8 +8,6 @@ import {
 } from "ra-core";
 import type {
   ContactNote,
-  Deal,
-  DealNote,
   RAFile,
   Sale,
   SalesFormData,
@@ -28,31 +26,12 @@ const getBaseDataProvider = () =>
     sortOrder: "asc,desc.nullslast" as any,
   });
 
-const processCompanyLogo = async (params: any) => {
-  const logo = params.data.logo;
-
-  if (logo?.rawFile instanceof File) {
-    await uploadToBucket(logo);
-  }
-
-  return {
-    ...params,
-    data: {
-      ...params.data,
-      logo,
-    },
-  };
-};
-
 const getDataProviderWithCustomMethods = () => {
   const baseDataProvider = getBaseDataProvider();
 
   return {
     ...baseDataProvider,
     async getList(resource: string, params: GetListParams) {
-      if (resource === "companies") {
-        return baseDataProvider.getList("companies_summary", params);
-      }
       if (resource === "contacts") {
         return baseDataProvider.getList("contacts_summary", params);
       }
@@ -66,9 +45,7 @@ const getDataProviderWithCustomMethods = () => {
           data: data.map((row: any) => ({
             ...row,
             contactNote: row.contact_note ?? undefined,
-            dealNote: row.deal_note ?? undefined,
             contact_note: undefined,
-            deal_note: undefined,
           })),
           total,
         };
@@ -77,9 +54,6 @@ const getDataProviderWithCustomMethods = () => {
       return baseDataProvider.getList(resource, params);
     },
     async getOne(resource: string, params: any) {
-      if (resource === "companies") {
-        return baseDataProvider.getOne("companies_summary", params);
-      }
       if (resource === "contacts") {
         return baseDataProvider.getOne("contacts_summary", params);
       }
@@ -181,31 +155,6 @@ const getDataProviderWithCustomMethods = () => {
 
       return passwordUpdated;
     },
-    async unarchiveDeal(deal: Deal) {
-      // get all deals where stage is the same as the deal to unarchive
-      const { data: deals } = await baseDataProvider.getList<Deal>("deals", {
-        filter: { stage: deal.stage },
-        pagination: { page: 1, perPage: 1000 },
-        sort: { field: "index", order: "ASC" },
-      });
-
-      // set index for each deal starting from 1, if the deal to unarchive is found, set its index to the last one
-      const updatedDeals = deals.map((d, index) => ({
-        ...d,
-        index: d.id === deal.id ? 0 : index + 1,
-        archived_at: d.id === deal.id ? null : d.archived_at,
-      }));
-
-      return await Promise.all(
-        updatedDeals.map((updatedDeal) =>
-          baseDataProvider.update("deals", {
-            id: updatedDeal.id,
-            data: updatedDeal,
-            previousData: deals.find((d) => d.id === updatedDeal.id),
-          }),
-        ),
-      );
-    },
     async isInitialized() {
       return getIsInitialized();
     },
@@ -281,17 +230,6 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
     },
   },
   {
-    resource: "deal_notes",
-    beforeSave: async (data: DealNote, _, __) => {
-      if (data.attachments) {
-        data.attachments = await Promise.all(
-          data.attachments.map((fi) => uploadToBucket(fi)),
-        );
-      }
-      return data;
-    },
-  },
-  {
     resource: "sales",
     beforeSave: async (data: Sale, _, __) => {
       if (data.avatar) {
@@ -306,7 +244,6 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
       return applyFullTextSearch([
         "first_name",
         "last_name",
-        "company_name",
         "title",
         "email",
         "phone",
@@ -315,42 +252,9 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
     },
   },
   {
-    resource: "companies",
-    beforeGetList: async (params) => {
-      return applyFullTextSearch([
-        "name",
-        "phone_number",
-        "website",
-        "zipcode",
-        "city",
-        "state_abbr",
-      ])(params);
-    },
-    beforeCreate: async (params) => {
-      const createParams = await processCompanyLogo(params);
-
-      return {
-        ...createParams,
-        data: {
-          created_at: new Date().toISOString(),
-          ...createParams.data,
-        },
-      };
-    },
-    beforeUpdate: async (params) => {
-      return await processCompanyLogo(params);
-    },
-  },
-  {
     resource: "contacts_summary",
     beforeGetList: async (params) => {
       return applyFullTextSearch(["first_name", "last_name"])(params);
-    },
-  },
-  {
-    resource: "deals",
-    beforeGetList: async (params) => {
-      return applyFullTextSearch(["name", "category", "description"])(params);
     },
   },
 ];

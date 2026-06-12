@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import type { ContactNote, DealNote } from "../types";
+import type { ContactNote } from "../types";
 import { Status } from "../misc/Status";
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { getCurrentDate } from "./utils";
@@ -27,16 +27,14 @@ export const NoteInputs = ({
   defaultStatus?: string;
   showStatus?: boolean;
   selectReference?: boolean;
-  reference?: "contacts" | "deals";
+  reference?: "contacts";
 }) => {
   const { noteStatuses } = useConfigurationContext();
   const translate = useTranslate();
   const [displayMore, setDisplayMore] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { control, formState, setValue } = useFormContext<
-    ContactNote | DealNote
-  >();
+  const { control, formState, setValue } = useFormContext<ContactNote>();
   const selectedContactId = useWatch({ control, name: "contact_id" });
   const selectedStatus = useWatch({ control, name: "status" });
   const textValue = useWatch({ control, name: "text" as any });
@@ -90,7 +88,7 @@ export const NoteInputs = ({
   ]);
 
   // We manually define the input labels because the default ones
-  // would use the resource from the context, which is either "contact_notes" or "deal_notes",
+  // would use the resource from the context ("contact_notes"),
   // but we want it to be "notes" regardless of the context
   return (
     <div ref={containerRef} className="space-y-2">
@@ -116,14 +114,8 @@ export const NoteInputs = ({
           reference={reference}
         >
           <AutocompleteInput
-            label={
-              reference === "contacts"
-                ? "resources.notes.fields.contact_id"
-                : "resources.notes.fields.deal_id"
-            }
-            optionText={
-              reference === "contacts" ? contactOptionText : undefined
-            }
+            label="resources.notes.fields.contact_id"
+            optionText={contactOptionText}
             helperText={false}
             validate={required()}
             modal

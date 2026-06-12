@@ -1,23 +1,4 @@
-import { parse } from "tldts";
-
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-
-export function extractCompanyName(domain: string) {
-  if (!domain) return "";
-  let name = domain.split(".").at(-2) || domain;
-
-  const parseResult = parse(domain);
-  if (parseResult.domainWithoutSuffix) {
-    name = parseResult.domainWithoutSuffix;
-  }
-
-  const humanizedName = name
-    .replace(/[-_]+/g, " ")
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-  return humanizedName;
-}
 
 /**
  * Extracts the first name, last name, email, and domain from a mail contact.
@@ -60,16 +41,11 @@ export const extractMailContactData = (
       firstName = parts[0];
       lastName = parts.slice(1).join(" ");
     }
-    const companyName = extractCompanyName(domain);
-    const website = `https://${domain}`;
-
     return {
       firstName: capitalize(firstName),
       lastName: capitalize(lastName),
       email: contact.Email,
       domain,
-      companyName,
-      website,
     };
   });
 };

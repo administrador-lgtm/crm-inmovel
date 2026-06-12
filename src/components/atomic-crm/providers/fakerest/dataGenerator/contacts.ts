@@ -7,19 +7,14 @@ import {
   random,
 } from "faker/locale/en_US";
 
-import { defaultNoteStatuses } from "../../../root/defaultConfiguration";
+import {
+  defaultLeadStages,
+  defaultNoteStatuses,
+} from "../../../root/defaultConfiguration";
 import { contactGender } from "../../../contacts/contactModel";
-import type { Company, Contact } from "../../../types";
+import type { Contact } from "../../../types";
 import type { Db } from "./types";
 import { randomDate, weightedBoolean } from "./utils";
-
-const maxContacts = {
-  1: 1,
-  10: 4,
-  50: 12,
-  250: 25,
-  500: 50,
-};
 
 const getRandomContactDetailsType = () =>
   random.arrayElement(["Work", "Home", "Other"]) as "Work" | "Home" | "Other";
@@ -63,14 +58,9 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       numberOfContacts++;
     }
 
-    // choose company with people left to know
-    let company: Company;
-    do {
-      company = random.arrayElement(db.companies);
-    } while ((company.nb_contacts ?? 0) >= maxContacts[company.size]);
-    company.nb_contacts = (company.nb_contacts ?? 0) + 1;
+    const sale = random.arrayElement(db.sales);
 
-    const first_seen = randomDate(new Date(company.created_at)).toISOString();
+    const first_seen = randomDate().toISOString();
     const last_seen = first_seen;
 
     return {
@@ -79,8 +69,6 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       last_name,
       gender,
       title: title.charAt(0).toUpperCase() + title.substr(1),
-      company_id: company.id,
-      company_name: company.name,
       email_jsonb,
       phone_jsonb,
       background: lorem.sentence(),
@@ -90,11 +78,11 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       last_seen: last_seen,
       has_newsletter: weightedBoolean(30),
       status: random.arrayElement(defaultNoteStatuses).value,
+      stage: random.arrayElement(defaultLeadStages).value,
       tags: random
         .arrayElements(db.tags, random.arrayElement([0, 0, 0, 1, 1, 2]))
         .map((tag) => tag.id), // finalize
-      sales_id: company.sales_id!,
-      nb_tasks: 0,
+      sales_id: sale.id,
       linkedin_url: null,
     };
   });

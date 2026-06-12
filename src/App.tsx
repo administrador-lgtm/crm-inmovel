@@ -4,15 +4,11 @@ import { CRM } from "@/components/atomic-crm/root/CRM";
  * Application entry point
  *
  * Customize Atomic CRM by passing props to the CRM component:
- *  - companySectors
  *  - darkTheme
- *  - dealCategories
- *  - dealPipelineStatuses
- *  - dealStages
+ *  - leadStages
  *  - lightTheme
  *  - logo
  *  - noteStatuses
- *  - taskTypes
  *  - title
  * ... as well as all the props accepted by shadcn-admin-kit's <Admin> component.
  *

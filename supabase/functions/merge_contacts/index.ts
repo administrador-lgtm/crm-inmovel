@@ -58,7 +58,6 @@ function mergeContactData(winner: Contact, loser: Contact) {
     first_name: winner.first_name ?? loser.first_name,
     last_name: winner.last_name ?? loser.last_name,
     title: winner.title ?? loser.title,
-    company_id: winner.company_id ?? loser.company_id,
     email_jsonb: JSON.stringify(mergedEmails) as any,
     phone_jsonb: JSON.stringify(mergedPhones) as any,
     linkedin_url: winner.linkedin_url || loser.linkedin_url,
@@ -105,21 +104,14 @@ async function mergeContacts(
           .executeTakeFirstOrThrow(),
       ]);
 
-      // 2. Reassign tasks from loser to winner
-      await trx
-        .updateTable("tasks")
-        .set({ contact_id: winnerId })
-        .where("contact_id", "=", loserId)
-        .execute();
-
-      // 3. Reassign notes from loser to winner
+      // 2. Reassign notes from loser to winner
       await trx
         .updateTable("contact_notes")
         .set({ contact_id: winnerId })
         .where("contact_id", "=", loserId)
         .execute();
 
-      // 4. Update deals - replace loserId with winnerId in contact_ids array
+      // 3. Update deals - replace loserId with winnerId in contact_ids array
       const deals = await trx
         .selectFrom("deals")
         .selectAll()

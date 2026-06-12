@@ -2,68 +2,6 @@ import type { CrmMessages } from "./englishCrmMessages";
 
 export const frenchCrmMessages = {
   resources: {
-    companies: {
-      name: "Entreprise |||| Entreprises",
-      forcedCaseName: "Entreprise",
-      fields: {
-        name: "Nom de l'entreprise",
-        website: "Site web",
-        linkedin_url: "LinkedIn",
-        phone_number: "Numéro de téléphone",
-        created_at: "Date de création",
-        nb_contacts: "Nombre de contacts",
-        revenue: "Chiffre d'affaires",
-        sector: "Secteur",
-        size: "Taille",
-        tax_identifier: "Identifiant fiscal",
-        address: "Adresse",
-        city: "Ville",
-        zipcode: "Code postal",
-        state_abbr: "État",
-        country: "Pays",
-        description: "Description",
-        context_links: "URLs de contexte",
-        sales_id: "Responsable de compte",
-      },
-      empty: {
-        description: "Il semble que la liste de vos entreprises soit vide.",
-        title: "Aucune entreprise trouvée",
-      },
-      field_categories: {
-        contact: "Contact",
-        additional_info: "Informations supplémentaires",
-        address: "Adresse",
-        context: "Contexte",
-      },
-      action: {
-        create: "Créer une entreprise",
-        edit: "Modifier l'entreprise",
-        new: "Nouvelle entreprise",
-        show: "Afficher l'entreprise",
-      },
-      added_on: "Ajoutée le %{date}",
-      followed_by: "Suivie par %{name}",
-      followed_by_you: "Suivie par vous",
-      no_contacts: "Aucun contact",
-      nb_contacts: "%{smart_count} contact |||| %{smart_count} contacts",
-      nb_deals: "%{smart_count} affaire |||| %{smart_count} affaires",
-      sizes: {
-        one_employee: "1 employé",
-        two_to_nine_employees: "2-9 employés",
-        ten_to_forty_nine_employees: "10-49 employés",
-        fifty_to_two_hundred_forty_nine_employees: "50-249 employés",
-        two_hundred_fifty_or_more_employees: "250 employés ou plus",
-      },
-      autocomplete: {
-        create_error:
-          "Une erreur s'est produite lors de la création de l'entreprise",
-        create_item: "Créer %{item}",
-        create_label: "Commencez à taper pour créer une nouvelle entreprise",
-      },
-      filters: {
-        only_mine: "Seulement les entreprises que je gère",
-      },
-    },
     contacts: {
       name: "Contact |||| Contacts",
       forcedCaseName: "Contact",
@@ -186,7 +124,6 @@ export const frenchCrmMessages = {
         this_week: "Cette semaine",
         today: "Aujourd'hui",
         tags: "Étiquettes",
-        tasks: "Tâches",
       },
       hot: {
         empty_change_status:
@@ -194,50 +131,6 @@ export const frenchCrmMessages = {
         empty_hint: 'Les contacts avec un statut "chaud" apparaîtront ici.',
         title: "Contacts chauds",
       },
-    },
-    deals: {
-      name: "Affaire |||| Affaires",
-      fields: {
-        name: "Nom",
-        description: "Description",
-        company_id: "Entreprise",
-        contact_ids: "Contacts",
-        category: "Catégorie",
-        amount: "Budget",
-        expected_closing_date: "Date de clôture prévue",
-        stage: "Étape",
-      },
-      action: {
-        back_to_deal: "Retour à l'affaire",
-        create: "Créer une affaire",
-        new: "Nouvelle affaire",
-      },
-      field_categories: {
-        misc: "Divers",
-      },
-      archived: {
-        action: "Archiver",
-        error: "Erreur : affaire non archivée",
-        list_title: "Affaires archivées",
-        success: "Affaire archivée",
-        title: "Affaire archivée",
-        view: "Afficher les affaires archivées",
-      },
-      inputs: {
-        linked_to: "Lié à",
-      },
-      unarchived: {
-        action: "Renvoyer au tableau",
-        error: "Erreur : affaire non désarchivée",
-        success: "Affaire désarchivée",
-      },
-      updated: "Affaire mise à jour",
-      empty: {
-        before_create: "avant de créer une affaire.",
-        description: "Il semble que votre liste d'affaires soit vide.",
-        title: "Aucune affaire trouvée",
-      },
-      invalid_date: "Date invalide",
     },
     notes: {
       name: "Note |||| Notes",
@@ -247,7 +140,6 @@ export const frenchCrmMessages = {
         date: "Date",
         attachments: "Pièces jointes",
         contact_id: "Contact",
-        deal_id: "Affaire",
       },
       action: {
         add: "Ajouter une note",
@@ -314,49 +206,6 @@ export const frenchCrmMessages = {
         new: "Nouvel utilisateur",
       },
     },
-    tasks: {
-      name: "Tâche |||| Tâches",
-      forcedCaseName: "Tâche",
-      fields: {
-        text: "Description",
-        due_date: "Date d'échéance",
-        type: "Type",
-        contact_id: "Contact",
-        due_short: "échéance",
-      },
-      action: {
-        add: "Ajouter une tâche",
-        create: "Créer une tâche",
-        edit: "Modifier la tâche",
-      },
-      actions: {
-        postpone_next_week: "Reporté à la semaine prochaine",
-        postpone_tomorrow: "Reporter à demain",
-        title: "Actions de tâche",
-      },
-      added: "Tâche ajoutée",
-      deleted: "Tâche supprimée avec succès",
-      dialog: {
-        create: "Créer une tâche",
-        create_for: "Créer une tâche pour %{name}",
-      },
-      sheet: {
-        edit: "Modifier la tâche",
-        edit_for: "Modifier la tâche pour %{name}",
-      },
-      empty: "Aucune tâche pour l'instant",
-      empty_list_hint: "Les tâches ajoutées à vos contacts apparaîtront ici.",
-      filters: {
-        later: "Plus tard",
-        overdue: "En retard",
-        this_week: "Cette semaine",
-        today: "Aujourd'hui",
-        tomorrow: "Demain",
-        with_pending: "Avec des tâches en attente",
-      },
-      regarding_contact: "(Concernant : %{name})",
-      updated: "Tâche mise à jour",
-    },
     tags: {
       name: "Étiquette |||| Étiquettes",
       action: {
@@ -406,7 +255,6 @@ export const frenchCrmMessages = {
       read_more: "En savoir plus",
       retry: "Réessayer",
       show_less: "Afficher moins",
-      task_count: "%{smart_count} tâche |||| %{smart_count} tâches",
       copied: "Copié !",
       copy: "Copier",
       loading: "Chargement...",
@@ -422,17 +270,11 @@ export const frenchCrmMessages = {
       you_added_contact: "Vous avez ajouté le contact",
       added_note: "%{name} a ajouté une note sur",
       you_added_note: "Vous avez ajouté une note sur",
-      added_note_about_deal: "%{name} a ajouté une note sur l'affaire",
-      you_added_note_about_deal: "Vous avez ajouté une note sur l'affaire",
-      added_deal: "%{name} a ajouté l'affaire",
-      you_added_deal: "Vous avez ajouté l'affaire",
       at_company: "chez",
       to: "à",
       load_more: "Charger plus d'activité",
     },
     dashboard: {
-      deals_chart: "Revenus des affaires à venir",
-      deals_pipeline: "Pipeline des affaires",
       latest_activity: "Dernière activité",
       latest_activity_error:
         "Erreur lors du chargement de la dernière activité",
@@ -443,7 +285,6 @@ export const frenchCrmMessages = {
         progress: "%{step}/3 terminé",
         whats_next: "Et ensuite ?",
       },
-      upcoming_tasks: "Tâches à venir",
     },
     header: {
       import_data: "Importer des données",
@@ -467,7 +308,7 @@ export const frenchCrmMessages = {
       },
       idle: {
         description_1:
-          "Vous pouvez importer des ventes, des entreprises, des contacts, des entreprises, des notes et des tâches.",
+          "Vous pouvez importer des ventes, des contacts et des notes.",
         description_2:
           "Les données doivent se trouver dans un fichier JSON correspondant à l'exemple suivant :",
       },
@@ -484,17 +325,10 @@ export const frenchCrmMessages = {
     },
     settings: {
       about: "À propos",
-      companies: {
-        sectors: "Secteurs",
-      },
       dark_mode_logo: "Logo du mode sombre",
-      deals: {
-        categories: "Catégories",
-        currency: "Devise",
-        pipeline_help:
-          "Sélectionnez les étapes d'affaire à considérer comme des affaires dans le pipeline.",
-        pipeline_statuses: "Statuts des pipelines",
-        stages: "Étapes",
+      currency: "Devise",
+      leads: {
+        stages: "Étapes du pipeline",
       },
       light_mode_logo: "Logo du mode clair",
       notes: {
@@ -504,24 +338,11 @@ export const frenchCrmMessages = {
       save_error: "Échec de l'enregistrement de la configuration",
       saved: "Configuration enregistrée avec succès",
       saving: "Enregistrement...",
-      tasks: {
-        types: "Types",
-      },
       preferences: "Préférences",
       title: "Paramètres",
       app_title: "Titre de l'application",
       sections: {
         branding: "Image de marque",
-      },
-      validation: {
-        duplicate: "%{display_name} en double : %{items}",
-        in_use:
-          "Impossible de supprimer %{display_name} encore utilisés par des affaires : %{items}",
-        validating: "Validation\u2026",
-        entities: {
-          categories: "catégories",
-          stages: "étapes",
-        },
       },
     },
     theme: {
@@ -533,6 +354,7 @@ export const frenchCrmMessages = {
     language: "Langue",
     navigation: {
       label: "Navigation CRM",
+      leads: "Prospects",
     },
     profile: {
       inbound: {

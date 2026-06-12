@@ -7,7 +7,6 @@ import { Avatar } from "../contacts/Avatar";
 import { RelativeDate } from "../misc/RelativeDate";
 import { useGetSalesName } from "../sales/useGetSalesName";
 import type { ActivityContactNoteCreated, Contact } from "../types";
-import { useActivityLogContext } from "./ActivityLogContext";
 import { ActivityLogNote } from "./ActivityLogNote";
 
 type ActivityLogContactNoteCreatedProps = {
@@ -22,7 +21,6 @@ function ContactAvatar() {
 export function ActivityLogContactNoteCreated({
   activity,
 }: ActivityLogContactNoteCreatedProps) {
-  const context = useActivityLogContext();
   const isMobile = useIsMobile();
   const translate = useTranslate();
   const { identity } = useGetIdentity();
@@ -59,20 +57,9 @@ export function ActivityLogContactNoteCreated({
               record={activity.contactNote}
             >
               <TextField source="first_name" /> <TextField source="last_name" />
-            </ReferenceField>
-            {context !== "company" && (
-              <>
-                {" "}
-                <RelativeDate date={activity.date} />
-              </>
-            )}
+            </ReferenceField>{" "}
+            <RelativeDate date={activity.date} />
           </span>
-
-          {context === "company" && (
-            <span className="text-muted-foreground text-sm">
-              <RelativeDate date={activity.date} />
-            </span>
-          )}
         </div>
       }
       text={contactNote.text}

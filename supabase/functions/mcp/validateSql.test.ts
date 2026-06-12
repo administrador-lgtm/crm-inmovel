@@ -11,11 +11,11 @@ describe("validateReadOnly", () => {
     ],
     [
       "SELECT with JOIN",
-      "SELECT c.name, co.name FROM contacts c JOIN companies co ON c.company_id = co.id",
+      "SELECT c.first_name, t.text FROM contacts c JOIN tasks t ON t.contact_id = c.id",
     ],
     [
       "SELECT with subquery",
-      "SELECT * FROM contacts WHERE company_id IN (SELECT id FROM companies WHERE sector = 'Tech')",
+      "SELECT * FROM contacts WHERE id IN (SELECT contact_id FROM tasks WHERE done_date IS NULL)",
     ],
     [
       "read-only CTE",
@@ -23,7 +23,7 @@ describe("validateReadOnly", () => {
     ],
     [
       "aggregate query",
-      "SELECT COUNT(*) as total, type FROM tasks GROUP BY type",
+      "SELECT COUNT(*) as total, stage FROM deals GROUP BY stage",
     ],
     [
       "DELETE in string literal",
@@ -91,7 +91,7 @@ describe("validateWrite", () => {
     ],
     [
       "UPDATE with subquery",
-      "UPDATE contacts SET company_id = (SELECT id FROM companies WHERE name = 'Acme') WHERE id = 1",
+      "UPDATE contacts SET sales_id = (SELECT id FROM sales WHERE email = 'a@b.com') WHERE id = 1",
     ],
     [
       "writable CTE with INSERT",

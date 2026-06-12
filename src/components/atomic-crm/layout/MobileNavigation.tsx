@@ -6,13 +6,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Home, ListTodo, Plus, Settings, Users } from "lucide-react";
+import { Home, Plus, Settings, Users } from "lucide-react";
 import { useTranslate } from "ra-core";
 import { Link, matchPath, useLocation, useMatch } from "react-router";
 import { ContactCreateSheet } from "../contacts/ContactCreateSheet";
 import { useState } from "react";
 import { NoteCreateSheet } from "../notes/NoteCreateSheet";
-import { TaskCreateSheet } from "../tasks/TaskCreateSheet";
 
 export const MobileNavigation = () => {
   const location = useLocation();
@@ -23,12 +22,6 @@ export const MobileNavigation = () => {
     currentPath = "/";
   } else if (matchPath("/contacts/*", location.pathname)) {
     currentPath = "/contacts";
-  } else if (matchPath("/companies/*", location.pathname)) {
-    currentPath = "/companies";
-  } else if (matchPath("/tasks/*", location.pathname)) {
-    currentPath = "/tasks";
-  } else if (matchPath("/deals/*", location.pathname)) {
-    currentPath = "/deals";
   } else {
     currentPath = false;
   }
@@ -69,12 +62,6 @@ export const MobileNavigation = () => {
             isActive={currentPath === "/contacts"}
           />
           <CreateButton />
-          <NavigationButton
-            href="/tasks"
-            Icon={ListTodo}
-            label={translate("resources.tasks.name", { smart_count: 2 })}
-            isActive={currentPath === "/tasks"}
-          />
           <SettingsButton />
         </>
       </div>
@@ -113,7 +100,6 @@ const CreateButton = () => {
   const contact_id = useMatch("/contacts/:id/*")?.params.id;
   const [contactCreateOpen, setContactCreateOpen] = useState(false);
   const [noteCreateOpen, setNoteCreateOpen] = useState(false);
-  const [taskCreateOpen, setTaskCreateOpen] = useState(false);
 
   return (
     <>
@@ -124,11 +110,6 @@ const CreateButton = () => {
       <NoteCreateSheet
         open={noteCreateOpen}
         onOpenChange={setNoteCreateOpen}
-        contact_id={contact_id}
-      />
-      <TaskCreateSheet
-        open={taskCreateOpen}
-        onOpenChange={setTaskCreateOpen}
         contact_id={contact_id}
       />
       <DropdownMenu>
@@ -158,14 +139,6 @@ const CreateButton = () => {
             }}
           >
             {translate("resources.notes.forcedCaseName")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="h-12 px-4 text-base"
-            onSelect={() => {
-              setTaskCreateOpen(true);
-            }}
-          >
-            {translate("resources.tasks.forcedCaseName")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

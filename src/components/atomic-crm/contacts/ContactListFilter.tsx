@@ -1,5 +1,5 @@
 import { endOfYesterday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { CheckSquare, Clock, Tag, TrendingUp, Users } from "lucide-react";
+import { Clock, Tag, TrendingUp, Users } from "lucide-react";
 import {
   useGetIdentity,
   useGetList,
@@ -129,18 +129,6 @@ export const ContactListFilter = () => {
       </FilterCategory>
 
       <FilterCategory
-        icon={<CheckSquare />}
-        label="resources.contacts.filters.tasks"
-      >
-        <ToggleFilterButton
-          className="w-full justify-between h-10 md:h-8"
-          label="resources.tasks.filters.with_pending"
-          value={{ "nb_tasks@gt": 0 }}
-          size={isMobile ? "lg" : undefined}
-        />
-      </FilterCategory>
-
-      <FilterCategory
         icon={<Users />}
         label="resources.contacts.fields.sales_id"
       >
@@ -246,12 +234,6 @@ export const ContactListFilterSummary = () => {
             value={{ "tags@cs": `{${record.id}}` }}
           />
         ))}
-
-      <ActiveFilterButton
-        className="w-auto justify-between h-8"
-        label="resources.tasks.filters.with_pending"
-        value={{ "nb_tasks@gt": 0 }}
-      />
 
       <ActiveFilterButton
         className="w-auto justify-between h-8"

@@ -32,19 +32,8 @@ export interface ContactsTable {
   has_newsletter: boolean | null;
   status: string | null;
   tags: number[] | null;
-  company_id: number | null;
   sales_id: number | null;
   linkedin_url: string | null;
-}
-
-interface TasksTable {
-  id: Generated<number>;
-  contact_id: number;
-  type: string | null;
-  text: string | null;
-  due_date: Date;
-  done_date: Date | null;
-  sales_id: number | null;
 }
 
 interface ContactNotesTable {
@@ -60,7 +49,6 @@ interface ContactNotesTable {
 interface DealsTable {
   id: Generated<number>;
   name: string;
-  company_id: number | null;
   contact_ids: number[];
   category: string | null;
   stage: string;
@@ -76,7 +64,6 @@ interface DealsTable {
 
 interface Database {
   contacts: ContactsTable;
-  tasks: TasksTable;
   contact_notes: ContactNotesTable;
   deals: DealsTable;
 }

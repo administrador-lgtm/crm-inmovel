@@ -16,7 +16,7 @@ import { SelectAllButton } from "@/components/admin/select-all-button";
 import { SortButton } from "@/components/admin/sort-button";
 import { Card } from "@/components/ui/card";
 
-import type { Company, Contact, Sale, Tag } from "../types";
+import type { Contact, Sale, Tag } from "../types";
 import { BulkTagButton } from "./BulkTagButton";
 import { ContactEmpty } from "./ContactEmpty";
 import { ContactImportButton } from "./ContactImportButton";
@@ -139,21 +139,12 @@ const ContactListLayoutMobile = () => {
 };
 
 const exporter: Exporter<Contact> = async (records, fetchRelatedRecords) => {
-  const companies = await fetchRelatedRecords<Company>(
-    records,
-    "company_id",
-    "companies",
-  );
   const sales = await fetchRelatedRecords<Sale>(records, "sales_id", "sales");
   const tags = await fetchRelatedRecords<Tag>(records, "tags", "tags");
 
   const contacts = records.map((contact) => {
     const exportedContact = {
       ...contact,
-      company:
-        contact.company_id != null
-          ? companies[contact.company_id].name
-          : undefined,
       sales:
         contact.sales_id != null
           ? `${sales[contact.sales_id].first_name} ${sales[contact.sales_id].last_name}`
