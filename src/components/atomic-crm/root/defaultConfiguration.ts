@@ -21,23 +21,20 @@ export const defaultCompanySectors = [
   { value: "utilities", label: "Utilities" },
 ];
 
-export const defaultDealStages = [
-  { value: "opportunity", label: "Opportunity" },
-  { value: "proposal-sent", label: "Proposal Sent" },
-  { value: "in-negociation", label: "In Negotiation" },
-  { value: "won", label: "Won" },
-  { value: "lost", label: "Lost" },
-  { value: "delayed", label: "Delayed" },
-];
-
-export const defaultDealPipelineStatuses = ["won"];
-
-export const defaultDealCategories = [
-  { value: "other", label: "Other" },
-  { value: "copywriting", label: "Copywriting" },
-  { value: "print-project", label: "Print project" },
-  { value: "ui-design", label: "UI Design" },
-  { value: "website-design", label: "Website design" },
+// Inmovel lead pipeline stages (S1..S10 + descartado). The stage lives on the
+// lead (a contact); S1..S5 are sync-owned and read-only in the CRM.
+export const defaultLeadStages = [
+  { value: "S1", label: "Contacto" },
+  { value: "S2", label: "En conversación" },
+  { value: "S3", label: "Perfilando" },
+  { value: "S4", label: "Handoff ready" },
+  { value: "S5", label: "Handoff enviado" },
+  { value: "S6", label: "Asesor aceptó" },
+  { value: "S7", label: "Visita agendada" },
+  { value: "S8", label: "Visita realizada" },
+  { value: "S9", label: "Negociación" },
+  { value: "S10", label: "Cierre" },
+  { value: "descartado", label: "Descartado" },
 ];
 
 export const defaultNoteStatuses = [
@@ -62,9 +59,7 @@ export const defaultTaskTypes = [
 export const defaultConfiguration: ConfigurationContextValue = {
   companySectors: defaultCompanySectors,
   currency: defaultCurrency,
-  dealCategories: defaultDealCategories,
-  dealPipelineStatuses: defaultDealPipelineStatuses,
-  dealStages: defaultDealStages,
+  leadStages: defaultLeadStages,
   noteStatuses: defaultNoteStatuses,
   taskTypes: defaultTaskTypes,
   title: defaultTitle,

@@ -5,7 +5,7 @@ import type {
   LayoutComponent,
 } from "ra-core";
 import { CustomRoutes, localStorageStore, Resource } from "ra-core";
-import { useEffect, useMemo } from "react";
+import { lazy, useEffect, useMemo } from "react";
 import { Route } from "react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -19,7 +19,6 @@ import companies from "../companies";
 import contacts from "../contacts";
 import { Dashboard } from "../dashboard/Dashboard";
 import { MobileDashboard } from "../dashboard/MobileDashboard";
-import deals from "../deals";
 import { Layout } from "../layout/Layout";
 import { MobileLayout } from "../layout/MobileLayout";
 import { SignupPage } from "../login/SignupPage";
@@ -43,9 +42,7 @@ import {
   defaultCompanySectors,
   defaultCurrency,
   defaultDarkModeLogo,
-  defaultDealCategories,
-  defaultDealPipelineStatuses,
-  defaultDealStages,
+  defaultLeadStages,
   defaultLightModeLogo,
   defaultNoteStatuses,
   defaultTaskTypes,
@@ -61,6 +58,12 @@ import { CompanyShow } from "../companies/CompanyShow.tsx";
 import { NoteShowPage } from "../notes/NoteShowPage.tsx";
 
 const defaultStore = localStorageStore(undefined, "CRM");
+
+// Lead pipeline kanban (retargeted from the former deal board). Lazy-loaded
+// because it pulls in the drag-and-drop library only when the route is visited.
+const LeadKanban = lazy(() => import("../leads/LeadKanban"));
+
+export const LEAD_KANBAN_PATH = "/leads/kanban";
 
 export type CRMProps = {
   dataProvider?: CrmDataProvider;
@@ -82,9 +85,7 @@ export type CRMProps = {
  * @param {LabeledValue[]} companySectors - The list of company sectors used in the application.
  * @param {string} currency - The ISO 4217 currency code used to format monetary values (e.g. "USD", "EUR", "GBP").
  * @param {RaThemeOptions} darkTheme - The theme to use when the application is in dark mode.
- * @param {LabeledValue[]} dealCategories - The categories of deals used in the application.
- * @param {string[]} dealPipelineStatuses - The statuses of deals in the pipeline used in the application.
- * @param {DealStage[]} dealStages - The stages of deals used in the application.
+ * @param {LeadStage[]} leadStages - The pipeline stages a lead can be in.
  * @param {RaThemeOptions} lightTheme - The theme to use when the application is in light mode.
  * @param {string} logo - The logo used in the CRM application.
  * @param {NoteStatus[]} noteStatuses - The statuses of notes used in the application.
@@ -115,9 +116,7 @@ export type CRMProps = {
 export const CRM = ({
   companySectors = defaultCompanySectors,
   currency = defaultCurrency,
-  dealCategories = defaultDealCategories,
-  dealPipelineStatuses = defaultDealPipelineStatuses,
-  dealStages = defaultDealStages,
+  leadStages = defaultLeadStages,
   darkModeLogo = defaultDarkModeLogo,
   lightModeLogo = defaultLightModeLogo,
   noteStatuses = defaultNoteStatuses,
@@ -154,9 +153,7 @@ export const CRM = ({
       store.setItem(CONFIGURATION_STORE_KEY, {
         companySectors,
         currency,
-        dealCategories,
-        dealPipelineStatuses,
-        dealStages,
+        leadStages,
         noteStatuses,
         taskTypes,
         title,
@@ -264,12 +261,11 @@ const DesktopAdmin = (
         <Route path={SettingsPage.path} element={<SettingsPage />} />
         <Route path={ImportPage.path} element={<ImportPage />} />
         <Route path={ChangelogPage.path} element={<ChangelogPage />} />
+        <Route path={LEAD_KANBAN_PATH} element={<LeadKanban />} />
       </CustomRoutes>
-      <Resource name="deals" {...deals} />
       <Resource name="contacts" {...contacts} />
       <Resource name="companies" {...companies} />
       <Resource name="contact_notes" />
-      <Resource name="deal_notes" />
       <Resource name="tasks" />
       <Resource name="sales" {...sales} />
       <Resource name="tags" />
