@@ -31,7 +31,7 @@
 //   ticketsDir    ticket JSON files   <- sessionDir/tickets
 //   flagsDir      coordination flags  <- sessionDir/flags
 
-import { readFileSync, readdirSync, mkdirSync, appendFileSync, existsSync, symlinkSync, unlinkSync } from "node:fs";
+import { readFileSync, readdirSync, mkdirSync, appendFileSync, existsSync, symlinkSync, unlinkSync, realpathSync } from "node:fs";
 import { dirname, basename, join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
@@ -64,6 +64,19 @@ export function tmpRoot() {
 // `${path.replace('/', '_')}` worktree-directory convention.
 export function sanitizePath(p) {
   return String(p ?? "").replace(/\//g, "_");
+}
+
+// Canonicalize a path for comparison against git output. On macOS /tmp is a
+// symlink to /private/tmp: git canonicalizes worktree paths (/private/tmp/...)
+// while paths derived from tmpRoot() say /tmp/.... Comparing them raw never
+// matches — that bug made activeWorktrees() return [] (silently skipping all
+// validation) and made the worktree hooks treat live worktrees as orphans.
+export function canonPath(p) {
+  try {
+    return realpathSync(p);
+  } catch {
+    return String(p ?? "");
+  }
 }
 
 // Repo default branch (base for worktrees / merge checks). Replaces hard-coded
@@ -218,11 +231,12 @@ export function crmIdentity(input) {
 export function activeWorktrees(ctx) {
   const only = process.env.VALIDATE_WORKTREE;
   if (only && existsSync(only)) return [only];
+  const canonBase = canonPath(ctx.worktreeBase);
   return git(["worktree", "list", "--porcelain"])
     .stdout.split("\n")
     .filter((l) => l.startsWith("worktree "))
     .map((l) => l.slice("worktree ".length))
-    .filter((p) => p.startsWith(ctx.worktreeBase + "/"));
+    .filter((p) => canonPath(p).startsWith(canonBase + "/"));
 }
 
 // True when a worktree has uncommitted changes OR commits ahead of base.
