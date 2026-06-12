@@ -28,6 +28,14 @@ export type Sale = {
   disabled?: boolean;
   user_id: string;
 
+  // Inmovel asesor fields (synced from the Sheet Asesores tab)
+  telefono?: string | null;
+  calendario?: string | null;
+  linea_negocio?: "exclusiva" | "compartida" | null;
+  activo?: boolean | null;
+  /** Manager this advisor reports to; drives manager team-scope RLS. */
+  manager_id?: Identifier | null;
+
   /**
    * This is a copy of the user's email, to make it easier to handle by react admin
    * DO NOT UPDATE this field directly, it should be updated by the backend

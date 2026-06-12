@@ -147,7 +147,15 @@ create table public.sales (
     administrator boolean not null,
     user_id uuid not null,
     avatar jsonb,
-    disabled boolean not null default false
+    disabled boolean not null default false,
+    -- Inmovel asesor fields (mirrored from the Sheet Asesores tab by the sync)
+    telefono text,
+    calendario text,
+    linea_negocio text check (linea_negocio in ('exclusiva', 'compartida')),
+    activo boolean default true,
+    -- Advisors are assigned to a manager; the manager team-scope RLS
+    -- (TASK-014) reads leads whose asesor_asignado has this manager_id.
+    manager_id bigint references public.sales(id)
 );
 
 create unique index uq__sales__user_id on public.sales using btree (user_id);
