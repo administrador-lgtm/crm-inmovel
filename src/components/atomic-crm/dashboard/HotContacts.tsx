@@ -71,16 +71,7 @@ export const HotContacts = () => {
           primaryText={(contact) =>
             `${contact.first_name} ${contact.last_name}`
           }
-          secondaryText={(contact) => (
-            <>
-              {contact.title && contact.company_name
-                ? translate("resources.contacts.position_at_company", {
-                    title: contact.title,
-                    company: contact.company_name,
-                  })
-                : contact.title || contact.company_name}
-            </>
-          )}
+          secondaryText={(contact) => <>{contact.title}</>}
           leftAvatar={(contact) => <Avatar record={contact} />}
           empty={
             <div className="p-4">

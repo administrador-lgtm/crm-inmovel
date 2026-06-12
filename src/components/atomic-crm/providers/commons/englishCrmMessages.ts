@@ -1,66 +1,5 @@
 export const englishCrmMessages = {
   resources: {
-    companies: {
-      name: "Company |||| Companies",
-      forcedCaseName: "Company",
-      fields: {
-        name: "Company name",
-        website: "Website",
-        linkedin_url: "LinkedIn URL",
-        phone_number: "Phone number",
-        created_at: "Created at",
-        nb_contacts: "Number of contacts",
-        revenue: "Revenue",
-        sector: "Sector",
-        size: "Size",
-        tax_identifier: "Tax Identifier",
-        address: "Address",
-        city: "City",
-        zipcode: "Zip code",
-        state_abbr: "State",
-        country: "Country",
-        description: "Description",
-        context_links: "Context links",
-        sales_id: "Account manager",
-      },
-      empty: {
-        description: "It seems your company list is empty.",
-        title: "No companies found",
-      },
-      field_categories: {
-        contact: "Contact",
-        additional_info: "Additional information",
-        address: "Address",
-        context: "Context",
-      },
-      action: {
-        create: "Create Company",
-        edit: "Edit company",
-        new: "New Company",
-        show: "Show company",
-      },
-      added_on: "Added on %{date}",
-      followed_by: "Followed by %{name}",
-      followed_by_you: "Followed by you",
-      no_contacts: "No contact",
-      nb_contacts: "%{smart_count} contact |||| %{smart_count} contacts",
-      nb_deals: "%{smart_count} deal |||| %{smart_count} deals",
-      sizes: {
-        one_employee: "1 employee",
-        two_to_nine_employees: "2-9 employees",
-        ten_to_forty_nine_employees: "10-49 employees",
-        fifty_to_two_hundred_forty_nine_employees: "50-249 employees",
-        two_hundred_fifty_or_more_employees: "250 or more employees",
-      },
-      autocomplete: {
-        create_error: "An error occurred while creating the company",
-        create_item: "Create %{item}",
-        create_label: "Start typing to create a new company",
-      },
-      filters: {
-        only_mine: "Only companies I manage",
-      },
-    },
     contacts: {
       name: "Contact |||| Contacts",
       forcedCaseName: "Contact",
@@ -412,8 +351,7 @@ export const englishCrmMessages = {
         unable: "Unable to import this file.",
       },
       idle: {
-        description_1:
-          "You can import sales, companies, contacts, companies, and notes.",
+        description_1: "You can import sales, contacts, and notes.",
         description_2:
           "Data must be in a JSON file matching the following sample:",
       },
@@ -431,9 +369,6 @@ export const englishCrmMessages = {
     },
     settings: {
       about: "About",
-      companies: {
-        sectors: "Sectors",
-      },
       dark_mode_logo: "Dark Mode Logo",
       deals: {
         categories: "Categories",

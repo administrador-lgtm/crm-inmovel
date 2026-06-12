@@ -2,7 +2,6 @@ import type { Identifier, RaRecord } from "ra-core";
 import type { ComponentType } from "react";
 
 import type {
-  COMPANY_CREATED,
   CONTACT_CREATED,
   CONTACT_NOTE_CREATED,
   DEAL_CREATED,
@@ -48,29 +47,6 @@ export type Sale = {
   password?: string;
 } & Pick<RaRecord, "id">;
 
-export type Company = {
-  name: string;
-  logo: RAFile;
-  sector: string;
-  size: 1 | 10 | 50 | 250 | 500;
-  linkedin_url: string;
-  website: string;
-  phone_number: string;
-  address: string;
-  zipcode: string;
-  city: string;
-  state_abbr: string;
-  sales_id?: Identifier;
-  created_at: string;
-  description: string;
-  revenue: string;
-  tax_identifier: string;
-  country: string;
-  context_links?: string[];
-  nb_contacts?: number;
-  nb_deals?: number;
-} & Pick<RaRecord, "id">;
-
 export type EmailAndType = {
   email: string;
   type: "Work" | "Home" | "Other";
@@ -85,7 +61,6 @@ export type Contact = {
   first_name: string;
   last_name: string;
   title: string;
-  company_id?: Identifier | null;
   email_jsonb: EmailAndType[];
   avatar?: Partial<RAFile>;
   linkedin_url?: string | null;
@@ -98,7 +73,6 @@ export type Contact = {
   status: string;
   background: string;
   phone_jsonb: PhoneNumberAndType[];
-  company_name?: string;
 } & Pick<RaRecord, "id">;
 
 export type ContactNote = {
@@ -112,7 +86,6 @@ export type ContactNote = {
 
 export type Deal = {
   name: string;
-  company_id: Identifier;
   contact_ids: Identifier[];
   category: string;
   stage: string;
@@ -143,17 +116,8 @@ export type Tag = {
   color: string;
 };
 
-export type ActivityCompanyCreated = {
-  type: typeof COMPANY_CREATED;
-  company_id: Identifier;
-  company: Company;
-  sales_id: Identifier;
-  date: string;
-} & Pick<RaRecord, "id">;
-
 export type ActivityContactCreated = {
   type: typeof CONTACT_CREATED;
-  company_id: Identifier;
   sales_id?: Identifier;
   contact: Contact;
   date: string;
@@ -168,7 +132,6 @@ export type ActivityContactNoteCreated = {
 
 export type ActivityDealCreated = {
   type: typeof DEAL_CREATED;
-  company_id: Identifier;
   sales_id?: Identifier;
   deal: Deal;
   date: string;
@@ -183,7 +146,6 @@ export type ActivityDealNoteCreated = {
 
 export type Activity = RaRecord &
   (
-    | ActivityCompanyCreated
     | ActivityContactCreated
     | ActivityContactNoteCreated
     | ActivityDealCreated

@@ -34,11 +34,6 @@ const SECTIONS = [
     label: "crm.settings.sections.branding",
     fallback: "Branding",
   },
-  {
-    id: "companies",
-    label: "resources.companies.name",
-    fallback: "Companies",
-  },
   { id: "deals", label: "resources.deals.name", fallback: "Deals" },
   { id: "notes", label: "resources.notes.name", fallback: "Notes" },
 ];
@@ -121,7 +116,6 @@ const transformFormValues = (data: Record<string, any>) => ({
     lightModeLogo: data.lightModeLogo,
     darkModeLogo: data.darkModeLogo,
     currency: data.currency,
-    companySectors: ensureValues(data.companySectors),
     dealCategories: ensureValues(data.dealCategories),
     dealStages: ensureValues(data.dealStages),
     dealPipelineStatuses: data.dealPipelineStatuses,
@@ -168,7 +162,6 @@ const SettingsForm = () => {
       lightModeLogo: { src: config.lightModeLogo },
       darkModeLogo: { src: config.darkModeLogo },
       currency: config.currency,
-      companySectors: config.companySectors,
       dealCategories: config.dealCategories,
       dealStages: config.dealStages,
       dealPipelineStatuses: config.dealPipelineStatuses,
@@ -301,29 +294,6 @@ const SettingsFormFields = () => {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Companies */}
-        <Card id="companies">
-          <CardContent className="space-y-4">
-            <h2 className="text-xl font-semibold text-muted-foreground">
-              {translate("resources.companies.name", {
-                smart_count: 2,
-              })}
-            </h2>
-            <h3 className="text-lg font-medium text-muted-foreground">
-              {translate("crm.settings.companies.sectors")}
-            </h3>
-            <ArrayInput
-              source="companySectors"
-              label={false}
-              helperText={false}
-            >
-              <SimpleFormIterator disableReordering disableClear>
-                <TextInput source="label" label={false} />
-              </SimpleFormIterator>
-            </ArrayInput>
           </CardContent>
         </Card>
 

@@ -4,7 +4,6 @@
 --
 
 -- Enable RLS on all tables
-alter table public.companies enable row level security;
 alter table public.contacts enable row level security;
 alter table public.contact_notes enable row level security;
 alter table public.deals enable row level security;
@@ -13,12 +12,6 @@ alter table public.sales enable row level security;
 alter table public.tags enable row level security;
 alter table public.configuration enable row level security;
 alter table public.favicons_excluded_domains enable row level security;
-
--- Companies
-create policy "Enable read access for authenticated users" on public.companies for select to authenticated using (true);
-create policy "Enable insert for authenticated users only" on public.companies for insert to authenticated with check (true);
-create policy "Enable update for authenticated users only" on public.companies for update to authenticated using (true) with check (true);
-create policy "Company Delete Policy" on public.companies for delete to authenticated using (true);
 
 -- Contacts
 create policy "Enable read access for authenticated users" on public.contacts for select to authenticated using (true);

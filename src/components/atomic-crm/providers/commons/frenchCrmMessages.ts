@@ -2,68 +2,6 @@ import type { CrmMessages } from "./englishCrmMessages";
 
 export const frenchCrmMessages = {
   resources: {
-    companies: {
-      name: "Entreprise |||| Entreprises",
-      forcedCaseName: "Entreprise",
-      fields: {
-        name: "Nom de l'entreprise",
-        website: "Site web",
-        linkedin_url: "LinkedIn",
-        phone_number: "Numéro de téléphone",
-        created_at: "Date de création",
-        nb_contacts: "Nombre de contacts",
-        revenue: "Chiffre d'affaires",
-        sector: "Secteur",
-        size: "Taille",
-        tax_identifier: "Identifiant fiscal",
-        address: "Adresse",
-        city: "Ville",
-        zipcode: "Code postal",
-        state_abbr: "État",
-        country: "Pays",
-        description: "Description",
-        context_links: "URLs de contexte",
-        sales_id: "Responsable de compte",
-      },
-      empty: {
-        description: "Il semble que la liste de vos entreprises soit vide.",
-        title: "Aucune entreprise trouvée",
-      },
-      field_categories: {
-        contact: "Contact",
-        additional_info: "Informations supplémentaires",
-        address: "Adresse",
-        context: "Contexte",
-      },
-      action: {
-        create: "Créer une entreprise",
-        edit: "Modifier l'entreprise",
-        new: "Nouvelle entreprise",
-        show: "Afficher l'entreprise",
-      },
-      added_on: "Ajoutée le %{date}",
-      followed_by: "Suivie par %{name}",
-      followed_by_you: "Suivie par vous",
-      no_contacts: "Aucun contact",
-      nb_contacts: "%{smart_count} contact |||| %{smart_count} contacts",
-      nb_deals: "%{smart_count} affaire |||| %{smart_count} affaires",
-      sizes: {
-        one_employee: "1 employé",
-        two_to_nine_employees: "2-9 employés",
-        ten_to_forty_nine_employees: "10-49 employés",
-        fifty_to_two_hundred_forty_nine_employees: "50-249 employés",
-        two_hundred_fifty_or_more_employees: "250 employés ou plus",
-      },
-      autocomplete: {
-        create_error:
-          "Une erreur s'est produite lors de la création de l'entreprise",
-        create_item: "Créer %{item}",
-        create_label: "Commencez à taper pour créer une nouvelle entreprise",
-      },
-      filters: {
-        only_mine: "Seulement les entreprises que je gère",
-      },
-    },
     contacts: {
       name: "Contact |||| Contacts",
       forcedCaseName: "Contact",
@@ -421,7 +359,7 @@ export const frenchCrmMessages = {
       },
       idle: {
         description_1:
-          "Vous pouvez importer des ventes, des entreprises, des contacts, des entreprises et des notes.",
+          "Vous pouvez importer des ventes, des contacts et des notes.",
         description_2:
           "Les données doivent se trouver dans un fichier JSON correspondant à l'exemple suivant :",
       },
@@ -438,9 +376,6 @@ export const frenchCrmMessages = {
     },
     settings: {
       about: "À propos",
-      companies: {
-        sectors: "Secteurs",
-      },
       dark_mode_logo: "Logo du mode sombre",
       deals: {
         categories: "Catégories",

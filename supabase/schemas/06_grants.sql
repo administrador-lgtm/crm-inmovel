@@ -29,10 +29,6 @@ grant all on function public.get_note_attachments_function_url() to service_role
 revoke all on function public.get_user_id_by_email(text) from public;
 grant all on function public.get_user_id_by_email(text) to service_role;
 
-grant all on function public.handle_company_saved() to anon;
-grant all on function public.handle_company_saved() to authenticated;
-grant all on function public.handle_company_saved() to service_role;
-
 grant all on function public.handle_contact_note_created_or_updated() to anon;
 grant all on function public.handle_contact_note_created_or_updated() to authenticated;
 grant all on function public.handle_contact_note_created_or_updated() to service_role;
@@ -66,10 +62,6 @@ grant all on function public.set_sales_id_default() to authenticated;
 grant all on function public.set_sales_id_default() to service_role;
 
 -- Table grants
-grant all on table public.companies to anon;
-grant all on table public.companies to authenticated;
-grant all on table public.companies to service_role;
-
 grant all on table public.contacts to anon;
 grant all on table public.contacts to authenticated;
 grant all on table public.contacts to service_role;
@@ -107,10 +99,6 @@ grant all on table public.activity_log to anon;
 grant all on table public.activity_log to authenticated;
 grant all on table public.activity_log to service_role;
 
-grant all on table public.companies_summary to anon;
-grant all on table public.companies_summary to authenticated;
-grant all on table public.companies_summary to service_role;
-
 grant all on table public.contacts_summary to anon;
 grant all on table public.contacts_summary to authenticated;
 grant all on table public.contacts_summary to service_role;
@@ -120,10 +108,6 @@ grant all on table public.init_state to authenticated;
 grant all on table public.init_state to service_role;
 
 -- Sequence grants
-grant all on sequence public.companies_id_seq to anon;
-grant all on sequence public.companies_id_seq to authenticated;
-grant all on sequence public.companies_id_seq to service_role;
-
 grant all on sequence public."contactNotes_id_seq" to anon;
 grant all on sequence public."contactNotes_id_seq" to authenticated;
 grant all on sequence public."contactNotes_id_seq" to service_role;

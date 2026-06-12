@@ -28,31 +28,12 @@ const getBaseDataProvider = () =>
     sortOrder: "asc,desc.nullslast" as any,
   });
 
-const processCompanyLogo = async (params: any) => {
-  const logo = params.data.logo;
-
-  if (logo?.rawFile instanceof File) {
-    await uploadToBucket(logo);
-  }
-
-  return {
-    ...params,
-    data: {
-      ...params.data,
-      logo,
-    },
-  };
-};
-
 const getDataProviderWithCustomMethods = () => {
   const baseDataProvider = getBaseDataProvider();
 
   return {
     ...baseDataProvider,
     async getList(resource: string, params: GetListParams) {
-      if (resource === "companies") {
-        return baseDataProvider.getList("companies_summary", params);
-      }
       if (resource === "contacts") {
         return baseDataProvider.getList("contacts_summary", params);
       }
@@ -77,9 +58,6 @@ const getDataProviderWithCustomMethods = () => {
       return baseDataProvider.getList(resource, params);
     },
     async getOne(resource: string, params: any) {
-      if (resource === "companies") {
-        return baseDataProvider.getOne("companies_summary", params);
-      }
       if (resource === "contacts") {
         return baseDataProvider.getOne("contacts_summary", params);
       }
@@ -306,39 +284,11 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
       return applyFullTextSearch([
         "first_name",
         "last_name",
-        "company_name",
         "title",
         "email",
         "phone",
         "background",
       ])(params);
-    },
-  },
-  {
-    resource: "companies",
-    beforeGetList: async (params) => {
-      return applyFullTextSearch([
-        "name",
-        "phone_number",
-        "website",
-        "zipcode",
-        "city",
-        "state_abbr",
-      ])(params);
-    },
-    beforeCreate: async (params) => {
-      const createParams = await processCompanyLogo(params);
-
-      return {
-        ...createParams,
-        data: {
-          created_at: new Date().toISOString(),
-          ...createParams.data,
-        },
-      };
-    },
-    beforeUpdate: async (params) => {
-      return await processCompanyLogo(params);
     },
   },
   {

@@ -1,7 +1,6 @@
 import {
   withLifecycleCallbacks,
   type CreateParams,
-  type DataProvider,
   type Identifier,
   type ResourceCallbacks,
   type UpdateParams,
@@ -9,7 +8,6 @@ import {
 import fakeRestDataProvider from "ra-data-fakerest";
 
 import type {
-  Company,
   Contact,
   ContactNote,
   Deal,
@@ -20,7 +18,6 @@ import type {
 } from "../../types";
 import type { ConfigurationContextValue } from "../../root/ConfigurationContext";
 import { getActivityLog } from "../commons/activity";
-import { getCompanyAvatar } from "../commons/getCompanyAvatar";
 import { getContactAvatar } from "../commons/getContactAvatar";
 import { mergeContacts } from "../commons/mergeContacts";
 import type { CrmDataProvider } from "../types";
@@ -31,25 +28,6 @@ import {
 import generateData from "./dataGenerator";
 import type { Db } from "./dataGenerator/types";
 import { withSupabaseFilterAdapter } from "./internal/supabaseAdapter";
-
-const processCompanyLogo = async (params: any) => {
-  let logo = params.data.logo;
-
-  if (typeof logo !== "object" || logo === null || !logo.src) {
-    logo = await getCompanyAvatar(params.data);
-  } else if (logo.rawFile instanceof File) {
-    const base64Logo = await convertFileToBase64(logo);
-    logo = { src: base64Logo, title: logo.title };
-  }
-
-  return {
-    ...params,
-    data: {
-      ...params.data,
-      logo,
-    },
-  };
-};
 
 async function processContactAvatar(
   params: UpdateParams<Contact>,
@@ -71,39 +49,6 @@ async function processContactAvatar(
   // Clone the data and modify the clone
   const newData = { ...data, avatar: { src: avatarUrl || undefined } };
 
-  return { ...params, data: newData };
-}
-
-async function fetchAndUpdateCompanyData(
-  params: UpdateParams<Contact>,
-  dataProvider: DataProvider,
-): Promise<UpdateParams<Contact>>;
-
-async function fetchAndUpdateCompanyData(
-  params: CreateParams<Contact>,
-  dataProvider: DataProvider,
-): Promise<CreateParams<Contact>>;
-
-async function fetchAndUpdateCompanyData(
-  params: CreateParams<Contact> | UpdateParams<Contact>,
-  dataProvider: DataProvider,
-): Promise<CreateParams<Contact> | UpdateParams<Contact>> {
-  const { data } = params;
-  const newData = { ...data };
-
-  if (!newData.company_id) {
-    return params;
-  }
-
-  const { data: company } = await dataProvider.getOne("companies", {
-    id: newData.company_id,
-  });
-
-  if (!company) {
-    return params;
-  }
-
-  newData.company_name = company.name;
   return { ...params, data: newData };
 }
 
@@ -144,23 +89,6 @@ export const createDataProvider = ({
   const getIdentity = async () =>
     authProvider?.getIdentity?.() ?? defaultAuthProvider.getIdentity?.();
 
-  const updateCompany = async (
-    companyId: Identifier,
-    updateFn: (company: Company) => Partial<Company>,
-  ) => {
-    const { data: company } = await dataProvider.getOne<Company>("companies", {
-      id: companyId,
-    });
-
-    return await dataProvider.update("companies", {
-      id: companyId,
-      data: {
-        ...updateFn(company),
-      },
-      previousData: company,
-    });
-  };
-
   const dataProviderWithCustomMethod: CrmDataProvider = {
     ...baseDataProvider,
     async getList(resource: string, params: any) {
@@ -168,7 +96,6 @@ export const createDataProvider = ({
         const { filter = {}, pagination } = params;
         const all = await getActivityLog(
           withSupabaseFilterAdapter(baseDataProvider),
-          filter.company_id,
           filter.sales_id,
         );
         const { page, perPage } = pagination;
@@ -354,15 +281,7 @@ export const createDataProvider = ({
 
           const newSaleId = params.meta.identity.id as Identifier;
 
-          const [companies, contacts, contactNotes, deals] = await Promise.all([
-            dataProvider.getList("companies", {
-              filter: { sales_id: params.id },
-              pagination: {
-                page: 1,
-                perPage: 10_000,
-              },
-              sort: { field: "id", order: "ASC" },
-            }),
+          const [contacts, contactNotes, deals] = await Promise.all([
             dataProvider.getList("contacts", {
               filter: { sales_id: params.id },
               pagination: {
@@ -390,26 +309,20 @@ export const createDataProvider = ({
           ]);
 
           await Promise.all([
-            dataProvider.updateMany("companies", {
-              ids: companies.data.map((company) => company.id),
-              data: {
-                sales_id: newSaleId,
-              },
-            }),
             dataProvider.updateMany("contacts", {
-              ids: contacts.data.map((company) => company.id),
+              ids: contacts.data.map((contact) => contact.id),
               data: {
                 sales_id: newSaleId,
               },
             }),
             dataProvider.updateMany("contact_notes", {
-              ids: contactNotes.data.map((company) => company.id),
+              ids: contactNotes.data.map((contactNote) => contactNote.id),
               data: {
                 sales_id: newSaleId,
               },
             }),
             dataProvider.updateMany("deals", {
-              ids: deals.data.map((company) => company.id),
+              ids: deals.data.map((deal) => deal.id),
               data: {
                 sales_id: newSaleId,
               },
@@ -421,7 +334,7 @@ export const createDataProvider = ({
       } satisfies ResourceCallbacks<Sale>,
       {
         resource: "contacts",
-        beforeCreate: async (createParams, dataProvider) => {
+        beforeCreate: async (createParams) => {
           const params = {
             ...createParams,
             data: {
@@ -432,65 +345,12 @@ export const createDataProvider = ({
                 createParams.data.last_seen ?? new Date().toISOString(),
             },
           };
-          const newParams = await processContactAvatar(params);
-          return fetchAndUpdateCompanyData(newParams, dataProvider);
-        },
-        afterCreate: async (result) => {
-          if (result.data.company_id != null) {
-            await updateCompany(result.data.company_id, (company) => ({
-              nb_contacts: (company.nb_contacts ?? 0) + 1,
-            }));
-          }
-
-          return result;
+          return processContactAvatar(params);
         },
         beforeUpdate: async (params) => {
-          const newParams = await processContactAvatar(params);
-          return fetchAndUpdateCompanyData(newParams, dataProvider);
-        },
-        afterDelete: async (result) => {
-          if (result.data.company_id != null) {
-            await updateCompany(result.data.company_id, (company) => ({
-              nb_contacts: (company.nb_contacts ?? 1) - 1,
-            }));
-          }
-
-          return result;
+          return processContactAvatar(params);
         },
       } satisfies ResourceCallbacks<Contact>,
-      {
-        resource: "companies",
-        beforeCreate: async (params) => {
-          const createParams = await processCompanyLogo(params);
-
-          return {
-            ...createParams,
-            data: {
-              ...createParams.data,
-              created_at: new Date().toISOString(),
-            },
-          };
-        },
-        beforeUpdate: async (params) => {
-          return await processCompanyLogo(params);
-        },
-        afterUpdate: async (result, dataProvider) => {
-          // get all contacts of the company and for each contact, update the company_name
-          const { id, name } = result.data;
-          const { data: contacts } = await dataProvider.getList("contacts", {
-            filter: { company_id: id },
-            pagination: { page: 1, perPage: 1000 },
-            sort: { field: "id", order: "ASC" },
-          });
-
-          const contactIds = contacts.map((contact) => contact.id);
-          await dataProvider.updateMany("contacts", {
-            ids: contactIds,
-            data: { company_name: name },
-          });
-          return result;
-        },
-      } satisfies ResourceCallbacks<Company>,
       {
         resource: "deals",
         beforeCreate: async (params) => {
@@ -503,13 +363,6 @@ export const createDataProvider = ({
             },
           };
         },
-        afterCreate: async (result) => {
-          await updateCompany(result.data.company_id, (company) => ({
-            nb_deals: (company.nb_deals ?? 0) + 1,
-          }));
-
-          return result;
-        },
         beforeUpdate: async (params) => {
           return {
             ...params,
@@ -518,13 +371,6 @@ export const createDataProvider = ({
               updated_at: new Date().toISOString(),
             },
           };
-        },
-        afterDelete: async (result) => {
-          await updateCompany(result.data.company_id, (company) => ({
-            nb_deals: (company.nb_deals ?? 1) - 1,
-          }));
-
-          return result;
         },
       } satisfies ResourceCallbacks<Deal>,
       {

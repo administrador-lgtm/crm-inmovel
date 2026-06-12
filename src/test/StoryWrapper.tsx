@@ -40,7 +40,6 @@ const baseSale: Sale = {
 // that matter for each scenario.
 export const createCrmDb = (overrides: Partial<Db> = {}): Db =>
   ({
-    companies: [],
     configuration: [{ config: {}, id: 1 }],
     contact_notes: [],
     contacts: [],
@@ -54,8 +53,6 @@ export const createCrmDb = (overrides: Partial<Db> = {}): Db =>
 // Build a valid contact record with sensible defaults to keep tests and stories terse.
 export const buildContact = (overrides: Partial<Contact> = {}): Contact => ({
   background: "",
-  company_id: null,
-  company_name: undefined,
   email_jsonb: [{ email: "ada@example.com", type: "Work" }],
   first_name: "Ada",
   first_seen: "2025-01-01T09:00:00.000Z",

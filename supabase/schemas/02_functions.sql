@@ -159,27 +159,6 @@ BEGIN
 END;
 $_$;
 
-CREATE OR REPLACE FUNCTION "public"."handle_company_saved"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    SET "search_path" TO 'public'
-    AS $$
-declare company_logo text;
-
-begin
-    if new.logo is not null then
-        return new;
-    end if;
-
-    company_logo = get_domain_favicon(new.website);
-    if company_logo is null then
-        return new;
-    end if;
-
-    new.logo = concat('{"src":"', company_logo, '","title":"Company favicon"}');
-    return new;
-end;
-$$;
-
 CREATE OR REPLACE FUNCTION "public"."handle_contact_note_created_or_updated"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO ''
@@ -403,7 +382,6 @@ BEGIN
     first_name = COALESCE(winner_contact.first_name, loser_contact.first_name),
     last_name = COALESCE(winner_contact.last_name, loser_contact.last_name),
     title = COALESCE(winner_contact.title, loser_contact.title),
-    company_id = COALESCE(winner_contact.company_id, loser_contact.company_id),
     email_jsonb = merged_emails,
     phone_jsonb = merged_phones,
     linkedin_url = COALESCE(winner_contact.linkedin_url, loser_contact.linkedin_url),

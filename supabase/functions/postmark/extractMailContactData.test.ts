@@ -1,11 +1,8 @@
 import { describe, it, expect } from "vitest";
-import {
-  extractMailContactData,
-  extractCompanyName,
-} from "./extractMailContactData";
+import { extractMailContactData } from "./extractMailContactData";
 
 describe("extractMailContactData", () => {
-  it("extracts first name, last name, email, domain, company name, and website when Name is provided", () => {
+  it("extracts first name, last name, email, and domain when Name is provided", () => {
     expect(
       extractMailContactData([
         {
@@ -19,8 +16,6 @@ describe("extractMailContactData", () => {
         lastName: "Lastname",
         email: "firstname.lastname@marmelab.com",
         domain: "marmelab.com",
-        companyName: "Marmelab",
-        website: "https://marmelab.com",
       },
     ]);
   });
@@ -34,8 +29,6 @@ describe("extractMailContactData", () => {
         lastName: "Doe",
         email: "john.doe@example.com",
         domain: "example.com",
-        companyName: "Example",
-        website: "https://example.com",
       },
     ]);
   });
@@ -47,8 +40,6 @@ describe("extractMailContactData", () => {
       {
         firstName: "",
         lastName: "Alice",
-        companyName: "Example",
-        website: "https://example.com",
         email: "alice@example.com",
         domain: "example.com",
       },
@@ -67,8 +58,6 @@ describe("extractMailContactData", () => {
       {
         firstName: "Jean",
         lastName: "De La Fontaine",
-        companyName: "Example",
-        website: "https://example.com",
         email: "jean.de.la.fontaine@example.com",
         domain: "example.com",
       },
@@ -80,8 +69,6 @@ describe("extractMailContactData", () => {
       extractMailContactData([{ Email: "jane.smith@company.org", Name: "" }]),
     ).toEqual([
       {
-        companyName: "Company",
-        website: "https://company.org",
         firstName: "Jane",
         lastName: "Smith",
         email: "jane.smith@company.org",
@@ -100,8 +87,6 @@ describe("extractMailContactData", () => {
       ]),
     ).toEqual([
       {
-        companyName: "Company",
-        website: "https://company.org",
         firstName: "Jane",
         lastName: "Smith",
         email: "jane.smith@company.org",
@@ -120,15 +105,11 @@ describe("extractMailContactData", () => {
       firstName: "Alice",
       lastName: "Wonder",
       domain: "foo.com",
-      companyName: "Foo",
-      website: "https://foo.com",
     });
     expect(result[1]).toMatchObject({
       firstName: "Bob",
       lastName: "Builder",
       domain: "bar.com",
-      companyName: "Bar",
-      website: "https://bar.com",
     });
   });
 
@@ -150,67 +131,7 @@ describe("extractMailContactData", () => {
         lastName: "Lastname",
         email: "firstname.lastname@marmelab.com",
         domain: "marmelab.com",
-        companyName: "Marmelab",
-        website: "https://marmelab.com",
       },
     ]);
-  });
-
-  describe("extractCompanyName", () => {
-    it("extracts company name from lowercase domain", () => {
-      expect(extractCompanyName("marmelab.com")).toBe("Marmelab");
-    });
-
-    it("extracts company name from uppercase domain", () => {
-      expect(extractCompanyName("Marmelab.com")).toBe("Marmelab");
-    });
-
-    it("extracts company name from common free email provider", () => {
-      expect(extractCompanyName("gmail.com")).toBe("Gmail");
-    });
-
-    it("extracts company name from multi-part TLD (.co.uk)", () => {
-      expect(extractCompanyName("example.co.uk")).toBe("Example");
-    });
-
-    it("extracts company name with hyphen and converts to title case", () => {
-      expect(extractCompanyName("example-company.co.uk")).toBe(
-        "Example Company",
-      );
-    });
-
-    it("extracts company name with underscore and converts to title case", () => {
-      expect(extractCompanyName("Example_Company.com")).toBe("Example Company");
-    });
-
-    it("extracts company name with multiple hyphens", () => {
-      expect(extractCompanyName("my-super-cool-company.com")).toBe(
-        "My Super Cool Company",
-      );
-    });
-
-    it("extracts company name with multiple underscores", () => {
-      expect(extractCompanyName("my_super_cool_company.com")).toBe(
-        "My Super Cool Company",
-      );
-    });
-
-    it("extracts company name with mixed separators", () => {
-      expect(extractCompanyName("my-super_cool-company.com")).toBe(
-        "My Super Cool Company",
-      );
-    });
-
-    it("handles invalid or unknown TLD domains gracefully", () => {
-      expect(extractCompanyName("invalid.domain")).toBe("Invalid");
-    });
-
-    it("returns empty string for empty domain", () => {
-      expect(extractCompanyName("")).toBe("");
-    });
-
-    it("handles domain with no TLD separator", () => {
-      expect(extractCompanyName("nodots")).toBe("Nodots");
-    });
   });
 });

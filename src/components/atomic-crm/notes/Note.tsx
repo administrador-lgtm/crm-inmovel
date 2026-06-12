@@ -10,7 +10,6 @@ import {
 } from "ra-core";
 import { useEffect, useRef, useState } from "react";
 import type { FieldValues, SubmitHandler } from "react-hook-form";
-import { ReferenceField } from "@/components/admin/reference-field";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -20,7 +19,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { Markdown } from "../misc/Markdown";
 import { RelativeDate } from "../misc/RelativeDate";
 import { Status } from "../misc/Status";
@@ -107,9 +105,6 @@ export const Note = ({
       className="mb-4"
     >
       <div className="flex items-center space-x-4 w-full">
-        <ReferenceField source="company_id" reference="companies" link="show">
-          <CompanyAvatar width={20} height={20} />
-        </ReferenceField>
         <div className="inline-flex h-full items-center text-sm text-muted-foreground">
           {translate(
             isCurrentUser
