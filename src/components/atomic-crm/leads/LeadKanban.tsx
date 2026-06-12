@@ -11,6 +11,8 @@ import { LeadKanbanContent } from "./LeadKanbanContent";
  * Retargeted from the former deal board: it reads the `contacts` resource
  * (a contact IS the lead/opportunity in Inmovel) and groups leads by their
  * pipeline `stage`. Mounted as a custom route at `/leads/kanban`.
+ *
+ * See adr/ADR-TASK-003-deal-to-lead-kanban-retarget.md
  */
 const LeadKanban = () => {
   const { identity } = useGetIdentity();
