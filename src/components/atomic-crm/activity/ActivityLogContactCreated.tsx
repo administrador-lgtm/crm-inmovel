@@ -1,11 +1,9 @@
 import { useGetIdentity, useTranslate } from "ra-core";
 import { Link } from "react-router";
 
-import { ReferenceField } from "@/components/admin/reference-field";
 import { Avatar } from "../contacts/Avatar";
 import { RelativeDate } from "../misc/RelativeDate";
 import type { ActivityContactCreated } from "../types";
-import { useActivityLogContext } from "./ActivityLogContext";
 import { useGetSalesName } from "../sales/useGetSalesName";
 
 type ActivityLogContactCreatedProps = {
@@ -15,7 +13,6 @@ type ActivityLogContactCreatedProps = {
 export function ActivityLogContactCreated({
   activity,
 }: ActivityLogContactCreatedProps) {
-  const context = useActivityLogContext();
   const translate = useTranslate();
   const { contact } = activity;
   const { identity, isPending } = useGetIdentity();
@@ -36,30 +33,9 @@ export function ActivityLogContactCreated({
           )}{" "}
           <Link to={`/contacts/${contact.id}/show`}>
             {contact.first_name} {contact.last_name}
-          </Link>
-          {context !== "company" && (
-            <>
-              {activity.company_id != null && (
-                <>
-                  {" "}
-                  {translate("crm.activity.to")}{" "}
-                  <ReferenceField
-                    source="company_id"
-                    reference="companies"
-                    record={activity}
-                    link="show"
-                  />
-                </>
-              )}{" "}
-              <RelativeDate date={activity.date} />
-            </>
-          )}
+          </Link>{" "}
+          <RelativeDate date={activity.date} />
         </span>
-        {context === "company" && (
-          <span className="text-muted-foreground text-sm">
-            <RelativeDate date={activity.date} />
-          </span>
-        )}
       </div>
     </div>
   );
