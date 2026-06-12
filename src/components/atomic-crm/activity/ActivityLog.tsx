@@ -8,7 +8,10 @@ type ActivityLogProps = {
   context?: "contact" | "deal" | "all";
 };
 
-export function ActivityLog({ pageSize = 20, context = "all" }: ActivityLogProps) {
+export function ActivityLog({
+  pageSize = 20,
+  context = "all",
+}: ActivityLogProps) {
   return (
     <ActivityLogContext.Provider value={context}>
       <InfiniteListBase

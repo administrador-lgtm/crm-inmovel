@@ -397,8 +397,7 @@ export const englishCrmMessages = {
         unable: "Unable to import this file.",
       },
       idle: {
-        description_1:
-          "You can import sales, contacts, notes, and tasks.",
+        description_1: "You can import sales, contacts, notes, and tasks.",
         description_2:
           "Data must be in a JSON file matching the following sample:",
       },
