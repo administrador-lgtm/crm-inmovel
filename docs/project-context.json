@@ -1,0 +1,287 @@
+{
+  "validated": true,
+  "bootstrapped": false,
+  "project_name": "crm-inmovel",
+  "github_username": "administrador-lgtm",
+  "supabase_project_name": null,
+  "deploy_platform": "railway",
+  "mode": "full",
+  "business_context": {
+    "industry": "residential real estate brokerage (CDMX, Mexico)",
+    "team_size": 5,
+    "client_type": "B2C",
+    "objective": "Post-handoff lead management: a WhatsApp bot qualifies leads and hands them to human advisors; this CRM is where advisors operate those leads. Not a prospecting tool."
+  },
+  "entities": [
+    {
+      "name": "lead",
+      "type": "extend",
+      "base_entity": "contact",
+      "notes": "1 lead = 1 person = 1 opportunity. The lead IS the opportunity: pipeline stage lives on the lead, not on a separate deal. Fields below mirror the Google Sheet Leads tab (sync-owned) plus 3 CRM-only fields. Source of truth for Sheet fields: ~/inmovel/code/src/lib/schema.js.",
+      "fields": [
+        { "name": "id", "type": "text", "required": true, "source": "sheet_sync" },
+        { "name": "canal", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "fuente", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "nombre", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "nombre_completo", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "telefono", "type": "text", "required": true, "source": "sheet_sync" },
+        { "name": "estado", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "desarrollos", "type": "json", "required": false, "source": "sheet_sync" },
+        { "name": "desarrollo_activo", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "ad_id", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "zona_interes", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "presupuesto", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "tipo_busqueda", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "total_mensajes", "type": "number", "required": false, "source": "sheet_sync" },
+        { "name": "historial_json", "type": "json", "required": false, "source": "sheet_sync" },
+        { "name": "ventana_compra", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "forma_compra", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "credito_status", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "fecha_visita_propuesta", "type": "date", "required": false, "source": "sheet_sync" },
+        { "name": "intencion_visita", "type": "boolean", "required": false, "source": "sheet_sync" },
+        { "name": "asesor_asignado", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "mensajes_post_handoff", "type": "number", "required": false, "source": "sheet_sync" },
+        { "name": "resumen_sales", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "renta_seleccion_pendiente", "type": "number", "required": false, "source": "sheet_sync" },
+        { "name": "renta_seleccion_confirmada", "type": "boolean", "required": false, "source": "sheet_sync" },
+        { "name": "propiedad_interes", "type": "json", "required": false, "source": "sheet_sync" },
+        { "name": "asesor_externo", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "asesor_externo_tel", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "alerta_broker_externo_enviada", "type": "boolean", "required": false, "source": "sheet_sync" },
+        { "name": "fecha_transicion_consultor", "type": "date", "required": false, "source": "sheet_sync" },
+        { "name": "fecha_ultimo_contacto", "type": "date", "required": false, "source": "sheet_sync" },
+        { "name": "created_at", "type": "date", "required": false, "source": "sheet_sync" },
+        { "name": "updated_at", "type": "date", "required": false, "source": "sheet_sync" },
+        { "name": "stage", "type": "list", "required": true, "source": "crm", "options": ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "descartado"], "notes": "Sync-computed while <= S5; CRM-owned from S6 onward (stage-ownership frontier)." },
+        { "name": "handoff_trigger", "type": "list", "required": false, "source": "crm", "options": ["perfil_completo", "visita_detectada"] },
+        { "name": "motivo_descarte", "type": "text", "required": false, "source": "crm", "notes": "Required when stage = descartado. Enum TBD; free text for now." }
+      ]
+    },
+    {
+      "name": "propiedad",
+      "type": "create",
+      "base_entity": null,
+      "notes": "Property inventory: own developments + shared/broker (NocNok) listings. 58 fields mirroring the Sheet Propiedades tab. Source: ~/inmovel/code/src/lib/schema.js PROPIEDADES_SCHEMA.",
+      "fields": [
+        { "name": "id", "type": "text", "required": true },
+        { "name": "tipo", "type": "list", "required": true, "options": ["propia", "compartida"] },
+        { "name": "nombre", "type": "text", "required": true },
+        { "name": "estatus", "type": "text", "required": false },
+        { "name": "operacion", "type": "list", "required": false, "options": ["venta", "renta"] },
+        { "name": "direccion", "type": "text", "required": false },
+        { "name": "colonia", "type": "text", "required": false },
+        { "name": "alcaldia", "type": "text", "required": false },
+        { "name": "precio", "type": "number", "required": false },
+        { "name": "metros", "type": "number", "required": false },
+        { "name": "recamaras", "type": "number", "required": false },
+        { "name": "banos", "type": "number", "required": false },
+        { "name": "estacionamiento", "type": "number", "required": false },
+        { "name": "pet_friendly", "type": "text", "required": false },
+        { "name": "argumento1", "type": "text", "required": false },
+        { "name": "argumento2", "type": "text", "required": false },
+        { "name": "argumento3", "type": "text", "required": false },
+        { "name": "lista_precios", "type": "text", "required": false },
+        { "name": "url_anuncio", "type": "text", "required": false },
+        { "name": "url_maps", "type": "text", "required": false },
+        { "name": "tipos_unidades", "type": "text", "required": false },
+        { "name": "precios_por_tipo", "type": "text", "required": false },
+        { "name": "caracteristicas", "type": "text", "required": false },
+        { "name": "amenidades", "type": "text", "required": false },
+        { "name": "argumentos_zona", "type": "text", "required": false },
+        { "name": "esquema_pago", "type": "text", "required": false },
+        { "name": "creditos", "type": "text", "required": false },
+        { "name": "objeciones", "type": "text", "required": false },
+        { "name": "precio_desde", "type": "number", "required": false },
+        { "name": "precio_hasta", "type": "number", "required": false },
+        { "name": "m2_desde", "type": "number", "required": false },
+        { "name": "m2_hasta", "type": "number", "required": false },
+        { "name": "recamaras_min", "type": "number", "required": false },
+        { "name": "recamaras_max", "type": "number", "required": false },
+        { "name": "unidades_disponibles", "type": "text", "required": false },
+        { "name": "fecha_entrega", "type": "text", "required": false },
+        { "name": "enganche_minimo_pct", "type": "text", "required": false },
+        { "name": "features", "type": "text", "required": false },
+        { "name": "destacado", "type": "text", "required": false },
+        { "name": "url_ficha", "type": "text", "required": false },
+        { "name": "codigo_fuente", "type": "text", "required": false },
+        { "name": "fuente", "type": "list", "required": false, "options": ["manual", "nocnok", "broker_directo", "bolsa"] },
+        { "name": "broker_nombre", "type": "text", "required": false },
+        { "name": "broker_telefono", "type": "text", "required": false },
+        { "name": "broker_wa", "type": "text", "required": false },
+        { "name": "comision", "type": "text", "required": false },
+        { "name": "activa", "type": "boolean", "required": false },
+        { "name": "orden", "type": "number", "required": false },
+        { "name": "fecha_carga", "type": "date", "required": false },
+        { "name": "account_name", "type": "text", "required": false },
+        { "name": "account_id", "type": "text", "required": false },
+        { "name": "shared_commission", "type": "text", "required": false },
+        { "name": "status_days", "type": "text", "required": false },
+        { "name": "is_exclusive", "type": "boolean", "required": false },
+        { "name": "share_type", "type": "text", "required": false }
+      ]
+    },
+    {
+      "name": "asesor",
+      "type": "extend",
+      "base_entity": "sales",
+      "notes": "Advisors map onto Atomic CRM's sales/users (auth.users <-> sales trigger). Extended with Sheet Asesores tab fields. RLS keys off lead.asesor_asignado <-> user.",
+      "fields": [
+        { "name": "telefono", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "calendario", "type": "text", "required": false, "source": "sheet_sync" },
+        { "name": "linea_negocio", "type": "list", "required": false, "options": ["exclusiva", "compartida"], "source": "sheet_sync" },
+        { "name": "activo", "type": "boolean", "required": false, "source": "sheet_sync" }
+      ]
+    },
+    {
+      "name": "visita",
+      "type": "create",
+      "base_entity": null,
+      "notes": "Advisor-recorded visit. Never touched by sync.",
+      "fields": [
+        { "name": "lead_id", "type": "text", "required": true },
+        { "name": "propiedad_id", "type": "text", "required": true },
+        { "name": "fecha", "type": "date", "required": true },
+        { "name": "resultado", "type": "text", "required": false },
+        { "name": "notas", "type": "text", "required": false }
+      ]
+    },
+    {
+      "name": "lead_propiedad",
+      "type": "create",
+      "base_entity": null,
+      "notes": "M:N lead <-> property relation.",
+      "fields": [
+        { "name": "lead_id", "type": "text", "required": true },
+        { "name": "propiedad_id", "type": "text", "required": true },
+        { "name": "relacion", "type": "list", "required": true, "options": ["match_bot", "pregunto", "visito"] }
+      ]
+    },
+    {
+      "name": "nota",
+      "type": "extend",
+      "base_entity": "note",
+      "notes": "Advisor note tied to a lead. Never touched by sync.",
+      "fields": []
+    },
+    {
+      "name": "conversacion",
+      "type": "create",
+      "base_entity": null,
+      "notes": "Bot transcript, append-only, read-only in CRM (activity log). Synced from Sheet.",
+      "fields": [
+        { "name": "id", "type": "number", "required": true },
+        { "name": "lead_id", "type": "text", "required": true },
+        { "name": "rol", "type": "list", "required": true, "options": ["lead", "bot"] },
+        { "name": "texto", "type": "text", "required": true },
+        { "name": "timestamp", "type": "date", "required": true },
+        { "name": "nombre_lead", "type": "text", "required": false }
+      ]
+    },
+    {
+      "name": "anuncio",
+      "type": "create",
+      "base_entity": null,
+      "notes": "Read-only synced reference: Meta ad -> property mapping.",
+      "fields": [
+        { "name": "ad_id", "type": "text", "required": true },
+        { "name": "ad_name", "type": "text", "required": false },
+        { "name": "propiedad_id", "type": "text", "required": false },
+        { "name": "activo", "type": "boolean", "required": false },
+        { "name": "created_at", "type": "date", "required": false }
+      ]
+    },
+    {
+      "name": "nocnok_raw",
+      "type": "create",
+      "base_entity": null,
+      "notes": "Read-only synced external feed (NocNok, 37 cols). Schema source: ~/inmovel/code/src/lib/schema.js NOCNOK_RAW_SCHEMA. Not exposed as a main CRM section.",
+      "fields": []
+    }
+  ],
+  "pipeline_entity": "lead",
+  "pipeline_stages": [
+    "S1 Contacto",
+    "S2 En conversación",
+    "S3 Perfilando",
+    "S4 Handoff ready",
+    "S5 Handoff enviado",
+    "S6 Asesor aceptó",
+    "S7 Visita agendada",
+    "S8 Visita realizada",
+    "S9 Negociación",
+    "S10 Cierre",
+    "Descartado"
+  ],
+  "pipeline_rules": {
+    "kanban": "Keep the Atomic CRM kanban but retarget it from deal to lead. Single mutually-exclusive stage per lead.",
+    "stage_ownership_frontier": "S1-S5 are read-only in the CRM (computed/overwritten by sync). From S6 onward the stage is CRM-owned and the sync MUST NOT overwrite it (guard in sync). S6 is set via a manual CRM button.",
+    "transitions": "Stages can be skipped. S7 <-> S8 is bidirectional (multiple visits). Descartado requires motivo_descarte. S10 Cierre is admin-set.",
+    "stage_owners": {
+      "S1": "auto_bot", "S2": "auto_bot", "S3": "auto_bot", "S4": "auto_bot",
+      "S5": "auto_system", "S6": "manual_crm_button", "S7": "manual", "S8": "manual",
+      "S9": "manual", "S10": "manual_admin", "Descartado": "manual"
+    }
+  },
+  "user_roles": [
+    { "name": "admin", "permissions": ["read_all", "write", "reassign_leads", "global_config", "set_stage_s6_s10", "set_cierre"] },
+    { "name": "manager", "permissions": ["read_own_and_team", "write", "reassign_within_team", "set_stage_s6_s10"] },
+    { "name": "asesor", "permissions": ["read_own", "set_stage_s6_s10", "write_notes", "write_visits"] }
+  ],
+  "multi_tenant": true,
+  "multi_tenant_notes": "Per-advisor isolation enforced via Supabase RLS (asesor_asignado <-> user), not frontend filters.",
+  "integrations": [
+    {
+      "name": "whatsapp_bot_sheet_sync",
+      "type": "custom",
+      "direction": "one_way_sheet_to_supabase",
+      "frequency": "cron every 1-2 min",
+      "synced_tables": ["leads", "propiedades", "conversaciones", "anuncios", "asesores", "nocnok_raw"],
+      "rules": [
+        "The WhatsApp bot keeps writing to Google Sheets; the Sheet stays the bot's source of truth.",
+        "Never sync Supabase -> Sheet. No bidirectionality CRM -> bot.",
+        "Stage-ownership frontier: sync computes/overwrites lead.stage only while stage <= S5; once a lead reaches S6 the sync must never overwrite the stage (explicit guard).",
+        "Advisor-only data (notas, visitas, motivo_descarte, manual handoff_trigger) is never touched by sync."
+      ]
+    }
+  ],
+  "ui": {
+    "language": "es",
+    "theme": "light",
+    "theme_notes": "Light only — advisors use phones in daylight. No dark mode.",
+    "palette": { "primary": "#4f46e5", "secondary": "#764ba2", "light": "#667eea" },
+    "dashboards": "none for now (post-validation)"
+  },
+  "auth": {
+    "provider": "google_oauth",
+    "domain_restriction": "@inmovel.net"
+  },
+  "cleanup": {
+    "entities_to_remove": ["company", "deal", "task"],
+    "features_to_disable": ["analytics_dashboard", "csv_import_export"],
+    "notes": "Remove the deal ENTITY but KEEP the kanban view, retargeted onto leads (stage lives on the lead). User confirmed keeping the tag feature."
+  },
+  "out_of_scope": [
+    "Bot writing directly to Supabase (would kill the sync; the Sheet dies in a later phase)",
+    "Fixing the corrupt asesor_asignado bug (fixed in Phase A)",
+    "SLAs / CRM-originated notifications",
+    "Analytics dashboards (post-validation)"
+  ],
+  "interview_progress": {
+    "domain_1": "done",
+    "domain_2": "done",
+    "domain_3": "done",
+    "domain_4": "done",
+    "domain_5": "done",
+    "domain_6": "done",
+    "domain_7": "done",
+    "domain_8": "done"
+  },
+  "phase_status": {
+    "spec": { "status": "pending" },
+    "fork": { "status": "pending" },
+    "supabase": { "status": "pending" },
+    "env": { "status": "pending" },
+    "deploy": { "status": "pending" }
+  },
+  "tickets": []
+}
