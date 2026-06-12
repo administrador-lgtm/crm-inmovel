@@ -23,7 +23,7 @@ describe("validateReadOnly", () => {
     ],
     [
       "aggregate query",
-      "SELECT COUNT(*) as total, type FROM tasks GROUP BY type",
+      "SELECT COUNT(*) as total, stage FROM deals GROUP BY stage",
     ],
     [
       "DELETE in string literal",
