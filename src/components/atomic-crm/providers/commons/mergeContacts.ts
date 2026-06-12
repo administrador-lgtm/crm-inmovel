@@ -1,12 +1,12 @@
 import type { Identifier, DataProvider } from "ra-core";
 
-import type { Contact, Deal, ContactNote } from "../../types";
+import type { Contact, ContactNote } from "../../types";
 
 /**
  * Merge one contact (loser) into another contact (winner).
  *
  * This function copies properties from the loser to the winner contact,
- * transfers all associated data (notes, deals) from the loser to the winner,
+ * transfers all associated data (notes) from the loser to the winner,
  * and deletes the loser contact.
  */
 export const mergeContacts = async (
@@ -48,30 +48,6 @@ export const mergeContacts = async (
         previousData: note,
       }),
     ) || [];
-
-  // 2. Change contact in deals - replace loser ID with winner ID in contact_ids array
-  const { data: loserDeals } = await dataProvider.getList<Deal>("deals", {
-    filter: { "contact_ids@cs": `{${loserId}}` },
-    pagination: { page: 1, perPage: 1000 },
-    sort: { field: "id", order: "ASC" },
-  });
-
-  const dealUpdates =
-    loserDeals?.map((deal) => {
-      const newContactIds = deal.contact_ids
-        .filter((id) => id !== loserId)
-        .concat(winnerId)
-        .filter(
-          (id: Identifier, index: number, self: Identifier[]) =>
-            self.indexOf(id) === index,
-        ); // Remove duplicates
-
-      return dataProvider.update<Deal>("deals", {
-        id: deal.id,
-        data: { contact_ids: newContactIds },
-        previousData: deal,
-      });
-    }) || [];
 
   // 3. Update winner contact with loser data
   const mergedEmails = mergeObjectArraysUnique(
@@ -118,7 +94,7 @@ export const mergeContacts = async (
   });
 
   // Execute all updates
-  await Promise.all([...noteUpdates, ...dealUpdates, winnerUpdate]);
+  await Promise.all([...noteUpdates, winnerUpdate]);
 
   // 4. Delete the loser contact
   await dataProvider.delete<Contact>("contacts", {

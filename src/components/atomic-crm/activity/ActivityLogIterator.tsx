@@ -13,14 +13,10 @@ import { RotateCcw } from "lucide-react";
 import {
   CONTACT_CREATED,
   CONTACT_NOTE_CREATED,
-  DEAL_CREATED,
-  DEAL_NOTE_CREATED,
 } from "../consts";
 import type { Activity } from "../types";
 import { ActivityLogContactCreated } from "./ActivityLogContactCreated";
 import { ActivityLogContactNoteCreated } from "./ActivityLogContactNoteCreated";
-import { ActivityLogDealCreated } from "./ActivityLogDealCreated";
-import { ActivityLogDealNoteCreated } from "./ActivityLogDealNoteCreated";
 import { InfinitePagination } from "../misc/InfinitePagination";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -110,14 +106,6 @@ function ActivityItem({ activity }: { activity: Activity }) {
 
   if (activity.type === CONTACT_NOTE_CREATED) {
     return <ActivityLogContactNoteCreated activity={activity} />;
-  }
-
-  if (activity.type === DEAL_CREATED) {
-    return <ActivityLogDealCreated activity={activity} />;
-  }
-
-  if (activity.type === DEAL_NOTE_CREATED) {
-    return <ActivityLogDealNoteCreated activity={activity} />;
   }
 
   return null;

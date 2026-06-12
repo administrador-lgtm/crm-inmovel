@@ -10,8 +10,6 @@ import fakeRestDataProvider from "ra-data-fakerest";
 import type {
   Contact,
   ContactNote,
-  Deal,
-  DealNote,
   Sale,
   SalesFormData,
   SignUpData,
@@ -103,31 +101,6 @@ export const createDataProvider = ({
         return { data: all.slice(start, start + perPage), total: all.length };
       }
       return baseDataProvider.getList(resource, params);
-    },
-    unarchiveDeal: async (deal: Deal) => {
-      // get all deals where stage is the same as the deal to unarchive
-      const { data: deals } = await baseDataProvider.getList<Deal>("deals", {
-        filter: { stage: deal.stage },
-        pagination: { page: 1, perPage: 1000 },
-        sort: { field: "index", order: "ASC" },
-      });
-
-      // set index for each deal starting from 1, if the deal to unarchive is found, set its index to the last one
-      const updatedDeals = deals.map((d, index) => ({
-        ...d,
-        index: d.id === deal.id ? 0 : index + 1,
-        archived_at: d.id === deal.id ? null : d.archived_at,
-      }));
-
-      return await Promise.all(
-        updatedDeals.map((updatedDeal) =>
-          dataProvider.update("deals", {
-            id: updatedDeal.id,
-            data: updatedDeal,
-            previousData: deals.find((d) => d.id === updatedDeal.id),
-          }),
-        ),
-      );
     },
     signUp: async ({
       email,
@@ -281,7 +254,7 @@ export const createDataProvider = ({
 
           const newSaleId = params.meta.identity.id as Identifier;
 
-          const [contacts, contactNotes, deals] = await Promise.all([
+          const [contacts, contactNotes] = await Promise.all([
             dataProvider.getList("contacts", {
               filter: { sales_id: params.id },
               pagination: {
@@ -291,14 +264,6 @@ export const createDataProvider = ({
               sort: { field: "id", order: "ASC" },
             }),
             dataProvider.getList("contact_notes", {
-              filter: { sales_id: params.id },
-              pagination: {
-                page: 1,
-                perPage: 10_000,
-              },
-              sort: { field: "id", order: "ASC" },
-            }),
-            dataProvider.getList("deals", {
               filter: { sales_id: params.id },
               pagination: {
                 page: 1,
@@ -317,12 +282,6 @@ export const createDataProvider = ({
             }),
             dataProvider.updateMany("contact_notes", {
               ids: contactNotes.data.map((contactNote) => contactNote.id),
-              data: {
-                sales_id: newSaleId,
-              },
-            }),
-            dataProvider.updateMany("deals", {
-              ids: deals.data.map((deal) => deal.id),
               data: {
                 sales_id: newSaleId,
               },
@@ -352,35 +311,9 @@ export const createDataProvider = ({
         },
       } satisfies ResourceCallbacks<Contact>,
       {
-        resource: "deals",
-        beforeCreate: async (params) => {
-          return {
-            ...params,
-            data: {
-              ...params.data,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-          };
-        },
-        beforeUpdate: async (params) => {
-          return {
-            ...params,
-            data: {
-              ...params.data,
-              updated_at: new Date().toISOString(),
-            },
-          };
-        },
-      } satisfies ResourceCallbacks<Deal>,
-      {
         resource: "contact_notes",
         beforeSave: async (params) => preserveAttachmentMimeType(params),
       } satisfies ResourceCallbacks<ContactNote>,
-      {
-        resource: "deal_notes",
-        beforeSave: async (params) => preserveAttachmentMimeType(params),
-      } satisfies ResourceCallbacks<DealNote>,
     ],
   ) as CrmDataProvider;
 

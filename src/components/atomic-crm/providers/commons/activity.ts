@@ -3,15 +3,11 @@ import type { DataProvider, Identifier } from "ra-core";
 import {
   CONTACT_CREATED,
   CONTACT_NOTE_CREATED,
-  DEAL_CREATED,
-  DEAL_NOTE_CREATED,
 } from "../../consts";
 import type {
   Activity,
   Contact,
   ContactNote,
-  Deal,
-  DealNote,
 } from "../../types";
 
 // FIXME: Requires 4 large queries to get the latest activities.
@@ -25,12 +21,12 @@ export async function getActivityLog(
     filter["sales_id@in"] = `(${salesId})`;
   }
 
-  const [newContactsAndNotes, newDealsAndNotes] = await Promise.all([
-    getNewContactsAndNotes(dataProvider, filter),
-    getNewDealsAndNotes(dataProvider, filter),
-  ]);
+  const newContactsAndNotes = await getNewContactsAndNotes(
+    dataProvider,
+    filter,
+  );
   return (
-    [...newContactsAndNotes, ...newDealsAndNotes]
+    [...newContactsAndNotes]
       // sort by date desc
       .sort(
         (a, b) =>
@@ -84,47 +80,4 @@ async function getNewContactsAndNotes(
   }));
 
   return [...newContacts, ...newContactNotes];
-}
-
-async function getNewDealsAndNotes(
-  dataProvider: DataProvider,
-  filter: any,
-): Promise<Activity[]> {
-  const { data: deals } = await dataProvider.getList<Deal>("deals", {
-    filter,
-    pagination: { page: 1, perPage: 250 },
-    sort: { field: "created_at", order: "DESC" },
-  });
-
-  const recentDealNotesFilter = {} as any;
-  if (filter.sales_id) {
-    recentDealNotesFilter.sales_id = filter.sales_id;
-  }
-
-  const { data: dealNotes } = await dataProvider.getList<DealNote>(
-    "deal_notes",
-    {
-      filter: recentDealNotesFilter,
-      pagination: { page: 1, perPage: 250 },
-      sort: { field: "date", order: "DESC" },
-    },
-  );
-
-  const newDeals = deals.map((deal) => ({
-    id: `deal.${deal.id}.created`,
-    type: DEAL_CREATED,
-    sales_id: deal.sales_id,
-    deal,
-    date: deal.created_at,
-  }));
-
-  const newDealNotes = dealNotes.map((dealNote) => ({
-    id: `dealNote.${dealNote.id}.created`,
-    type: DEAL_NOTE_CREATED,
-    sales_id: dealNote.sales_id,
-    dealNote,
-    date: dealNote.date,
-  }));
-
-  return [...newDeals, ...newDealNotes];
 }

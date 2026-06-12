@@ -12,14 +12,6 @@ create or replace trigger set_contact_notes_sales_id_trigger
     before insert on public.contact_notes
     for each row execute function public.set_sales_id_default();
 
-create or replace trigger set_deal_sales_id_trigger
-    before insert on public.deals
-    for each row execute function public.set_sales_id_default();
-
-create or replace trigger set_deal_notes_sales_id_trigger
-    before insert on public.deal_notes
-    for each row execute function public.set_sales_id_default();
-
 
 -- Lowercase contact emails before insert or update (must run before contact_saved)
 create or replace trigger "10_lowercase_contact_emails"
@@ -45,17 +37,6 @@ create or replace trigger on_contact_notes_attachments_updated_delete_note_attac
 
 create or replace trigger on_contact_notes_deleted_delete_note_attachments
     after delete on public.contact_notes
-    for each row execute function public.cleanup_note_attachments();
-
--- Cleanup storage attachments when deal notes are updated or deleted
-create or replace trigger on_deal_notes_attachments_updated_delete_note_attachments
-    after update on public.deal_notes
-    for each row
-    when (old.attachments is distinct from new.attachments)
-    execute function public.cleanup_note_attachments();
-
-create or replace trigger on_deal_notes_deleted_delete_note_attachments
-    after delete on public.deal_notes
     for each row execute function public.cleanup_note_attachments();
 
 -- Auth triggers: sync auth.users to public.sales

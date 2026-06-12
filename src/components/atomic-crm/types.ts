@@ -4,8 +4,6 @@ import type { ComponentType } from "react";
 import type {
   CONTACT_CREATED,
   CONTACT_NOTE_CREATED,
-  DEAL_CREATED,
-  DEAL_NOTE_CREATED,
 } from "./consts";
 
 export type SignUpData = {
@@ -73,6 +71,13 @@ export type Contact = {
   status: string;
   background: string;
   phone_jsonb: PhoneNumberAndType[];
+
+  /**
+   * Lead pipeline stage (S1..S10 or "descartado"). A contact IS the lead in
+   * Inmovel, so the pipeline stage lives here, not on a separate deal entity.
+   * Owned by the bot sync while in S1..S5; advisor-set from S6 onward.
+   */
+  stage?: string;
 } & Pick<RaRecord, "id">;
 
 export type ContactNote = {
@@ -82,32 +87,6 @@ export type ContactNote = {
   sales_id: Identifier;
   status: string;
   attachments?: AttachmentNote[];
-} & Pick<RaRecord, "id">;
-
-export type Deal = {
-  name: string;
-  contact_ids: Identifier[];
-  category: string;
-  stage: string;
-  description: string;
-  amount: number;
-  created_at: string;
-  updated_at: string;
-  archived_at?: string;
-  expected_closing_date: string;
-  sales_id: Identifier;
-  index: number;
-} & Pick<RaRecord, "id">;
-
-export type DealNote = {
-  deal_id: Identifier;
-  text: string;
-  date: string;
-  sales_id: Identifier;
-  attachments?: AttachmentNote[];
-
-  // This is defined for compatibility with `ContactNote`
-  status?: undefined;
 } & Pick<RaRecord, "id">;
 
 export type Tag = {
@@ -130,26 +109,10 @@ export type ActivityContactNoteCreated = {
   date: string;
 } & Pick<RaRecord, "id">;
 
-export type ActivityDealCreated = {
-  type: typeof DEAL_CREATED;
-  sales_id?: Identifier;
-  deal: Deal;
-  date: string;
-};
-
-export type ActivityDealNoteCreated = {
-  type: typeof DEAL_NOTE_CREATED;
-  sales_id?: Identifier;
-  dealNote: DealNote;
-  date: string;
-};
-
 export type Activity = RaRecord &
   (
     | ActivityContactCreated
     | ActivityContactNoteCreated
-    | ActivityDealCreated
-    | ActivityDealNoteCreated
   );
 
 export interface RAFile {
@@ -167,7 +130,7 @@ export interface LabeledValue {
   label: string;
 }
 
-export type DealStage = LabeledValue;
+export type LeadStage = LabeledValue;
 
 export interface NoteStatus extends LabeledValue {
   color: string;
