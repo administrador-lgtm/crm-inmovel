@@ -299,13 +299,10 @@ BEGIN
     RAISE EXCEPTION 'Contact not found';
   END IF;
 
-  -- 1. Reassign tasks from loser to winner
-  UPDATE tasks SET contact_id = winner_id WHERE contact_id = loser_id;
-
-  -- 2. Reassign contact notes from loser to winner
+  -- 1. Reassign contact notes from loser to winner
   UPDATE contact_notes SET contact_id = winner_id WHERE contact_id = loser_id;
 
-  -- 3. Update deals - replace loser with winner in contact_ids array
+  -- 2. Update deals - replace loser with winner in contact_ids array
   FOR deal_record IN
     SELECT id, contact_ids
     FROM deals
@@ -322,7 +319,7 @@ BEGIN
     WHERE id = deal_record.id;
   END LOOP;
 
-  -- 4. Merge contact data
+  -- 3. Merge contact data
 
   -- Get email arrays
   winner_emails := COALESCE(winner_contact.email_jsonb, '[]'::jsonb);
