@@ -1,0 +1,39 @@
+{
+  "ticket_id": "TASK-003",
+  "title": "Remove deal entity and retarget Kanban board onto lead",
+  "description": "The deal entity is removed from the CRM, but the Kanban board view MUST be kept and retargeted to display leads grouped by their pipeline stage (S1..S10 + Descartado). This is a combined ticket: first gut the deal-specific components (DealCreate, DealEdit, DealShow, DealInputs, DealArchivedList, dealUtils, stages.ts, deal FakeRest generators), then repurpose DealList / DealColumn / DealCard as LeadKanban / LeadKanbanColumn / LeadKanbanCard that reads from the 'contacts' resource filtered by lead-specific fields. The Kanban route moves from /deals to /leads/kanban or becomes the primary leads view. Deal-related notes (deal_notes) resource is removed. Dashboard DealsPipeline and DealsChart widgets are removed (analytics off). The 'deals' Resource in CRM.tsx is replaced by the new lead kanban routing.",
+  "type": "fix",
+  "risk_level": "high",
+  "acceptance_criteria": [
+    "All files under src/components/atomic-crm/deals/ are deleted after their kanban-board logic is extracted and adapted into src/components/atomic-crm/leads/LeadKanban*.tsx",
+    "src/components/atomic-crm/root/CRM.tsx no longer registers a 'deals' or 'deal_notes' Resource",
+    "A LeadKanbanColumn component renders one column per pipeline stage (S1..S10 + Descartado) ordered per spec",
+    "A LeadKanbanCard component shows lead name, telefono, and stage badge",
+    "The Kanban board is reachable via the main navigation (route /leads/kanban or as a view toggle on the leads list)",
+    "Dragging a card to another column updates lead.stage only for stages S6+ (S1-S5 columns are read-only; drag to them is blocked or a no-op with a user-facing message)",
+    "src/components/atomic-crm/types.ts removes the Deal and DealNote types",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/deals.ts and dealNotes.ts are deleted and imports removed from index.ts",
+    "supabase/schemas/01_tables.sql removes the deals and deal_notes table definitions",
+    "supabase/schemas/03_views.sql removes any deal-specific view",
+    "Dashboard no longer renders DealsChart or DealsPipeline widgets",
+    "App.tsx removes dealCategories, dealPipelineStatuses, and dealStages props"
+  ],
+  "non_functional_requirements": {
+    "performance": "Kanban board loads leads list in <500ms for up to 200 leads",
+    "security": "Stage mutation via drag is blocked for S1-S5 (read-only ownership); RLS will further restrict advisor write scope in TASK-014",
+    "scalability": "Board capped at displaying 50 cards per column; pagination or virtual scroll for overflow"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/types.ts",
+    "src/components/atomic-crm/dashboard/Dashboard.tsx",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/deals.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
+    "supabase/schemas/01_tables.sql"
+  ],
+  "dependencies": [],
+  "parallel_safe": true,
+  "branch_name": "fix/remove-deal-retarget-kanban",
+  "visual_customization": false,
+  "status": "in_progress"
+}

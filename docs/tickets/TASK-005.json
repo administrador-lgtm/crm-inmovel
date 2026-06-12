@@ -1,0 +1,32 @@
+{
+  "ticket_id": "TASK-005",
+  "title": "Lead schema extensions: types, DB schema, and FakeRest generator",
+  "description": "Extend the existing contacts table with all Inmovel lead fields (30+ sync-owned fields from the Sheet Leads tab plus 3 CRM-owned fields: stage, handoff_trigger, motivo_descarte). Update TypeScript types, Supabase schema files, the contacts_summary view, and FakeRest data generator. This is the data foundation that all lead UI tickets depend on. Sync-owned fields are populated by the Sheet sync (TASK-013); this ticket only defines the schema and types. Stage values: S1..S10 + descartado. motivo_descarte is required when stage = descartado (validation enforced in UI layer by TASK-009, not in DB check constraint for now).",
+  "type": "feature",
+  "risk_level": "medium",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/types.ts adds a Lead type extending Contact with all fields listed in project-context.json entities[0].fields (canal, fuente, nombre, nombre_completo, telefono, estado, desarrollos, desarrollo_activo, ad_id, zona_interes, presupuesto, tipo_busqueda, total_mensajes, historial_json, ventana_compra, forma_compra, credito_status, fecha_visita_propuesta, intencion_visita, asesor_asignado, mensajes_post_handoff, resumen_sales, renta_seleccion_pendiente, renta_seleccion_confirmada, propiedad_interes, asesor_externo, asesor_externo_tel, alerta_broker_externo_enviada, fecha_transicion_consultor, fecha_ultimo_contacto) plus stage, handoff_trigger, motivo_descarte",
+    "supabase/schemas/01_tables.sql adds all lead columns to the contacts table with correct PostgreSQL types (text, integer, boolean, date, jsonb where appropriate)",
+    "supabase/schemas/03_views.sql exposes the new columns in contacts_summary view",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/contacts.ts generates realistic fake data for lead fields (stage distributed across S1..S10, handoff_trigger nullable, motivo_descarte set when stage=descartado)",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts reflects the extended Lead type",
+    "The Lead type is exported from src/components/atomic-crm/types.ts and usable by UI components"
+  ],
+  "non_functional_requirements": {
+    "performance": "contacts_summary view query remains under 100ms for 500 rows",
+    "security": "No PII constraint violations; asesor_asignado is a plain text FK to sales.id for RLS in TASK-014",
+    "scalability": "jsonb columns (desarrollos, historial_json, propiedad_interes) indexed only if query patterns require it — leave unindexed for now"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/types.ts",
+    "supabase/schemas/01_tables.sql",
+    "supabase/schemas/03_views.sql",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/contacts.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
+  ],
+  "dependencies": ["TASK-001"],
+  "parallel_safe": true,
+  "branch_name": "feature/lead-schema-types",
+  "visual_customization": false,
+  "status": "pending"
+}

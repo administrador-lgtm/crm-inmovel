@@ -1,0 +1,34 @@
+{
+  "ticket_id": "TASK-004",
+  "title": "Remove analytics dashboard and CSV import/export features",
+  "description": "Analytics dashboard widgets (DealsChart, DealsPipeline, DashboardStepper deal-phase logic) and CSV import/export functionality (ContactImportButton, useContactImport, ExportVCardButton, ExportButton, BulkExportButton in contacts list, ImportPage) are disabled for this deployment. The Dashboard component becomes a simple welcome/activity-log page. The misc/ImportPage route is removed. CSV-related dependencies (jsonexport, papaparse usage in usePapaParse) are removed from the contacts list. Note: the Dashboard itself (activity log, LatestNotes, HotContacts) is retained.",
+  "type": "fix",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/dashboard/DealsChart.tsx and DealsPipeline.tsx and DashboardStepper.tsx are deleted",
+    "src/components/atomic-crm/dashboard/Dashboard.tsx renders only activity log, LatestNotes, and HotContacts — no deal-count checks or analytics widgets",
+    "src/components/atomic-crm/contacts/ContactImportButton.tsx is deleted",
+    "src/components/atomic-crm/contacts/useContactImport.tsx is deleted",
+    "src/components/atomic-crm/contacts/ContactList.tsx removes ExportButton, BulkExportButton, ContactImportButton, and CSV export exporter prop",
+    "src/components/atomic-crm/misc/ImportPage.tsx is deleted and its route removed from CRM.tsx",
+    "src/components/atomic-crm/misc/usePapaParse.tsx is deleted if only used by import/export",
+    "No import of jsonexport, downloadCSV, or papaparse remains in the contacts list file"
+  ],
+  "non_functional_requirements": {
+    "performance": "Contact list toolbar is simplified; no large CSV libraries loaded",
+    "security": "N/A",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/dashboard/Dashboard.tsx",
+    "src/components/atomic-crm/contacts/ContactList.tsx",
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/dashboard/MobileDashboard.tsx",
+    "src/components/atomic-crm/contacts/ContactAside.tsx"
+  ],
+  "dependencies": ["TASK-003"],
+  "parallel_safe": true,
+  "branch_name": "fix/remove-analytics-csv",
+  "visual_customization": false,
+  "status": "pending"
+}

@@ -1,0 +1,28 @@
+{
+  "ticket_id": "TASK-011",
+  "title": "Asesor extended fields in sales list and edit",
+  "description": "Surface the four new asesor fields (telefono, calendario, linea_negocio, activo) in the existing SalesEdit and SalesList components. The sales section is admin/manager-only. Extend SalesInputs with the new fields. SalesList shows activo status and linea_negocio. The asesor_asignado display on LeadShow links to the asesor's profile via the sales resource.",
+  "type": "feature",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/sales/SalesInputs.tsx adds inputs for telefono (text), calendario (text/URL), linea_negocio (select: exclusiva|compartida), activo (boolean toggle)",
+    "src/components/atomic-crm/sales/SalesList.tsx adds columns for activo and linea_negocio",
+    "SalesEdit saves the four new fields via dataProvider.update on the 'sales' resource",
+    "The asesor_asignado field on LeadShow links to the corresponding sales record show page"
+  ],
+  "non_functional_requirements": {
+    "performance": "No regression on sales list",
+    "security": "SalesEdit route restricted to admin/manager via canAccess check (existing pattern)",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/sales/SalesInputs.tsx",
+    "src/components/atomic-crm/sales/SalesList.tsx",
+    "src/components/atomic-crm/sales/SalesEdit.tsx"
+  ],
+  "dependencies": ["TASK-007"],
+  "parallel_safe": true,
+  "branch_name": "feature/asesor-sales-ui",
+  "visual_customization": false,
+  "status": "pending"
+}

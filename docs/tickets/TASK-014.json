@@ -1,0 +1,34 @@
+{
+  "ticket_id": "TASK-014",
+  "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction",
+  "description": "Enforce row-level security across all lead-facing tables keyed on asesor_asignado (contacts/leads) matching the authenticated user's sales record. Three roles: admin (read all, write all), manager (read own + team, write within team), asesor (read own leads only, write advisor-owned fields only). Also configure Google OAuth to restrict sign-in to @inmovel.net domain. The existing canAccess pattern in the FakeRest authProvider is extended to support the three roles. supabase/schemas/05_policies.sql is the main deliverable.",
+  "type": "feature",
+  "risk_level": "high",
+  "acceptance_criteria": [
+    "supabase/schemas/05_policies.sql adds RLS policies on the contacts (leads) table: admin can SELECT/UPDATE/INSERT all rows; manager can SELECT rows where asesor_asignado is themselves or a sales row whose manager_id is the manager's sales.id (team scope is modeled by sales.manager_id, added in TASK-007); asesor can SELECT only rows where asesor_asignado = auth.uid()-matched sales.id",
+    "supabase/schemas/05_policies.sql adds RLS on visitas: asesor can INSERT/SELECT their own lead's visitas; no asesor UPDATE/DELETE",
+    "supabase/schemas/05_policies.sql adds SELECT-only policy on conversaciones, anuncios, propiedades for all authenticated users",
+    "supabase/schemas/05_policies.sql restricts UPDATE on contacts.stage to: stages S1-S5 are never writable by any CRM role (enforced via a policy check: NEW.stage NOT IN ('S1','S2','S3','S4','S5') OR OLD.stage = NEW.stage); this is the DB-level guard complementing the UI guard in TASK-009",
+    "supabase/schemas/05_policies.sql grants admin/manager the ability to set stage=S10 Cierre",
+    "supabase/functions/users/index.ts or Supabase Auth config enforces domain restriction: only emails matching @inmovel.net are allowed to sign up / sign in via Google OAuth",
+    "src/components/atomic-crm/providers/commons/canAccess.ts updated to resolve permissions for roles admin, manager, asesor against a role claim stored in user JWT metadata (app_metadata.role)",
+    "src/components/atomic-crm/providers/fakerest/authProvider.ts sets app_metadata.role for fake users to enable local dev testing of all three roles"
+  ],
+  "non_functional_requirements": {
+    "performance": "RLS policies use index on contacts.asesor_asignado; policy evaluation adds <5ms overhead",
+    "security": "No row is readable by an asesor not assigned to it; the stage S1-S5 write-lock is enforced at the DB layer independently of the UI",
+    "scalability": "Manager team-scope query joins sales on manager_id (no separate teams table) — keep the join lightweight"
+  },
+  "files_to_modify": [
+    "supabase/schemas/05_policies.sql",
+    "supabase/schemas/06_grants.sql",
+    "src/components/atomic-crm/providers/commons/canAccess.ts",
+    "src/components/atomic-crm/providers/fakerest/authProvider.ts",
+    "supabase/functions/users/index.ts"
+  ],
+  "dependencies": ["TASK-005", "TASK-007"],
+  "parallel_safe": true,
+  "branch_name": "feature/rls-policies-auth",
+  "visual_customization": false,
+  "status": "pending"
+}

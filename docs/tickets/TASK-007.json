@@ -1,0 +1,29 @@
+{
+  "ticket_id": "TASK-007",
+  "title": "Asesor schema extensions: sales table, types, and FakeRest generator",
+  "description": "Extend the existing 'sales' table with the Asesor fields from the Sheet Asesores tab: telefono, calendario, linea_negocio (exclusiva|compartida), activo. Also add manager_id (nullable self-reference to sales.id): advisors are assigned to a manager, and TASK-014 uses this column for the manager team-scope RLS (manager reads leads whose asesor_asignado belongs to their advisors). Update TypeScript types, Supabase schema files, and FakeRest data generator for sales. The asesor_asignado column on contacts (leads) references sales.id. The existing sales<->auth.users trigger is unmodified.",
+  "type": "feature",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/types.ts extends the Sale type with telefono (string|null), calendario (string|null), linea_negocio ('exclusiva'|'compartida'|null), activo (boolean|null), manager_id (sales id, nullable)",
+    "supabase/schemas/01_tables.sql adds the five new columns to the existing sales table (manager_id as nullable FK to sales.id)",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/sales.ts generates values for the new fields (activo=true for most, linea_negocio distributed)",
+    "The extended Sale/Asesor type is exported and usable by RLS and UI tickets"
+  ],
+  "non_functional_requirements": {
+    "performance": "No regression on sales list query",
+    "security": "activo=false advisors are still auth-enabled; account disabling remains the Supabase mechanism",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/types.ts",
+    "supabase/schemas/01_tables.sql",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/sales.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
+  ],
+  "dependencies": [],
+  "parallel_safe": true,
+  "branch_name": "feature/asesor-schema-extensions",
+  "visual_customization": false,
+  "status": "pending"
+}

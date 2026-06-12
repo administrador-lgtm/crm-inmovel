@@ -1,0 +1,32 @@
+{
+  "ticket_id": "TASK-008",
+  "title": "Support tables schema and types: visita, lead_propiedad, conversacion, anuncio, nocnok_raw",
+  "description": "Create the five supporting tables that back-fill domain data from the Sheet sync and advisor actions. All are defined in schema files only at this stage; UI is handled by subsequent tickets. visita is advisor-created (never synced). lead_propiedad is the M:N join table. conversacion is bot transcript (append-only, synced). anuncio is the Meta ad -> property mapping (synced, read-only). nocnok_raw is the NocNok external feed (37+ cols, synced, not exposed as a main CRM section — no routes needed). Produce TypeScript types and minimal FakeRest generators for visita, lead_propiedad, and conversacion (anuncio and nocnok_raw are sync-only, minimal fake data).",
+  "type": "feature",
+  "risk_level": "medium",
+  "acceptance_criteria": [
+    "supabase/schemas/01_tables.sql adds tables: visitas (lead_id, propiedad_id, fecha, resultado, notas, created_at, asesor_id), lead_propiedad (lead_id, propiedad_id, relacion), conversaciones (id, lead_id, rol, texto, timestamp, nombre_lead), anuncios (ad_id, ad_name, propiedad_id, activo, created_at), nocnok_raw with codigo as pk and exactly these 37 columns — text unless noted: codigo, nocnok_id, operacion, precio (numeric), category, type, type_text, recamaras (numeric), full_bathrooms (numeric), half_bathrooms (numeric), m2 (numeric), lot_size (numeric), colonia, alcaldia, estado, cp, estacionamiento (numeric), year_built, levels, title, url_ficha, lat, lon, account_name, account_id, account_plan, shared_commission, is_exclusive (boolean), share_type, status_days, status_date, fotos (numeric), activa (boolean), orden (numeric), fecha_carga, broker_tel, broker_wa",
+    "supabase/schemas/03_views.sql adds a 'conversaciones_by_lead' view ordered by timestamp ASC for the activity log",
+    "src/components/atomic-crm/types.ts adds Visita, LeadPropiedad, Conversacion, Anuncio TypeScript types",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/ adds visitas.ts (5-10 fake visits per lead with stage>=S7), conversaciones.ts (10-30 messages per lead), lead_propiedades.ts (2-5 relations per lead), and a minimal anuncios.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts imports all new generators",
+    "lead_propiedad relacion field accepts only 'match_bot' | 'pregunto' | 'visito'"
+  ],
+  "non_functional_requirements": {
+    "performance": "conversaciones_by_lead view with LIMIT 100 returns in <100ms",
+    "security": "visitas and conversaciones will be RLS-restricted by asesor_asignado via TASK-014",
+    "scalability": "conversaciones table must support high insert volume (bot messages); no hard limit but index on lead_id + timestamp"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/types.ts",
+    "supabase/schemas/01_tables.sql",
+    "supabase/schemas/03_views.sql",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
+  ],
+  "dependencies": ["TASK-005", "TASK-006"],
+  "parallel_safe": true,
+  "branch_name": "feature/support-tables-schema",
+  "visual_customization": false,
+  "status": "pending"
+}

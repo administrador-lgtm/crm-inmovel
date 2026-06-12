@@ -1,0 +1,38 @@
+{
+  "ticket_id": "TASK-001",
+  "title": "Remove unused company entity from default CRM",
+  "description": "The company entity is not used in the Inmovel domain (leads are persons, not companies). Remove all company routes, list/show/edit components, navigation entries, TypeScript types, FakeRest data generators, and any reference to companies inside other components (contact inputs, dashboards, relation selectors, activity log, sidebar). The contacts table 'company_id' FK column becomes unused; remove it from the schema file and from the contacts_summary view.",
+  "type": "fix",
+  "risk_level": "medium",
+  "acceptance_criteria": [
+    "All files under src/components/atomic-crm/companies/ are deleted",
+    "src/components/atomic-crm/root/CRM.tsx no longer imports or registers a 'companies' Resource",
+    "src/components/atomic-crm/layout/ navigation components contain no company menu item",
+    "src/components/atomic-crm/types.ts removes the Company type and any company_id field from Contact",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/companies.ts is deleted and its import removed from index.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/contacts.ts no longer generates company_id",
+    "supabase/schemas/01_tables.sql removes the companies table definition and the company_id FK column from the contacts table",
+    "supabase/schemas/03_views.sql removes company-related joins and columns from contacts_summary",
+    "src/components/atomic-crm/providers/commons/getCompanyAvatar.ts and getCompanyAvatar.test.ts are deleted",
+    "No TypeScript import referencing Company or companies remains in CRM application files",
+    "App.tsx removes companySectors prop usage"
+  ],
+  "non_functional_requirements": {
+    "performance": "No regression on contact list render",
+    "security": "No orphan RLS policies referencing companies table",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/types.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/contacts.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
+    "supabase/schemas/01_tables.sql",
+    "supabase/schemas/03_views.sql"
+  ],
+  "dependencies": [],
+  "parallel_safe": true,
+  "branch_name": "fix/remove-company-entity",
+  "visual_customization": false,
+  "status": "in_progress"
+}

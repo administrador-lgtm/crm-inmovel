@@ -1,0 +1,32 @@
+{
+  "ticket_id": "TASK-013",
+  "title": "Google Sheet to Supabase one-way sync Edge Function (cron)",
+  "description": "Implement the custom cron sync that pulls data from the Google Sheet (Leads, Propiedades, Conversaciones, Anuncios, Asesores, NocNok raw tabs) into Supabase every 1-2 minutes. This is a new Supabase Edge Function at supabase/functions/sheet_sync/. Key invariants: (1) NEVER overwrite lead.stage once stage >= S6 (stage-ownership frontier guard); (2) NEVER touch advisor-only columns: notas, visitas, motivo_descarte, handoff_trigger on the lead; (3) NEVER sync in the Supabase->Sheet direction; (4) Upsert semantics keyed on the Sheet's own 'id' column for leads/propiedades; (5) Conversaciones are append-only (insert new rows, never update/delete); (6) Asesores upsert by email/id matched to sales table; (7) NocNok raw is a full-replace upsert. The function reads GOOGLE_SHEET_ID and GOOGLE_SERVICE_ACCOUNT_KEY from environment secrets. It uses the Supabase service-role key to bypass RLS for bulk writes.",
+  "type": "feature",
+  "risk_level": "high",
+  "acceptance_criteria": [
+    "supabase/functions/sheet_sync/index.ts implements an HTTP-triggered (cron-compatible) Edge Function that fetches all six Sheet tabs and upserts into Supabase tables: contacts (leads), propiedades, conversaciones, anuncios, sales (asesores), nocnok_raw",
+    "The sync function contains an explicit stage-ownership frontier guard: before upserting a lead row, if the existing lead.stage >= 'S6' (or = 'descartado'), the stage column is excluded from the upsert payload",
+    "The sync function never writes to these columns regardless of Sheet data: motivo_descarte, handoff_trigger (and notes/visitas which are in separate tables)",
+    "Conversaciones rows are INSERT-only (no UPDATE on existing rows); duplicate detection uses (lead_id, timestamp, rol) composite key",
+    "supabase/functions/sheet_sync/sheet_sync.test.ts includes unit tests for: stage-ownership frontier guard, advisor-field exclusion, and conversacion deduplication logic",
+    "The function handles Google Sheets API rate limits with exponential backoff (max 3 retries)",
+    "Error responses return structured JSON with sheet_tab, row_count, error_count, and a sample of failed rows",
+    "supabase/functions/sheet_sync/README.md documents the required environment variables (GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_KEY) and the cron scheduling approach"
+  ],
+  "non_functional_requirements": {
+    "performance": "Full sync of all 6 tabs completes in <60s; partial failures on one tab do not abort others",
+    "security": "Service-role key used only inside the Edge Function — never exposed to frontend; Sheet API key stored as Supabase secret",
+    "scalability": "Handles up to 5,000 lead rows and 50,000 conversacion rows per sync cycle without timeout"
+  },
+  "files_to_modify": [
+    "supabase/functions/sheet_sync/index.ts",
+    "supabase/schemas/01_tables.sql",
+    "supabase/functions/_shared/supabaseAdmin.ts"
+  ],
+  "dependencies": ["TASK-005", "TASK-006", "TASK-007", "TASK-008"],
+  "parallel_safe": true,
+  "branch_name": "feature/sheet-sync-edge-function",
+  "visual_customization": false,
+  "status": "pending"
+}

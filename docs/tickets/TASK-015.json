@@ -1,0 +1,32 @@
+{
+  "ticket_id": "TASK-015",
+  "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette",
+  "description": "Configure the CRM for Spanish runtime, Inmovel brand identity, and the specified color palette. This covers: (1) setting the i18nProvider to Spanish as default (the CRM ships with English and French message files — add Spanish or use a Spanish ra-language package); (2) updating App.tsx title and logo to Inmovel; (3) applying the palette primary=#4f46e5 / secondary=#764ba2 / light=#667eea to the lightTheme prop; (4) disabling dark mode (lightTheme only, no darkTheme prop); (5) updating CRM configuration props to use Spanish labels for pipeline stages, handoff_trigger options, and other domain enums.",
+  "type": "feature",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "src/App.tsx sets title='Inmovel CRM' and logo to the Inmovel brand mark (SVG or PNG asset added to src/assets/)",
+    "src/App.tsx passes lightTheme with primary color #4f46e5, secondary #764ba2, accent/light #667eea applied via the theme customization pattern used by shadcn-admin-kit",
+    "src/App.tsx does not pass a darkTheme prop (light-only deployment)",
+    "src/components/atomic-crm/providers/commons/ adds a spanishCrmMessages.ts file with Spanish translations for all CRM-specific UI strings (at minimum: resource names, field labels, action buttons, stage names S1..S10+Descartado)",
+    "i18nProvider is configured to use Spanish as the default locale",
+    "src/App.tsx CRM props use Spanish labels: dealStages equivalent (pipelineStages) uses 'S1 Contacto'..'S10 Cierre'+'Descartado', handoff_trigger options labeled in Spanish",
+    "The app renders Spanish UI labels at runtime without any English fallback visible to end users for core CRM strings"
+  ],
+  "non_functional_requirements": {
+    "performance": "No measurable bundle size impact from adding Spanish messages",
+    "security": "N/A",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/App.tsx",
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/root/defaultConfiguration.ts",
+    "src/components/atomic-crm/providers/commons/i18nProvider.ts"
+  ],
+  "dependencies": ["TASK-003", "TASK-009"],
+  "parallel_safe": true,
+  "branch_name": "feature/spanish-theme-branding",
+  "visual_customization": true,
+  "status": "pending"
+}

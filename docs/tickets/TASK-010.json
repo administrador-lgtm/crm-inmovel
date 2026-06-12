@@ -1,0 +1,31 @@
+{
+  "ticket_id": "TASK-010",
+  "title": "Propiedad list and show views",
+  "description": "Build a read-only property inventory section. Advisors browse propiedades to match them with leads. The list shows key fields from propiedades_summary. The show page displays all 58 fields organized by section (location, price/size, broker info, NocNok metadata). No create/edit UI — propiedades are populated exclusively by the Sheet sync (TASK-013). Register the propiedades resource in CRM.tsx with list and show only.",
+  "type": "feature",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/propiedades/PropiedadList.tsx renders a list with columns: nombre, tipo badge, operacion badge, precio formatted as MXN currency, activa status, fuente",
+    "src/components/atomic-crm/propiedades/PropiedadListFilter.tsx filters by tipo, operacion, activa, fuente",
+    "src/components/atomic-crm/propiedades/PropiedadShow.tsx displays all Propiedad fields grouped into sections: Identificacion, Ubicacion, Precio y Caracteristicas, Argumentos y Descripcion, Info Broker, Metadatos",
+    "No create or edit route is registered for propiedades in CRM.tsx",
+    "src/components/atomic-crm/root/CRM.tsx registers a 'propiedades' Resource with list=PropiedadList and show=PropiedadShow",
+    "Navigation includes a 'Propiedades' menu item",
+    "PropiedadList is accessible from the lead show page as a related resource panel (link to propiedad show from LeadShow via propiedad_interes field)"
+  ],
+  "non_functional_requirements": {
+    "performance": "Propiedad list loads 50 records in <200ms",
+    "security": "Read access is open to all authenticated users (no per-advisor restriction on propiedades in Phase 1)",
+    "scalability": "Supports up to 500 properties"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/layout/Layout.tsx",
+    "src/App.tsx"
+  ],
+  "dependencies": ["TASK-006"],
+  "parallel_safe": true,
+  "branch_name": "feature/propiedad-list-show",
+  "visual_customization": false,
+  "status": "pending"
+}

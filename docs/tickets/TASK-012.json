@@ -1,0 +1,30 @@
+{
+  "ticket_id": "TASK-012",
+  "title": "Visita create/list panel and conversacion activity log on lead show",
+  "description": "Add two advisor-facing panels to the LeadShow page. (1) Visitas panel: a collapsible list of past visits for this lead (fecha, propiedad name, resultado, notas) with a 'Registrar visita' create form (lead_id auto-set, propiedad_id select from propiedades list, fecha date picker, resultado text, notas textarea). Visitas are advisor-only, never synced. (2) Conversaciones panel: a read-only chronological chat-style activity log of bot/lead messages sourced from the conversaciones table (append-only, synced by TASK-013). Messages display rol (bot|lead) with visual differentiation. Both panels live inside the LeadAside or as tabs on LeadShow.",
+  "type": "feature",
+  "risk_level": "medium",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/leads/VisitaCreateForm.tsx renders a form with fields: propiedad_id (select), fecha (date), resultado (text), notas (textarea); submits via dataProvider.create('visitas', ...)",
+    "src/components/atomic-crm/leads/VisitasList.tsx lists visitas for the current lead ordered by fecha DESC, showing propiedad nombre, fecha, resultado",
+    "Both VisitaCreateForm and VisitasList are visible on LeadShow for users with write_visits permission (asesor, manager, admin)",
+    "src/components/atomic-crm/leads/ConversacionLog.tsx renders conversaciones for the lead in chronological order; bot messages visually distinct from lead messages (different bubble alignment/color)",
+    "ConversacionLog is visible to all authenticated users with read access to the lead",
+    "src/components/atomic-crm/root/CRM.tsx registers 'visitas' and 'conversaciones' as Resources",
+    "FakeRest: VisitasList and ConversacionLog render correctly with the fake data from TASK-008 generators"
+  ],
+  "non_functional_requirements": {
+    "performance": "ConversacionLog loads last 100 messages in <200ms using conversaciones_by_lead view with LIMIT",
+    "security": "Visita create is blocked for users without write_visits permission; conversaciones are read-only for all roles",
+    "scalability": "ConversacionLog paginates: loads 50 messages, 'load more' button for older messages"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/providers/fakerest/dataProvider.ts"
+  ],
+  "dependencies": ["TASK-008", "TASK-009"],
+  "parallel_safe": true,
+  "branch_name": "feature/visita-conversacion-ui",
+  "visual_customization": false,
+  "status": "pending"
+}

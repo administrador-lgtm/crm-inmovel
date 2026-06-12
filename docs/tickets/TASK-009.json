@@ -1,0 +1,36 @@
+{
+  "ticket_id": "TASK-009",
+  "title": "Lead list, show, and edit UI with pipeline stage controls",
+  "description": "Build the lead-facing CRM screens on top of the extended contacts resource. Leads list replaces the generic contact list as the primary CRM view, showing key fields (nombre_completo, telefono, asesor_asignado, stage, zona_interes, presupuesto) with stage-filter sidebar. Lead show page displays all sync-owned fields read-only, plus advisor-owned fields editable. Critical stage-ownership rules enforced in UI: (1) stages S1-S5 show as read-only badges — no edit input; (2) an 'Asesor aceptó' action button sets stage=S6 when current stage is S5; (3) stages S6-S10 can be set via a stage selector (skipping allowed); (4) S7<->S8 is bidirectional; (5) setting stage=descartado opens a motivo_descarte required input dialog; (6) S10 Cierre shows only for admin/manager. The lead show page also surfaces a read-only view of asesor_asignado name. Contact-level notes remain available on lead show. The existing ContactEdit is adapted as LeadEdit for advisor-owned fields only (notas, visitas are on separate panels per TASK-012).",
+  "type": "feature",
+  "risk_level": "high",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/leads/LeadList.tsx renders a list of leads with columns: nombre_completo, telefono, stage badge, asesor_asignado, zona_interes, presupuesto",
+    "src/components/atomic-crm/leads/LeadListFilter.tsx provides filters: stage (multi-select S1..S10+Descartado), asesor_asignado, zona_interes",
+    "src/components/atomic-crm/leads/LeadShow.tsx shows all lead fields; sync-owned fields (source=sheet_sync) are rendered read-only with no edit inputs",
+    "src/components/atomic-crm/leads/StageControl.tsx: for stage<=S5 shows a read-only stage badge; for stage=S5 shows an 'Asesor aceptó' button that sets stage=S6 via dataProvider.update; for stage S6-S10+Descartado shows a stage selector dropdown",
+    "Setting stage=descartado via StageControl opens a confirmation dialog requiring motivo_descarte text before saving",
+    "Setting stage=S10 is only rendered for users with role admin or manager (hidden for asesor role)",
+    "src/components/atomic-crm/leads/LeadEdit.tsx edits only advisor-owned fields (handoff_trigger, motivo_descarte); sync-owned fields are not rendered in the edit form",
+    "src/components/atomic-crm/root/CRM.tsx registers leads as the primary resource (backed by 'contacts' table) with list, show, edit pointing to the new lead components",
+    "The Kanban board (from TASK-003) is accessible as a view toggle from the lead list toolbar",
+    "src/components/atomic-crm/providers/fakerest/dataProvider.ts handles 'leads' as an alias for 'contacts' if needed, or CRM.tsx routes the 'contacts' resource with lead components"
+  ],
+  "non_functional_requirements": {
+    "performance": "Lead list loads 50 records in <300ms including stage filter",
+    "security": "Stage mutation for S1-S5 is blocked client-side; server-side guard is enforced by RLS in TASK-014",
+    "scalability": "Infinite scroll pagination reused from ContactList pattern"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/contacts/ContactList.tsx",
+    "src/components/atomic-crm/contacts/ContactShow.tsx",
+    "src/components/atomic-crm/contacts/ContactInputs.tsx",
+    "src/App.tsx"
+  ],
+  "dependencies": ["TASK-003", "TASK-005", "TASK-016"],
+  "parallel_safe": true,
+  "branch_name": "feature/lead-list-show-edit",
+  "visual_customization": false,
+  "status": "pending"
+}

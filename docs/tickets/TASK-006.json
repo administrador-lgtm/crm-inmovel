@@ -1,0 +1,33 @@
+{
+  "ticket_id": "TASK-006",
+  "title": "Propiedad schema, types, and FakeRest generator",
+  "description": "Create the propiedad (property inventory) entity from scratch. Mirrors the Sheet Propiedades tab (58 fields per project-context.json). Covers: TypeScript type, Supabase schema (new propiedades table), a propiedades_summary view, and FakeRest data generator. This is the data foundation for the property list UI (TASK-010) and the lead-property relation (TASK-008).",
+  "type": "feature",
+  "risk_level": "medium",
+  "acceptance_criteria": [
+    "src/components/atomic-crm/types.ts adds a Propiedad type with all 58 fields from project-context.json entities[1].fields",
+    "supabase/schemas/01_tables.sql adds a 'propiedades' table with correct PostgreSQL column types (text, numeric, boolean, date, list fields as text with check constraints for enum-like columns tipo, operacion, fuente)",
+    "supabase/schemas/03_views.sql adds a 'propiedades_summary' view exposing id, nombre, tipo, operacion, precio, activa, fuente, broker_nombre for list display",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/ adds a propiedades.ts generator producing at least 20 realistic fake properties distributed across tipo=propia/compartida and operacion=venta/renta",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts imports and calls the new propiedades generator",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts reflects the Propiedad type",
+    "The Propiedad type is exported from src/components/atomic-crm/types.ts"
+  ],
+  "non_functional_requirements": {
+    "performance": "propiedades_summary query under 50ms for 200 rows",
+    "security": "No RLS on propiedades yet (read-only sync target; advisor read-all is acceptable in Phase 1)",
+    "scalability": "Supports up to 500 property records"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/types.ts",
+    "supabase/schemas/01_tables.sql",
+    "supabase/schemas/03_views.sql",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
+  ],
+  "dependencies": [],
+  "parallel_safe": true,
+  "branch_name": "feature/propiedad-schema-types",
+  "visual_customization": false,
+  "status": "pending"
+}

@@ -1,0 +1,38 @@
+{
+  "ticket_id": "TASK-002",
+  "title": "Remove unused task entity from default CRM",
+  "description": "Tasks are not part of the Inmovel workflow. Remove all task routes, list/show/edit/create components, navigation entries, TypeScript types, FakeRest data generators, and every reference to tasks in other components (contact aside, dashboard TasksList widget, mobile layout, settings). Remove the tasks table from the schema files.",
+  "type": "fix",
+  "risk_level": "low",
+  "acceptance_criteria": [
+    "All files under src/components/atomic-crm/tasks/ are deleted",
+    "src/components/atomic-crm/root/CRM.tsx no longer imports or registers a 'tasks' Resource",
+    "src/components/atomic-crm/layout/ navigation components contain no task menu item",
+    "src/components/atomic-crm/dashboard/TasksList.tsx and any dashboard widget importing tasks are removed or gutted of task references",
+    "src/components/atomic-crm/contacts/ContactTasksList.tsx is deleted and its import removed from ContactAside / ContactShow",
+    "src/components/atomic-crm/types.ts removes the Task type",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/tasks.ts is deleted and its import removed from index.ts",
+    "supabase/schemas/01_tables.sql removes the tasks table definition",
+    "supabase/schemas/05_policies.sql removes any RLS policy referencing tasks",
+    "No TypeScript import referencing Task or tasks remains in CRM application files",
+    "App.tsx removes taskTypes prop usage"
+  ],
+  "non_functional_requirements": {
+    "performance": "No regression on contact show page render",
+    "security": "No orphan RLS policies referencing tasks table",
+    "scalability": "N/A"
+  },
+  "files_to_modify": [
+    "src/components/atomic-crm/root/CRM.tsx",
+    "src/components/atomic-crm/types.ts",
+    "src/components/atomic-crm/contacts/ContactAside.tsx",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/tasks.ts",
+    "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
+    "supabase/schemas/01_tables.sql"
+  ],
+  "dependencies": [],
+  "parallel_safe": true,
+  "branch_name": "fix/remove-task-entity",
+  "visual_customization": false,
+  "status": "in_progress"
+}
