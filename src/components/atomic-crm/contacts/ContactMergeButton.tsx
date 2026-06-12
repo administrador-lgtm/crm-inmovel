@@ -111,15 +111,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
     { enabled: canFetchCounts },
   );
 
-  const { total: dealsCount } = useGetList(
-    "deals",
-    {
-      filter: { "contact_ids@cs": `{${loserContact?.id}}` },
-      pagination: { page: 1, perPage: 1 },
-    },
-    { enabled: canFetchCounts },
-  );
-
   useEffect(() => {
     if (matchingContacts && matchingContacts.length > 0) {
       const suggestedWinnerId = matchingContacts[0].id;
@@ -238,12 +229,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                       {tasksCount !== 1 ? "s" : ""} will be reassigned
                     </li>
                   )}
-                  {dealsCount != null && dealsCount > 0 && (
-                    <li>
-                      • {dealsCount} deal
-                      {dealsCount !== 1 ? "s" : ""} will be updated
-                    </li>
-                  )}
                   {loserContact.email_jsonb?.length > 0 && (
                     <li>
                       • {loserContact.email_jsonb.length} email address
@@ -260,7 +245,6 @@ const ContactMergeDialog = ({ open, onClose }: ContactMergeDialogProps) => {
                   )}
                   {!notesCount &&
                     !tasksCount &&
-                    !dealsCount &&
                     !loserContact.email_jsonb?.length &&
                     !loserContact.phone_jsonb?.length && (
                       <li className="text-muted-foreground/60">
