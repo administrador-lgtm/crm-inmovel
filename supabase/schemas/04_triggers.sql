@@ -4,10 +4,6 @@
 --
 
 -- Auto-populate sales_id from current auth user on insert
-create or replace trigger set_company_sales_id_trigger
-    before insert on public.companies
-    for each row execute function public.set_sales_id_default();
-
 create or replace trigger set_contact_sales_id_trigger
     before insert on public.contacts
     for each row execute function public.set_sales_id_default();
@@ -27,11 +23,6 @@ create or replace trigger set_deal_notes_sales_id_trigger
 create or replace trigger set_task_sales_id_trigger
     before insert on public.tasks
     for each row execute function public.set_sales_id_default();
-
--- Auto-fetch company logo from website favicon on save
-create or replace trigger company_saved
-    before insert or update on public.companies
-    for each row execute function public.handle_company_saved();
 
 -- Lowercase contact emails before insert or update (must run before contact_saved)
 create or replace trigger "10_lowercase_contact_emails"
