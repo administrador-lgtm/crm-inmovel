@@ -1,7 +1,6 @@
 import {
   withLifecycleCallbacks,
   type CreateParams,
-  type DataProvider,
   type Identifier,
   type ResourceCallbacks,
   type UpdateParams,

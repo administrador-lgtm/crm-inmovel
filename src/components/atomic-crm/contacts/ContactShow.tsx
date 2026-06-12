@@ -210,7 +210,6 @@ const ContactShowContentMobile = () => {
 };
 
 const ContactShowContent = () => {
-  const translate = useTranslate();
   const { record, isPending } = useShowContext<Contact>();
   if (isPending || !record) return null;
 
