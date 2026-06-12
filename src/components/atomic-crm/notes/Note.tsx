@@ -24,7 +24,7 @@ import { CompanyAvatar } from "../companies/CompanyAvatar";
 import { Markdown } from "../misc/Markdown";
 import { RelativeDate } from "../misc/RelativeDate";
 import { Status } from "../misc/Status";
-import type { ContactNote, DealNote } from "../types";
+import type { ContactNote } from "../types";
 import { NoteAttachments } from "./NoteAttachments";
 import { NoteInputs } from "./NoteInputs";
 import { useGetSalesName } from "../sales/useGetSalesName";
@@ -34,7 +34,7 @@ export const Note = ({
   note,
 }: {
   showStatus?: boolean;
-  note: DealNote | ContactNote;
+  note: ContactNote;
   isLast: boolean;
 }) => {
   const [isHover, setHover] = useState(false);
