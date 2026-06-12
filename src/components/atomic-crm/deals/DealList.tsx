@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { InputProps } from "ra-core";
-import { useGetIdentity, useListContext, useTranslate } from "ra-core";
+import { useGetIdentity, useListContext } from "ra-core";
 import { matchPath, useLocation } from "react-router";
 import { CreateButton } from "@/components/admin/create-button";
 import { ExportButton } from "@/components/admin/export-button";
@@ -22,7 +22,6 @@ import { OnlyMineInput } from "./OnlyMineInput";
 const DealList = () => {
   const { identity } = useGetIdentity();
   const { dealCategories } = useConfigurationContext();
-  const translate = useTranslate();
 
   if (!identity) return null;
 
