@@ -19,9 +19,22 @@
 //   2. Orphan dir, not registered  → rm -rf, then retry
 //   3. Orphan branch, no worktree  → force-delete branch so -b works
 
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { readStdin, crmIdentity, baseBranch, git } from "./lib/common.mjs";
+
+// Canonicalize for comparisons: on macOS /tmp symlinks to /private/tmp, so git
+// reports worktree paths as /private/tmp/... while our derived paths say
+// /tmp/.... Raw string comparison never matches, which made Recovery 1 miss
+// live worktrees and the destructive recoveries (rm dir, delete branch) fire
+// against ACTIVE developer worktrees.
+function canon(p) {
+  try {
+    return realpathSync(p);
+  } catch {
+    return p;
+  }
+}
 
 const ctx = crmIdentity(readStdin());
 
@@ -80,27 +93,47 @@ if (!existsSync(join(sessionWt, ".git"))) {
 
 ctx.log(`setup-worktree START agent=${agentType} path=${worktreePath} branch=${branchName}`);
 
-// Recovery 1: already registered → restart, use as-is.
-if (git(["worktree", "list", "--porcelain"]).stdout.includes(`worktree ${worktreePath}`)) {
+// Recovery 1: already registered AND live on disk → restart, use as-is.
+const registeredPaths = git(["worktree", "list", "--porcelain"])
+  .stdout.split("\n")
+  .filter((l) => l.startsWith("worktree "))
+  .map((l) => canon(l.slice("worktree ".length)));
+if (registeredPaths.includes(canon(worktreePath)) && existsSync(join(worktreePath, ".git"))) {
   ctx.log(`setup-worktree SKIP already registered (${worktreePath})`);
   process.exit(0);
 }
 
-// Recovery 2: orphan dir → clean slate. (Never targets _session — different path.)
-if (existsSync(worktreePath)) {
+// Drop stale registrations (dir wiped while git still held the entry) so the
+// add below doesn't fail with "missing but already registered worktree".
+git(["worktree", "prune"]);
+
+// Recovery 2: orphan dir (present but not a live worktree) → clean slate.
+// (Never targets _session — different path.)
+if (existsSync(worktreePath) && !existsSync(join(worktreePath, ".git"))) {
   rmSync(worktreePath, { recursive: true, force: true });
   ctx.log(`setup-worktree REMOVED orphan dir ${worktreePath}`);
 }
 
 mkdirSync(dirname(worktreePath), { recursive: true });
 
-// Recovery 3: orphan branch → force-delete so -b works cleanly.
-if (git(["branch", "--list", branchName]).stdout.trim()) {
-  git(["branch", "-D", branchName]);
-  ctx.log(`setup-worktree DELETED orphan branch ${branchName}`);
+// Recovery 3: leftover branch. If it carries commits ahead of the session
+// branch (developer work), NEVER delete it — re-attach the worktree to it.
+// Only a commit-less branch is safe to recreate from scratch.
+let add;
+const branchExists = git(["branch", "--list", branchName]).stdout.trim();
+const ahead = branchExists
+  ? git(["log", "--oneline", `${sessionBranch}..${branchName}`]).stdout.trim()
+  : "";
+if (branchExists && ahead) {
+  add = git(["worktree", "add", worktreePath, branchName]);
+  ctx.log(`setup-worktree REUSED branch with commits ${branchName}`);
+} else {
+  if (branchExists) {
+    git(["branch", "-D", branchName]);
+    ctx.log(`setup-worktree DELETED orphan branch ${branchName}`);
+  }
+  add = git(["worktree", "add", worktreePath, "-b", branchName, sessionBranch]);
 }
-
-const add = git(["worktree", "add", worktreePath, "-b", branchName, sessionBranch]);
 if (add.status === 0) {
   ctx.log(`setup-worktree CREATED branch=${branchName} path=${worktreePath}`);
 } else {
