@@ -468,6 +468,7 @@ export const frenchCrmMessages = {
     language: "Langue",
     navigation: {
       label: "Navigation CRM",
+      leads: "Prospects",
     },
     profile: {
       inbound: {
