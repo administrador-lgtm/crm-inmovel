@@ -1,14 +1,13 @@
 import { useDataProvider, useGetIdentity, type DataProvider } from "ra-core";
 import { useCallback, useMemo } from "react";
 
-import type { Company, Tag } from "../types";
+import type { Tag } from "../types";
 
 export type ContactImportSchema = {
   first_name: string;
   last_name: string;
   gender: string;
   title: string;
-  company: string;
   email_work: string;
   email_home: string;
   email_other: string;
@@ -29,29 +28,6 @@ export function useContactImport() {
   const today = new Date().toISOString();
   const user = useGetIdentity();
   const dataProvider = useDataProvider();
-
-  // company cache to avoid creating the same company multiple times and costly roundtrips
-  // Cache is dependent of dataProvider, so it's safe to use it as a dependency
-  const companiesCache = useMemo(
-    () => new Map<string, Company>(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataProvider],
-  );
-  const getCompanies = useCallback(
-    async (names: string[]) =>
-      fetchRecordsWithCache<Company>(
-        "companies",
-        companiesCache,
-        names,
-        (name) => ({
-          name,
-          created_at: new Date().toISOString(),
-          sales_id: user?.identity?.id,
-        }),
-        dataProvider,
-      ),
-    [companiesCache, user?.identity?.id, dataProvider],
-  );
 
   // Tags cache to avoid creating the same tag multiple times and costly roundtrips
   // Cache is dependent of dataProvider, so it's safe to use it as a dependency
@@ -74,14 +50,9 @@ export function useContactImport() {
 
   const processBatch = useCallback(
     async (batch: ContactImportSchema[]) => {
-      const [companies, tags] = await Promise.all([
-        getCompanies(
-          batch
-            .map((contact) => contact.company?.trim())
-            .filter((name) => name),
-        ),
-        getTags(batch.flatMap((batch) => parseTags(batch.tags))),
-      ]);
+      const tags = await getTags(
+        batch.flatMap((batch) => parseTags(batch.tags)),
+      );
 
       await Promise.all(
         batch.map(
@@ -101,7 +72,6 @@ export function useContactImport() {
             last_seen,
             has_newsletter,
             status,
-            company: companyName,
             tags: tagNames,
             linkedin_url,
           }) => {
@@ -115,9 +85,6 @@ export function useContactImport() {
               { number: phone_home, type: "Home" },
               { number: phone_other, type: "Other" },
             ].filter(({ number }) => number);
-            const company = companyName?.trim()
-              ? companies.get(companyName.trim())
-              : undefined;
             const tagList = parseTags(tagNames)
               .map((name) => tags.get(name))
               .filter((tag): tag is Tag => !!tag);
@@ -139,7 +106,6 @@ export function useContactImport() {
                   : today,
                 has_newsletter,
                 status,
-                company_id: company?.id,
                 tags: tagList.map((tag) => tag.id),
                 sales_id: user?.identity?.id,
                 linkedin_url,
@@ -149,7 +115,7 @@ export function useContactImport() {
         ),
       );
     },
-    [dataProvider, getCompanies, getTags, user?.identity?.id, today],
+    [dataProvider, getTags, user?.identity?.id, today],
   );
 
   return processBatch;
