@@ -12,8 +12,6 @@ import type {
   Company,
   Contact,
   ContactNote,
-  Deal,
-  DealNote,
   Sale,
   SalesFormData,
   SignUpData,
@@ -183,31 +181,6 @@ export const createDataProvider = ({
       }
       return baseDataProvider.getList(resource, params);
     },
-    unarchiveDeal: async (deal: Deal) => {
-      // get all deals where stage is the same as the deal to unarchive
-      const { data: deals } = await baseDataProvider.getList<Deal>("deals", {
-        filter: { stage: deal.stage },
-        pagination: { page: 1, perPage: 1000 },
-        sort: { field: "index", order: "ASC" },
-      });
-
-      // set index for each deal starting from 1, if the deal to unarchive is found, set its index to the last one
-      const updatedDeals = deals.map((d, index) => ({
-        ...d,
-        index: d.id === deal.id ? 0 : index + 1,
-        archived_at: d.id === deal.id ? null : d.archived_at,
-      }));
-
-      return await Promise.all(
-        updatedDeals.map((updatedDeal) =>
-          dataProvider.update("deals", {
-            id: updatedDeal.id,
-            data: updatedDeal,
-            previousData: deals.find((d) => d.id === updatedDeal.id),
-          }),
-        ),
-      );
-    },
     signUp: async ({
       email,
       password,
@@ -360,7 +333,7 @@ export const createDataProvider = ({
 
           const newSaleId = params.meta.identity.id as Identifier;
 
-          const [companies, contacts, contactNotes, deals] = await Promise.all([
+          const [companies, contacts, contactNotes] = await Promise.all([
             dataProvider.getList("companies", {
               filter: { sales_id: params.id },
               pagination: {
@@ -385,14 +358,6 @@ export const createDataProvider = ({
               },
               sort: { field: "id", order: "ASC" },
             }),
-            dataProvider.getList("deals", {
-              filter: { sales_id: params.id },
-              pagination: {
-                page: 1,
-                perPage: 10_000,
-              },
-              sort: { field: "id", order: "ASC" },
-            }),
           ]);
 
           await Promise.all([
@@ -410,12 +375,6 @@ export const createDataProvider = ({
             }),
             dataProvider.updateMany("contact_notes", {
               ids: contactNotes.data.map((company) => company.id),
-              data: {
-                sales_id: newSaleId,
-              },
-            }),
-            dataProvider.updateMany("deals", {
-              ids: deals.data.map((company) => company.id),
               data: {
                 sales_id: newSaleId,
               },
@@ -562,49 +521,9 @@ export const createDataProvider = ({
         },
       } satisfies ResourceCallbacks<Company>,
       {
-        resource: "deals",
-        beforeCreate: async (params) => {
-          return {
-            ...params,
-            data: {
-              ...params.data,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-          };
-        },
-        afterCreate: async (result) => {
-          await updateCompany(result.data.company_id, (company) => ({
-            nb_deals: (company.nb_deals ?? 0) + 1,
-          }));
-
-          return result;
-        },
-        beforeUpdate: async (params) => {
-          return {
-            ...params,
-            data: {
-              ...params.data,
-              updated_at: new Date().toISOString(),
-            },
-          };
-        },
-        afterDelete: async (result) => {
-          await updateCompany(result.data.company_id, (company) => ({
-            nb_deals: (company.nb_deals ?? 1) - 1,
-          }));
-
-          return result;
-        },
-      } satisfies ResourceCallbacks<Deal>,
-      {
         resource: "contact_notes",
         beforeSave: async (params) => preserveAttachmentMimeType(params),
       } satisfies ResourceCallbacks<ContactNote>,
-      {
-        resource: "deal_notes",
-        beforeSave: async (params) => preserveAttachmentMimeType(params),
-      } satisfies ResourceCallbacks<DealNote>,
     ],
   ) as CrmDataProvider;
 

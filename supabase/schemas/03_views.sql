@@ -12,9 +12,7 @@ select
     c.sales_id,
     to_json(c.*) as company,
     null::json as contact,
-    null::json as deal,
-    null::json as contact_note,
-    null::json as deal_note
+    null::json as contact_note
 from public.companies c
 union all
 select
@@ -25,9 +23,7 @@ select
     co.sales_id,
     null::json as company,
     to_json(co.*) as contact,
-    null::json as deal,
-    null::json as contact_note,
-    null::json as deal_note
+    null::json as contact_note
 from public.contacts co
 union all
 select
@@ -38,38 +34,9 @@ select
     cn.sales_id,
     null::json as company,
     null::json as contact,
-    null::json as deal,
-    to_json(cn.*) as contact_note,
-    null::json as deal_note
+    to_json(cn.*) as contact_note
 from public.contact_notes cn
-    left join public.contacts co on co.id = cn.contact_id
-union all
-select
-    ('deal.' || d.id || '.created') as id,
-    'deal.created' as type,
-    d.created_at as date,
-    d.company_id,
-    d.sales_id,
-    null::json as company,
-    null::json as contact,
-    to_json(d.*) as deal,
-    null::json as contact_note,
-    null::json as deal_note
-from public.deals d
-union all
-select
-    ('dealNote.' || dn.id || '.created') as id,
-    'dealNote.created' as type,
-    dn.date,
-    d.company_id,
-    dn.sales_id,
-    null::json as company,
-    null::json as contact,
-    null::json as deal,
-    null::json as contact_note,
-    to_json(dn.*) as deal_note
-from public.deal_notes dn
-    left join public.deals d on d.id = dn.deal_id;
+    left join public.contacts co on co.id = cn.contact_id;
 
 create or replace view public.companies_summary with (security_invoker = on) as
 select
@@ -92,10 +59,8 @@ select
     c.revenue,
     c.tax_identifier,
     c.logo,
-    count(distinct d.id) as nb_deals,
     count(distinct co.id) as nb_contacts
 from public.companies c
-    left join public.deals d on c.id = d.company_id
     left join public.contacts co on c.id = co.company_id
 group by c.id;
 
