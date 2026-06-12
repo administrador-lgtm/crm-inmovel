@@ -283,5 +283,21 @@
     "env": { "status": "pending" },
     "deploy": { "status": "pending" }
   },
-  "tickets": []
+  "tickets": [
+    { "ticket_id": "TASK-001", "title": "Remove unused company entity from default CRM", "status": "pending" },
+    { "ticket_id": "TASK-002", "title": "Remove unused task entity from default CRM", "status": "pending" },
+    { "ticket_id": "TASK-003", "title": "Remove deal entity and retarget Kanban board onto lead", "status": "pending" },
+    { "ticket_id": "TASK-004", "title": "Remove analytics dashboard and CSV import/export features", "status": "pending" },
+    { "ticket_id": "TASK-005", "title": "Lead schema extensions: types, DB schema, and FakeRest generator", "status": "pending" },
+    { "ticket_id": "TASK-006", "title": "Propiedad schema, types, and FakeRest generator", "status": "pending" },
+    { "ticket_id": "TASK-007", "title": "Asesor schema extensions: sales table, types, and FakeRest generator", "status": "pending" },
+    { "ticket_id": "TASK-008", "title": "Support tables schema and types: visita, lead_propiedad, conversacion, anuncio, nocnok_raw", "status": "pending" },
+    { "ticket_id": "TASK-009", "title": "Lead list, show, and edit UI with pipeline stage controls", "status": "pending" },
+    { "ticket_id": "TASK-010", "title": "Propiedad list and show views", "status": "pending" },
+    { "ticket_id": "TASK-011", "title": "Asesor extended fields in sales list and edit", "status": "pending" },
+    { "ticket_id": "TASK-012", "title": "Visita create/list panel and conversacion activity log on lead show", "status": "pending" },
+    { "ticket_id": "TASK-013", "title": "Google Sheet to Supabase one-way sync Edge Function (cron)", "status": "pending" },
+    { "ticket_id": "TASK-014", "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction", "status": "pending" },
+    { "ticket_id": "TASK-015", "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette", "status": "pending" }
+  ]
 }
