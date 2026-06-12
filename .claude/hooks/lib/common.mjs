@@ -136,6 +136,7 @@ export function exec(file, args = [], opts = {}) {
     stdout: r.stdout ?? "",
     stderr: r.stderr ?? "",
     error: r.error,
+    signal: r.signal ?? null,
   };
 }
 
@@ -276,13 +277,21 @@ export function tailLines(text, n) {
 // Returns { status, output, timedOut }. status 124 == timeout.
 // `projects` (optional) narrows the run to specific vitest projects via repeated
 // --project flags — used since the app/claude/functions suites share one config.
+// Resolve a timeout wrapper binary once. macOS ships neither `timeout` nor
+// `gtimeout` (GNU coreutils) by default — in that case we fall back to
+// spawnSync's native `timeout` option instead of a shell wrapper.
+const TIMEOUT_BIN = ["timeout", "gtimeout"].find(
+  (bin) => spawnSync("which", [bin], { encoding: "utf8" }).status === 0,
+);
+
 export function runVitest(wt, configFile, projects = []) {
   const projectTag = projects.length ? `-${projects.join("-")}` : "";
   const out = join(tmpdir(), `vitest-${basename(configFile)}${projectTag}-${process.pid}.out`);
   const projectFlags = projects.map((p) => `--project ${p}`).join(" ");
+  const wrapper = TIMEOUT_BIN ? `${TIMEOUT_BIN} 180 ` : "";
   const r = bash(
-    `CI=true timeout 180 npx vitest run --config ${configFile} ${projectFlags} > "${out}" 2>&1`,
-    { cwd: wt },
+    `CI=true ${wrapper}npx vitest run --config ${configFile} ${projectFlags} > "${out}" 2>&1`,
+    { cwd: wt, ...(TIMEOUT_BIN ? {} : { timeout: 180_000 }) },
   );
   let output = "";
   try {
@@ -295,5 +304,9 @@ export function runVitest(wt, configFile, projects = []) {
   } catch {
     // best-effort cleanup
   }
-  return { status: r.status, output, timedOut: r.status === 124 };
+  return {
+    status: r.status,
+    output,
+    timedOut: r.status === 124 || r.signal === "SIGTERM",
+  };
 }
