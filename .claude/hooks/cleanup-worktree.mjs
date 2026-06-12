@@ -6,9 +6,21 @@
 // base branch AND has commits. If the merger stopped prematurely (before
 // merging), the worktree is preserved.
 
-import { existsSync, readdirSync, rmSync, rmdirSync } from "node:fs";
+import { existsSync, readdirSync, rmSync, rmdirSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 import { readStdin, crmIdentity, baseBranch, git, exec } from "./lib/common.mjs";
+
+// Canonicalize a path for comparison. On macOS /tmp is a symlink to
+// /private/tmp: git reports worktree paths canonicalized (/private/tmp/...)
+// while our derived paths use /tmp/... — comparing them raw never matches,
+// which made the leftover sweep delete ACTIVE worktrees as orphans.
+function canon(p) {
+  try {
+    return realpathSync(p);
+  } catch {
+    return p;
+  }
+}
 
 const ctx = crmIdentity(readStdin());
 
@@ -39,8 +51,11 @@ for (const line of porcelain.split("\n")) {
   }
 }
 
+const canonBase = canon(ctx.worktreeBase);
+
 for (const { path: wtPath, branch } of entries) {
-  if (!(wtPath === ctx.worktreeBase || wtPath.startsWith(ctx.worktreeBase + "/"))) continue;
+  const canonWt = canon(wtPath);
+  if (!(canonWt === canonBase || canonWt.startsWith(canonBase + "/"))) continue;
 
   // Never clean the session integration worktree or the SIMPLE worktree; both
   // persist for the whole session (_session for complex merges, <ID>/simple for
@@ -105,7 +120,7 @@ git(["worktree", "prune"]);
 const registered = git(["worktree", "list", "--porcelain"])
   .stdout.split("\n")
   .filter((l) => l.startsWith("worktree "))
-  .map((l) => l.slice("worktree ".length));
+  .map((l) => canon(l.slice("worktree ".length)));
 
 for (const entry of readdirSync(ctx.worktreeBase, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
@@ -125,7 +140,7 @@ for (const entry of readdirSync(ctx.worktreeBase, { withFileTypes: true })) {
     ctx.log(`cleanup-worktree SKIP-NON-WORKTREE ${dir}`);
     continue;
   }
-  if (!registered.includes(dir)) {
+  if (!registered.includes(canon(dir))) {
     rmSync(dir, { recursive: true, force: true });
     ctx.log(`cleanup-worktree LEFTOVER RM ${dir}`);
   }
