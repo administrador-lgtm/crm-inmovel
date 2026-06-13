@@ -1,5 +1,5 @@
 import { endOfYesterday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { Clock, TrendingUp, Users } from "lucide-react";
+import { Clock, Layers, TrendingUp, Users } from "lucide-react";
 import { useGetIdentity, useListContext, useTranslate } from "ra-core";
 import { ToggleFilterButton } from "@/components/admin/toggle-filter-button";
 
@@ -11,7 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ActiveFilterButton } from "../misc/ActiveFilterButton";
 
 export const ContactListFilter = () => {
-  const { noteStatuses } = useConfigurationContext();
+  const { noteStatuses, leadStages } = useConfigurationContext();
   const isMobile = useIsMobile();
   const { identity } = useGetIdentity();
   const translate = useTranslate();
@@ -74,6 +74,18 @@ export const ContactListFilter = () => {
           }}
           size={isMobile ? "lg" : undefined}
         />
+      </FilterCategory>
+
+      <FilterCategory label="crm.leads.stage" icon={<Layers />}>
+        {leadStages.map((stage) => (
+          <ToggleFilterButton
+            key={stage.value}
+            className="w-auto md:w-full justify-between h-10 md:h-8"
+            label={<span>{stage.label}</span>}
+            value={{ stage: stage.value }}
+            size={isMobile ? "lg" : undefined}
+          />
+        ))}
       </FilterCategory>
 
       <FilterCategory

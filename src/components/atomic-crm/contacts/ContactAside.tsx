@@ -4,6 +4,8 @@ import { DeleteButton } from "@/components/admin";
 import { ShowButton } from "@/components/admin/show-button";
 
 import { ContactStatusSelector } from "./ContactInputs";
+import { StageControl } from "../leads/StageControl";
+import { LeadInfo } from "../leads/LeadInfo";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
 import { ContactBackgroundInfo } from "./ContactBackgroundInfo";
 import { AsideSection } from "../misc/AsideSection";
@@ -26,6 +28,18 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
           <ShowButton label="resources.contacts.action.show" />
         )}
       </div>
+
+      <AsideSection
+        title={translate("crm.leads.stage", { _: "Etapa del lead" })}
+      >
+        <StageControl />
+      </AsideSection>
+
+      <AsideSection
+        title={translate("crm.leads.info", { _: "Datos del lead" })}
+      >
+        <LeadInfo />
+      </AsideSection>
 
       <AsideSection title={translate("resources.notes.fields.status")}>
         <ContactStatusSelector />

@@ -109,3 +109,14 @@ select
     p.fuente,
     p.broker_nombre
 from public.propiedades p;
+
+create or replace view public.conversaciones_by_lead with (security_invoker = on) as
+select
+    c.id,
+    c.lead_id,
+    c.rol,
+    c.texto,
+    c.timestamp,
+    c.nombre_lead
+from public.conversaciones c
+order by c.timestamp asc;

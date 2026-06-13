@@ -18,6 +18,11 @@ export type SalesFormData = {
   last_name: string;
   administrator: boolean;
   disabled: boolean;
+  telefono?: string | null;
+  calendario?: string | null;
+  linea_negocio?: "exclusiva" | "compartida" | null;
+  activo?: boolean | null;
+  manager_id?: Identifier | null;
 };
 
 export type Sale = {
@@ -183,6 +188,39 @@ export type Propiedad = {
   status_days?: string;
   is_exclusive?: boolean;
   share_type?: string;
+};
+
+export type Visita = {
+  lead_id: Identifier;
+  propiedad_id?: string | null;
+  fecha: string;
+  resultado?: string | null;
+  notas?: string | null;
+  asesor_id?: Identifier | null;
+  created_at?: string;
+} & Pick<RaRecord, "id">;
+
+export type LeadPropiedad = {
+  lead_id: Identifier;
+  propiedad_id: string;
+  relacion: "match_bot" | "pregunto" | "visito";
+} & Pick<RaRecord, "id">;
+
+export type Conversacion = {
+  lead_id: Identifier;
+  rol: "lead" | "bot";
+  texto: string;
+  timestamp: string;
+  nombre_lead?: string | null;
+} & Pick<RaRecord, "id">;
+
+export type Anuncio = {
+  /** Meta ad id (primary key). */
+  id: string;
+  ad_name?: string | null;
+  propiedad_id?: string | null;
+  activo?: boolean;
+  created_at?: string | null;
 };
 
 /**

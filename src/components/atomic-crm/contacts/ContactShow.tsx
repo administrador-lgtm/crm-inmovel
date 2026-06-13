@@ -26,6 +26,8 @@ import { ContactBackgroundInfo } from "./ContactBackgroundInfo";
 import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
+import { VisitasPanel } from "../leads/VisitasPanel";
+import { ConversacionLog } from "../leads/ConversacionLog";
 import { MobileBackButton } from "../misc/MobileBackButton";
 
 export const ContactShow = (props: ShowBaseProps = {}) => {
@@ -104,12 +106,15 @@ const ContactShowContentMobile = () => {
         </div>
 
         <Tabs defaultValue="notes" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-10">
+          <TabsList className="grid w-full grid-cols-3 h-10">
             <TabsTrigger value="notes">
               {translate("resources.notes.name", { smart_count: 2 })}
             </TabsTrigger>
             <TabsTrigger value="details">
               {translate("crm.common.details")}
+            </TabsTrigger>
+            <TabsTrigger value="activity">
+              {translate("crm.leads.activity", { _: "Actividad" })}
             </TabsTrigger>
           </TabsList>
 
@@ -181,6 +186,10 @@ const ContactShowContentMobile = () => {
               </div>
             </div>
           </TabsContent>
+          <TabsContent value="activity" className="mt-2">
+            <VisitasPanel />
+            <ConversacionLog />
+          </TabsContent>
         </Tabs>
       </MobileContent>
     </>
@@ -222,6 +231,8 @@ const ContactShowContent = () => {
             </InfiniteListBase>
           </CardContent>
         </Card>
+        <VisitasPanel />
+        <ConversacionLog />
       </div>
       <ContactAside />
     </div>

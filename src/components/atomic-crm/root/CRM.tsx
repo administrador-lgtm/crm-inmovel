@@ -28,6 +28,7 @@ import {
   getDataProvider as defaultDataProviderBuilder,
 } from "../providers/supabase";
 import sales from "../sales";
+import propiedades from "../propiedades";
 import { SettingsPageMobile } from "../settings/SettingsPageMobile";
 import { ProfilePage } from "../settings/ProfilePage";
 import { SettingsPage } from "../settings/SettingsPage";
@@ -252,6 +253,7 @@ const DesktopAdmin = (
       </CustomRoutes>
       <Resource name="contacts" {...contacts} />
       <Resource name="contact_notes" />
+      <Resource name="propiedades" {...propiedades} />
       <Resource name="sales" {...sales} />
     </Admin>
   );
@@ -317,6 +319,7 @@ const MobileAdmin = (
         >
           <Route path=":id/notes/:noteId" element={<NoteShowPage />} />
         </Resource>
+        <Resource name="propiedades" {...propiedades} />
       </Admin>
     </PersistQueryClientProvider>
   );
