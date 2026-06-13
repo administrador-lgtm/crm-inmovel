@@ -210,6 +210,12 @@ CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
 declare
   sales_count int;
 begin
+  -- Inmovel: restrict sign-up to the company domain. Any other email (e.g. a
+  -- Google OAuth account outside @inmovel.net) is rejected here, at the DB.
+  if new.email is null or lower(new.email) not like '%@inmovel.net' then
+    raise exception 'Only @inmovel.net accounts are allowed';
+  end if;
+
   select count(id) into sales_count
   from public.sales;
 
@@ -409,4 +415,56 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
+$$;
+
+-- Inmovel: the sales.id of the currently authenticated user (null if none).
+CREATE OR REPLACE FUNCTION "public"."current_sale_id"() RETURNS bigint
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+begin
+  return (select id from public.sales where user_id = auth.uid());
+end;
+$$;
+
+-- Inmovel: whether the current user may access a lead assigned to `asesor`.
+-- Admins see everything; everyone else sees their own leads plus the leads of
+-- any advisor who reports to them (manager_id graph). A plain advisor with no
+-- reports therefore sees only their own leads — no separate manager role needed.
+CREATE OR REPLACE FUNCTION "public"."can_access_lead"("asesor" bigint) RETURNS boolean
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare
+  me bigint;
+begin
+  if public.is_admin() then
+    return true;
+  end if;
+  me := public.current_sale_id();
+  if me is null then
+    return false;
+  end if;
+  return asesor = me
+    or asesor in (select id from public.sales where manager_id = me);
+end;
+$$;
+
+-- Inmovel: DB-level guard for the stage-ownership frontier. CRM users
+-- (authenticated, non-service-role) may never set a lead's stage into the
+-- sync-owned range S1..S5. The sync itself runs as service_role and bypasses
+-- RLS/this guard. Complements the UI guard in StageControl.
+CREATE OR REPLACE FUNCTION "public"."enforce_stage_frontier"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO ''
+    AS $$
+begin
+  -- auth.uid() is null for the service role (the sync); only police CRM users.
+  if auth.uid() is not null
+     and new.stage is distinct from old.stage
+     and new.stage in ('S1', 'S2', 'S3', 'S4', 'S5') then
+    raise exception 'Stage % is sync-owned and cannot be set from the CRM', new.stage;
+  end if;
+  return new;
+end;
 $$;
