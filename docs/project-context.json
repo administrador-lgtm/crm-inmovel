@@ -3,7 +3,7 @@
   "bootstrapped": true,
   "project_name": "crm-inmovel",
   "github_username": "administrador-lgtm",
-  "supabase_project_name": null,
+  "supabase_project_name": "crm-inmovel",
   "deploy_platform": "railway",
   "mode": "full",
   "business_context": {
@@ -873,19 +873,19 @@
   },
   "phase_status": {
     "spec": {
-      "status": "pending"
+      "status": "done"
     },
     "fork": {
-      "status": "pending"
+      "status": "done"
     },
     "supabase": {
-      "status": "pending"
+      "status": "done"
     },
     "env": {
-      "status": "pending"
+      "status": "done"
     },
     "deploy": {
-      "status": "pending"
+      "status": "done"
     }
   },
   "tickets": [
@@ -969,5 +969,7 @@
       "title": "Remove unused tag entity from default CRM",
       "status": "merged"
     }
-  ]
+  ],
+  "supabase_project_ref": "yvowokyomykvntupibpp",
+  "deploy_url": "https://crm-web-production-6d3c.up.railway.app"
 }
