@@ -185,6 +185,39 @@ export type Propiedad = {
   share_type?: string;
 };
 
+export type Visita = {
+  lead_id: Identifier;
+  propiedad_id?: string | null;
+  fecha: string;
+  resultado?: string | null;
+  notas?: string | null;
+  asesor_id?: Identifier | null;
+  created_at?: string;
+} & Pick<RaRecord, "id">;
+
+export type LeadPropiedad = {
+  lead_id: Identifier;
+  propiedad_id: string;
+  relacion: "match_bot" | "pregunto" | "visito";
+} & Pick<RaRecord, "id">;
+
+export type Conversacion = {
+  lead_id: Identifier;
+  rol: "lead" | "bot";
+  texto: string;
+  timestamp: string;
+  nombre_lead?: string | null;
+} & Pick<RaRecord, "id">;
+
+export type Anuncio = {
+  /** Meta ad id (primary key). */
+  id: string;
+  ad_name?: string | null;
+  propiedad_id?: string | null;
+  activo?: boolean;
+  created_at?: string | null;
+};
+
 /**
  * In Inmovel a lead IS a contact (1 lead = 1 person = 1 opportunity), so the
  * Lead type is the extended Contact. Exported for UI components that speak
