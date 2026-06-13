@@ -37,3 +37,16 @@ Work lives on branches (SAFE in .git; worktrees under /tmp are disposable):
 1. Run full unit + e2e suite after a machine reboot (vitest browser mode was wedged; logic verified by typecheck + targeted runs).
 2. Deno tests for sheet_sync/stageFrontier.test.ts run at deploy (deno not installed locally).
 3. DEPLOY: user creates a Supabase project (supabase_project_name still null in spec); then generate migrations from supabase/schemas via `npx supabase db diff`, configure Google OAuth (@inmovel.net) + env vars (INMOVEL_SHEET_ID, GOOGLE_SHEETS_TOKEN, SHEET_SYNC_SECRET, SUPABASE_SERVICE_ROLE_KEY), schedule the sheet_sync cron (1-2 min), deploy to Railway, GitHub administrador-lgtm/crm-inmovel.
+
+## DEPLOYED & LIVE (2026-06-13)
+- App: https://crm-web-production-6d3c.up.railway.app (Railway project crm-inmovel / service crm-web)
+- Supabase: crm-inmovel / ref yvowokyomykvntupibpp (us-west-1)
+- Google OAuth: WEB client 1088362139074-unil6i1b08d2ga8ima2jcosqa21aqh4k (NOT the bot's gkjhvg client) — has the Supabase callback redirect URI. Login confirmed working.
+- Sync cron active every 2 min. Last full sync: 1476 leads, 22 props, 10184 conversaciones, 678 nocnok.
+
+## OPEN ITEM (next session, ~10 min): logged in but leads not visible in UI.
+Likely causes to check in order:
+1. First user may not be admin yet — check: `select email, administrator from sales`. The handle_new_user trigger sets administrator=TRUE only when sales table was empty at signup; if a prior row existed, user is non-admin.
+2. RLS: synced leads have asesor_asignado=NULL (excluded from sync — Sheet stores names not ids). can_access_lead returns false for non-admins on null-asesor leads, and even admins: is_admin() must resolve. Verify current_sale_id()/is_admin() work for the logged-in user.
+3. The CRM lists leads from contacts_summary view (security_invoker=on) — confirm the view respects/passes RLS and returns rows for the admin.
+Quick test: as the logged-in user, `select count(*) from contacts_summary`. If 0 for an admin, debug is_admin(); if >0, it's a frontend query/filter issue.
