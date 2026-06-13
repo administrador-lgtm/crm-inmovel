@@ -138,6 +138,11 @@ const ContactItemContent = ({
                 {findLeadStageLabel(leadStages, contact.stage) ?? contact.stage}
               </Badge>
             ) : null}
+            {contact.tipo_busqueda ? (
+              <Badge variant="outline" className="font-normal capitalize">
+                {contact.tipo_busqueda}
+              </Badge>
+            ) : null}
             {contact.zona_interes ? <span>📍 {contact.zona_interes}</span> : null}
             {contact.presupuesto ? <span>💰 {contact.presupuesto}</span> : null}
             {contact.desarrollo_activo ? (
