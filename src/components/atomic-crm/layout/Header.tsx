@@ -1,4 +1,4 @@
-import { FileText, Import, Settings, User, Users } from "lucide-react";
+import { FileText, Settings, User, Users } from "lucide-react";
 import { CanAccess, useTranslate, useUserMenu } from "ra-core";
 import { Link, matchPath, useLocation } from "react-router";
 import { RefreshButton } from "@/components/admin/refresh-button";
@@ -7,7 +7,6 @@ import { UserMenu } from "@/components/admin/user-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
-import { ImportPage } from "../misc/ImportPage";
 import { ChangelogPage } from "../misc/ChangelogPage";
 
 const Header = () => {
@@ -82,7 +81,6 @@ const Header = () => {
                   <CanAccess resource="configuration" action="edit">
                     <SettingsMenu />
                   </CanAccess>
-                  <ImportFromJsonMenuItem />
                   <ChangelogMenuItem />
                 </UserMenu>
               </div>
@@ -158,22 +156,6 @@ const SettingsMenu = () => {
       <Link to="/settings" className="flex items-center gap-2">
         <Settings />
         {translate("crm.settings.title")}
-      </Link>
-    </DropdownMenuItem>
-  );
-};
-
-const ImportFromJsonMenuItem = () => {
-  const translate = useTranslate();
-  const userMenuContext = useUserMenu();
-  if (!userMenuContext) {
-    throw new Error("<ImportFromJsonMenuItem> must be used inside <UserMenu>");
-  }
-  return (
-    <DropdownMenuItem asChild onClick={userMenuContext.onClose}>
-      <Link to={ImportPage.path} className="flex items-center gap-2">
-        <Import />
-        {translate("crm.header.import_data")}
       </Link>
     </DropdownMenuItem>
   );

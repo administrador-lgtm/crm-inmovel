@@ -1,25 +1,14 @@
-import jsonExport from "jsonexport/dist";
-import {
-  downloadCSV,
-  InfiniteListBase,
-  useGetIdentity,
-  useListContext,
-  type Exporter,
-} from "ra-core";
+import { InfiniteListBase, useGetIdentity, useListContext } from "ra-core";
 import { BulkActionsToolbar } from "@/components/admin/bulk-actions-toolbar";
 import { BulkDeleteButton } from "@/components/admin/bulk-delete-button";
-import { BulkExportButton } from "@/components/admin/bulk-export-button";
 import { CreateButton } from "@/components/admin/create-button";
-import { ExportButton } from "@/components/admin/export-button";
 import { List } from "@/components/admin/list";
 import { SelectAllButton } from "@/components/admin/select-all-button";
 import { SortButton } from "@/components/admin/sort-button";
 import { Card } from "@/components/ui/card";
 
-import type { Contact, Sale, Tag } from "../types";
 import { BulkTagButton } from "./BulkTagButton";
 import { ContactEmpty } from "./ContactEmpty";
-import { ContactImportButton } from "./ContactImportButton";
 import {
   ContactListContent,
   ContactListContentMobile,
@@ -44,7 +33,6 @@ export const ContactList = () => {
       actions={<ContactListActions />}
       perPage={25}
       sort={{ field: "last_seen", order: "DESC" }}
-      exporter={exporter}
     >
       <ContactListLayoutDesktop />
     </List>
@@ -79,7 +67,6 @@ const ContactBulkActionButtons = () => (
   <>
     <SelectAllButton />
     <BulkTagButton />
-    <BulkExportButton />
     <BulkDeleteButton />
   </>
 );
@@ -87,8 +74,6 @@ const ContactBulkActionButtons = () => (
 const ContactListActions = () => (
   <TopToolbar>
     <SortButton fields={["first_name", "last_name", "last_seen"]} />
-    <ContactImportButton />
-    <ExportButton exporter={exporter} />
     <CreateButton />
   </TopToolbar>
 );
@@ -101,7 +86,6 @@ export const ContactListMobile = () => {
     <InfiniteListBase
       perPage={25}
       sort={{ field: "last_seen", order: "DESC" }}
-      exporter={exporter}
       queryOptions={{
         onError: () => {
           /* Disable error notification as ContactListLayoutMobile handles it */
@@ -136,42 +120,4 @@ const ContactListLayoutMobile = () => {
       </MobileContent>
     </div>
   );
-};
-
-const exporter: Exporter<Contact> = async (records, fetchRelatedRecords) => {
-  const sales = await fetchRelatedRecords<Sale>(records, "sales_id", "sales");
-  const tags = await fetchRelatedRecords<Tag>(records, "tags", "tags");
-
-  const contacts = records.map((contact) => {
-    const exportedContact = {
-      ...contact,
-      sales:
-        contact.sales_id != null
-          ? `${sales[contact.sales_id].first_name} ${sales[contact.sales_id].last_name}`
-          : undefined,
-      tags: contact.tags.map((tagId) => tags[tagId].name).join(", "),
-      email_work: contact.email_jsonb?.find((email) => email.type === "Work")
-        ?.email,
-      email_home: contact.email_jsonb?.find((email) => email.type === "Home")
-        ?.email,
-      email_other: contact.email_jsonb?.find((email) => email.type === "Other")
-        ?.email,
-      email_jsonb: JSON.stringify(contact.email_jsonb),
-      email_fts: undefined,
-      phone_work: contact.phone_jsonb?.find((phone) => phone.type === "Work")
-        ?.number,
-      phone_home: contact.phone_jsonb?.find((phone) => phone.type === "Home")
-        ?.number,
-      phone_other: contact.phone_jsonb?.find((phone) => phone.type === "Other")
-        ?.number,
-      phone_jsonb: JSON.stringify(contact.phone_jsonb),
-      phone_fts: undefined,
-    };
-    delete exportedContact.email_fts;
-    delete exportedContact.phone_fts;
-    return exportedContact;
-  });
-  return jsonExport(contacts, {}, (_err: any, csv: string) => {
-    downloadCSV(csv, "contacts");
-  });
 };
