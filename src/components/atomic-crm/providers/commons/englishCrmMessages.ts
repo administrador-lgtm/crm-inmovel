@@ -217,8 +217,23 @@ export const englishCrmMessages = {
     },
   },
   crm: {
+    visitas: {
+      title: "Visits",
+      add: "Add visit",
+      empty: "No visits recorded.",
+      propiedad: "Property",
+      fecha: "Date",
+      resultado: "Result",
+      notas: "Notes",
+      created: "Visit recorded",
+    },
+    conversaciones: {
+      title: "Bot conversation",
+      empty: "No messages recorded.",
+    },
     leads: {
       stage: "Lead stage",
+      activity: "Activity",
       info: "Lead data",
       stage_read_only:
         "This stage is managed by the system and cannot be changed manually.",
