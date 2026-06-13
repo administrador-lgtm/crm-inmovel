@@ -28,9 +28,13 @@
     "src/components/atomic-crm/contacts/ContactInputs.tsx",
     "src/App.tsx"
   ],
-  "dependencies": ["TASK-003", "TASK-005", "TASK-016"],
+  "dependencies": [
+    "TASK-003",
+    "TASK-005",
+    "TASK-016"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/lead-list-show-edit",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

@@ -24,9 +24,12 @@
     "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
     "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
   ],
-  "dependencies": ["TASK-005", "TASK-006"],
+  "dependencies": [
+    "TASK-005",
+    "TASK-006"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/support-tables-schema",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

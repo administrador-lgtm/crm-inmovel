@@ -22,9 +22,12 @@
     "src/components/atomic-crm/root/CRM.tsx",
     "src/components/atomic-crm/providers/fakerest/dataProvider.ts"
   ],
-  "dependencies": ["TASK-008", "TASK-009"],
+  "dependencies": [
+    "TASK-008",
+    "TASK-009"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/visita-conversacion-ui",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

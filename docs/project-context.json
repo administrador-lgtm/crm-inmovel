@@ -927,27 +927,27 @@
     {
       "ticket_id": "TASK-008",
       "title": "Support tables schema and types: visita, lead_propiedad, conversacion, anuncio, nocnok_raw",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-009",
       "title": "Lead list, show, and edit UI with pipeline stage controls",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-010",
       "title": "Propiedad list and show views",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-011",
       "title": "Asesor extended fields in sales list and edit",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-012",
       "title": "Visita create/list panel and conversacion activity log on lead show",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-013",

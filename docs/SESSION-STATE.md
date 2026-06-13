@@ -24,3 +24,5 @@ Work lives on branches (SAFE in .git; worktrees under /tmp are disposable):
 - Agent team tickets-4e3d9b5a (10 members) still nominally alive but idle; tear down or ignore — direct mode supersedes it.
 
 ## Wave 2 DONE (same session, direct mode): TASK-004/005/006/007/016 merged to main at 4b6a223. Typecheck green. 8/16 tickets in main. Next: wave 3-4 UI (TASK-008 support tables, TASK-009 lead UI, TASK-010 propiedades UI, TASK-011 asesor UI, TASK-012 visitas+conversaciones), then TASK-013 sync + TASK-014 RLS (use review ceremony or extra care), TASK-015 branding. Unit tests still pending machine reboot.
+
+## Waves 3-4 DONE (direct mode): TASK-008/009/010/011/012 merged to main at 52f66bc. 13/16 tickets done. StageControl enforces S6 frontier in UI. Remaining: TASK-013 (Sheet->Supabase sync edge fn), TASK-014 (RLS + Google OAuth domain) — the 2 critical ones, give extra care; TASK-015 (Spanish i18n + Inmovel branding + light theme + indigo palette). Then deploy phase (user creates Supabase project). Unit tests still pending machine reboot.

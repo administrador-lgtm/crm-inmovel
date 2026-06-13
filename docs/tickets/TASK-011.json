@@ -20,9 +20,11 @@
     "src/components/atomic-crm/sales/SalesList.tsx",
     "src/components/atomic-crm/sales/SalesEdit.tsx"
   ],
-  "dependencies": ["TASK-007"],
+  "dependencies": [
+    "TASK-007"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/asesor-sales-ui",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

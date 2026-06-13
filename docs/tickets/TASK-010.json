@@ -23,9 +23,11 @@
     "src/components/atomic-crm/layout/Layout.tsx",
     "src/App.tsx"
   ],
-  "dependencies": ["TASK-006"],
+  "dependencies": [
+    "TASK-006"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/propiedad-list-show",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }
