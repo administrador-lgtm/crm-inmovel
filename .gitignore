@@ -66,3 +66,8 @@ check-sales.mjs
 check-rls.mjs
 check-rls2.mjs
 check-names.mjs
+add-cols.mjs
+update-view.mjs
+inspect.mjs
+vchk.mjs
+seed-config.mjs

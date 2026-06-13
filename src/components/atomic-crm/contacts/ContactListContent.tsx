@@ -12,6 +12,7 @@ import { type MouseEvent, useCallback, useRef } from "react";
 import { Link } from "react-router";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 
@@ -19,6 +20,8 @@ import { Status } from "../misc/Status";
 import { formatRelativeDate } from "../misc/RelativeDate";
 import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
+import { findLeadStageLabel } from "../leads/stages";
+import { useConfigurationContext } from "../root/ConfigurationContext";
 
 export const ContactListContent = () => {
   const translate = useTranslate();
@@ -103,6 +106,7 @@ const ContactItemContent = ({
 }) => {
   const translate = useTranslate();
   const [locale = "en"] = useLocaleState();
+  const { leadStages } = useConfigurationContext();
   const { selectedIds } = useListContext<Contact>();
   const lastActivity = contact.last_seen
     ? formatRelativeDate(contact.last_seen, locale)
@@ -121,21 +125,37 @@ const ContactItemContent = ({
       </div>
       <Link
         to={`/contacts/${contact.id}/show`}
-        className="flex-1 flex flex-row gap-4 items-center"
+        className="flex-1 flex flex-row gap-4 items-center min-w-0"
       >
         <Avatar />
         <div className="flex-1 min-w-0">
-          <div className="font-medium">
+          <div className="font-medium truncate">
             {`${contact.first_name} ${contact.last_name ?? ""}`}
           </div>
-          {contact.title ? (
-            <div className="text-sm text-muted-foreground">{contact.title}</div>
-          ) : null}
+          <div className="text-sm text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5">
+            {contact.stage ? (
+              <Badge variant="secondary" className="font-normal">
+                {findLeadStageLabel(leadStages, contact.stage) ?? contact.stage}
+              </Badge>
+            ) : null}
+            {contact.zona_interes ? <span>📍 {contact.zona_interes}</span> : null}
+            {contact.presupuesto ? <span>💰 {contact.presupuesto}</span> : null}
+            {contact.desarrollo_activo ? (
+              <span>🏢 {contact.desarrollo_activo}</span>
+            ) : null}
+          </div>
         </div>
-        {contact.last_seen && (
-          <div className="text-right ml-4">
+        <div className="hidden md:flex flex-col items-end text-right ml-4 shrink-0">
+          {contact.asesor_nombre ? (
+            <div className="text-sm font-medium truncate max-w-40">
+              {contact.asesor_nombre}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground/60">Sin asesor</div>
+          )}
+          {contact.last_seen && (
             <div
-              className="text-sm text-muted-foreground"
+              className="text-xs text-muted-foreground"
               title={contact.last_seen}
             >
               {translate("crm.common.last_activity_with_date", {
@@ -143,8 +163,8 @@ const ContactItemContent = ({
               })}{" "}
               <Status status={contact.status} />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </Link>
     </div>
   );

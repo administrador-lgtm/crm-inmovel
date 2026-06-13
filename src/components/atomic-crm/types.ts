@@ -128,6 +128,8 @@ export type Contact = {
   motivo_descarte?: string;
   /** Sheet lead id; the one-way sync keys upserts on this. */
   sheet_id?: string | null;
+  /** Advisor name from the Sheet (display-only; RLS uses asesor_asignado). */
+  asesor_nombre?: string | null;
 } & Pick<RaRecord, "id">;
 
 export type Propiedad = {

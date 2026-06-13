@@ -18,6 +18,7 @@ const SHEET_LEAD_COLUMNS = [
   "ad_id",
   "zona_interes",
   "presupuesto",
+  "desarrollo_activo",
   "tipo_busqueda",
   "ventana_compra",
   "forma_compra",
@@ -135,6 +136,11 @@ export async function syncLeads(
     }
     if (row.telefono) {
       payload.phone_jsonb = [{ number: row.telefono, type: "Work" }];
+    }
+    // The Sheet stores the advisor as a NAME (not an id); keep it as a
+    // display-only field. The RLS bigint asesor_asignado is CRM-assigned.
+    if (row.asesor_asignado) {
+      payload.asesor_nombre = row.asesor_asignado;
     }
     const firstSeen = row.created_at || row.fecha_ultimo_contacto || "";
     if (firstSeen && !Number.isNaN(Date.parse(firstSeen))) {
