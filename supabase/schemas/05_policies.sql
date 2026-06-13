@@ -91,7 +91,7 @@ create policy "Nocnok selectable by authenticated" on public.nocnok_raw
   for select to authenticated using (true);
 
 -- Configuration (admin-only for writes)
-create policy "Enable read for authenticated" on public.configuration for select to authenticated using (true);
+create policy "Configuration readable by all" on public.configuration for select using (true);
 create policy "Enable insert for admins" on public.configuration for insert to authenticated with check (public.is_admin());
 create policy "Enable update for admins" on public.configuration for update to authenticated using (public.is_admin()) with check (public.is_admin());
 

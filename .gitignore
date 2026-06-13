@@ -60,3 +60,8 @@ check-data.mjs
 finalize-stages.mjs
 drop-checks.mjs
 .sheet-sync-secret.txt
+seed-config.mjs
+fix-config-policy.mjs
+check-sales.mjs
+check-rls.mjs
+check-rls2.mjs
