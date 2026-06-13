@@ -54,3 +54,9 @@ node_modules/
 .supabase-db-password.txt
 apply-schema.mjs
 verify-deploy.mjs
+alter-ts.mjs
+alter-fk.mjs
+check-data.mjs
+finalize-stages.mjs
+drop-checks.mjs
+.sheet-sync-secret.txt

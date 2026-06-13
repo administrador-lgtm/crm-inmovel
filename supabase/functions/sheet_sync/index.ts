@@ -12,17 +12,34 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { readTab } from "./sheetClient.ts";
 import { syncLeads } from "./syncLeads.ts";
 import { upsertTable } from "./syncTable.ts";
+import { mintAccessToken } from "./googleAuth.ts";
 
 const SPREADSHEET_ID = Deno.env.get("INMOVEL_SHEET_ID") ?? "";
-const SHEETS_TOKEN = Deno.env.get("GOOGLE_SHEETS_TOKEN") ?? "";
+const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") ?? "";
+const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET") ?? "";
+const GOOGLE_REFRESH_TOKEN = Deno.env.get("GOOGLE_REFRESH_TOKEN") ?? "";
 // A shared secret so only the cron caller can trigger the sync (the function is
 // deployed with verify_jwt = false to allow cron/service callers).
 const SYNC_SECRET = Deno.env.get("SHEET_SYNC_SECRET") ?? "";
 
 async function runSync() {
-  if (!SPREADSHEET_ID || !SHEETS_TOKEN) {
-    throw new Error("Missing INMOVEL_SHEET_ID or GOOGLE_SHEETS_TOKEN");
+  if (
+    !SPREADSHEET_ID ||
+    !GOOGLE_CLIENT_ID ||
+    !GOOGLE_CLIENT_SECRET ||
+    !GOOGLE_REFRESH_TOKEN
+  ) {
+    throw new Error(
+      "Missing INMOVEL_SHEET_ID or GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN",
+    );
   }
+
+  // Mint a fresh Sheets access token from the long-lived refresh token.
+  const SHEETS_TOKEN = await mintAccessToken(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REFRESH_TOKEN,
+  );
 
   const summary: Record<string, unknown> = {};
 
@@ -63,18 +80,44 @@ async function runSync() {
     propiedadRows,
   );
 
-  // 3. Conversaciones — append-only transcript, upsert on id.
-  const conversacionRows = await readTab(
-    SPREADSHEET_ID,
-    "Conversaciones",
-    SHEETS_TOKEN,
-  );
+  // Build a sheet-lead-id -> contacts.id map. The Sheet's child tables
+  // reference a lead by its Sheet id, but our FKs point at contacts.id, so we
+  // resolve them here (paginated to cover all leads).
+  const sheetToContactId = new Map<string, number>();
+  {
+    const PAGE = 1000;
+    let from = 0;
+    for (;;) {
+      const { data, error } = await supabaseAdmin
+        .from("contacts")
+        .select("id, sheet_id")
+        .not("sheet_id", "is", null)
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      for (const row of data ?? []) {
+        if (row.sheet_id) sheetToContactId.set(String(row.sheet_id), row.id);
+      }
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+  }
+
+  // 3. Conversaciones — append-only transcript. Resolve the Sheet lead id to
+  // contacts.id and drop messages whose lead isn't in the CRM.
+  const conversacionRows = (
+    await readTab(SPREADSHEET_ID, "Conversaciones", SHEETS_TOKEN)
+  )
+    .map((row) => {
+      const contactId = sheetToContactId.get(row.lead_id);
+      return contactId ? { ...row, lead_id: String(contactId) } : null;
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
   summary.conversaciones = await upsertTable(
     supabaseAdmin,
     "conversaciones",
     "id",
     ["id", "lead_id", "rol", "texto", "timestamp", "nombre_lead"],
-    new Set(["id"]),
+    new Set(["id", "lead_id"]),
     new Set(),
     conversacionRows,
   );
@@ -137,8 +180,12 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    const detail =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : error;
     return new Response(
-      JSON.stringify({ ok: false, error: String(error) }),
+      JSON.stringify({ ok: false, error: detail }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

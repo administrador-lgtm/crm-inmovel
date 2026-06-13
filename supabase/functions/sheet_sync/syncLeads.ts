@@ -23,7 +23,6 @@ const SHEET_LEAD_COLUMNS = [
   "forma_compra",
   "credito_status",
   "fecha_visita_propuesta",
-  "asesor_asignado",
   "resumen_sales",
   "fecha_transicion_consultor",
   "fecha_ultimo_contacto",
@@ -83,11 +82,15 @@ export async function syncLeads(
     string,
     { id: number; stage: string | null }
   >();
-  if (sheetIds.length > 0) {
+  // Look up existing leads in batches — a single IN() over hundreds of sheet
+  // ids would blow past the REST URL length limit.
+  const LOOKUP_BATCH = 100;
+  for (let i = 0; i < sheetIds.length; i += LOOKUP_BATCH) {
+    const batch = sheetIds.slice(i, i + LOOKUP_BATCH);
     const { data, error } = await supabase
       .from("contacts")
       .select("id, sheet_id, stage")
-      .in("sheet_id", sheetIds);
+      .in("sheet_id", batch);
     if (error) throw error;
     for (const row of data ?? []) {
       if (row.sheet_id) {
@@ -99,6 +102,9 @@ export async function syncLeads(
     }
   }
 
+  // Build one payload per unique sheet_id (the Sheet can repeat a lead id; an
+  // upsert batch must not contain the same conflict key twice, so last wins).
+  const payloadBySheetId = new Map<string, Record<string, unknown>>();
   for (const row of rows) {
     if (!row.id) continue;
     result.processed++;
@@ -120,31 +126,33 @@ export async function syncLeads(
     }
 
     const existing = existingBySheetId.get(row.id);
-
     if (!existing) {
-      // New lead: insert with the Sheet stage (defaults to S1 if absent).
+      // New lead: set the Sheet stage (defaults to S1 if absent).
       payload.stage = row.stage || "S1";
-      const { error } = await supabase.from("contacts").insert(payload);
-      if (error) throw error;
       result.inserted++;
-      continue;
-    }
-
-    // Existing lead: apply the frontier guard before touching the stage.
-    if (canSyncWriteStage(existing.stage)) {
+    } else if (canSyncWriteStage(existing.stage)) {
+      // Existing, still sync-owned: the Sheet may refresh the stage.
       if (row.stage) payload.stage = row.stage;
+      result.updated++;
     } else {
+      // CRM-owned (S6+): never send a stage — leave the advisor's value intact.
       result.stageSkipped++;
-      // Defensive: ensure we never send a stage for a CRM-owned lead.
-      delete payload.stage;
+      result.updated++;
     }
 
+    payloadBySheetId.set(row.id, payload);
+  }
+
+  // Upsert in batches keyed on sheet_id. Omitting `stage` for CRM-owned leads
+  // preserves their existing stage (PostgREST only updates provided columns).
+  const payloads = [...payloadBySheetId.values()];
+  const UPSERT_BATCH = 200;
+  for (let i = 0; i < payloads.length; i += UPSERT_BATCH) {
+    const batch = payloads.slice(i, i + UPSERT_BATCH);
     const { error } = await supabase
       .from("contacts")
-      .update(payload)
-      .eq("id", existing.id);
+      .upsert(batch, { onConflict: "sheet_id" });
     if (error) throw error;
-    result.updated++;
   }
 
   return result;
