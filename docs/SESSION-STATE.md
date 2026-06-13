@@ -50,3 +50,12 @@ Likely causes to check in order:
 2. RLS: synced leads have asesor_asignado=NULL (excluded from sync — Sheet stores names not ids). can_access_lead returns false for non-admins on null-asesor leads, and even admins: is_admin() must resolve. Verify current_sale_id()/is_admin() work for the logged-in user.
 3. The CRM lists leads from contacts_summary view (security_invoker=on) — confirm the view respects/passes RLS and returns rows for the admin.
 Quick test: as the logged-in user, `select count(*) from contacts_summary`. If 0 for an admin, debug is_admin(); if >0, it's a frontend query/filter issue.
+
+## LIVE & WORKING (2026-06-13, end of session 2)
+- Leads list now shows per row: stage badge, tipo de operación (venta/renta), zona, presupuesto, desarrollo de interés, asesor + last activity.
+- Sync maps: nombre→first/last_name, telefono→phone_jsonb, created_at→first_seen, asesor_asignado(name)→asesor_nombre (display-only), desarrollo_activo, tipo_busqueda.
+- Configuration table seeded + public-read (fixed the 406 that blocked app init).
+
+## BACKLOG (user-requested, not now):
+1. Admin-only "reassign advisor" control on the lead show page — a SelectInput of sales (asesor_asignado bigint, RLS-backed). Display-only asesor_nombre comes from the Sheet; the real assignment should be CRM-set by admin/manager.
+2. The Sheet's asesor_asignado column has legacy dirty values (e.g. dates) — old bugs, user says ignore for now; cleaned at source (Sheet/bot) will reflect on next sync.
