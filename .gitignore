@@ -49,3 +49,8 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Supabase deploy secrets (local only)
+.supabase-db-password.txt
+apply-schema.mjs
+verify-deploy.mjs

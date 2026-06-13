@@ -5,17 +5,6 @@
 
 create or replace view public.activity_log with (security_invoker = on) as
 select
-    ('company.' || c.id || '.created') as id,
-    'company.created' as type,
-    c.created_at as date,
-    c.id as company_id,
-    c.sales_id,
-    to_json(c.*) as company,
-    null::json as contact,
-    null::json as contact_note
-from public.companies c
-union all
-select
     ('contact.' || co.id || '.created') as id,
     'contact.created' as type,
     co.first_seen as date,

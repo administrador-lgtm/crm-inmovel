@@ -52,7 +52,7 @@ create table public.contacts (
     intencion_visita boolean,
     -- Advisor owning this lead; FK to sales for RLS (TASK-014). The sheet
     -- sync resolves the sheet's advisor phone to a sales id on upsert.
-    asesor_asignado bigint references public.sales(id),
+    asesor_asignado bigint,
     mensajes_post_handoff integer,
     resumen_sales text,
     renta_seleccion_pendiente integer,
@@ -139,7 +139,7 @@ create table public.visitas (
     fecha timestamp with time zone not null,
     resultado text,
     notas text,
-    asesor_id bigint references public.sales(id),
+    asesor_id bigint,
     created_at timestamp with time zone not null default now()
 );
 
@@ -284,3 +284,10 @@ alter table only public.contact_notes
 --
 
 create index contact_notes_contact_id_idx on public.contact_notes using btree (contact_id);
+
+-- Inmovel FK constraints (added after table creation to avoid forward refs)
+alter table public.contacts
+    add constraint contacts_asesor_asignado_fkey foreign key (asesor_asignado) references public.sales(id);
+
+alter table public.visitas
+    add constraint visitas_asesor_id_fkey foreign key (asesor_id) references public.sales(id);
