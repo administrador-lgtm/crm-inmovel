@@ -126,6 +126,8 @@ export type Contact = {
   handoff_trigger?: "perfil_completo" | "visita_detectada" | null;
   /** Required (enforced in the UI layer) when stage = "descartado". */
   motivo_descarte?: string;
+  /** Sheet lead id; the one-way sync keys upserts on this. */
+  sheet_id?: string | null;
 } & Pick<RaRecord, "id">;
 
 export type Propiedad = {

@@ -65,7 +65,10 @@ create table public.contacts (
     fecha_ultimo_contacto timestamp with time zone,
     -- CRM-owned lead fields (never touched by the sheet sync)
     handoff_trigger text,
-    motivo_descarte text
+    motivo_descarte text,
+    -- Sheet lead id (string key from the Google Sheet); the one-way sync keys
+    -- upserts on this so it stays idempotent. Null for CRM-created contacts.
+    sheet_id text unique
 );
 
 -- Property inventory: own developments plus shared/broker (NocNok) listings.
