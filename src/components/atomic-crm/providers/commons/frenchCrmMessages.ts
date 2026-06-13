@@ -222,6 +222,31 @@ export const frenchCrmMessages = {
     },
   },
   crm: {
+    leads: {
+      stage: "Lead stage",
+      info: "Lead data",
+      stage_read_only:
+        "This stage is managed by the system and cannot be changed manually.",
+      accept_handoff: "Advisor accepted",
+      discard_title: "Discard lead",
+      discard_hint: "Provide the reason for discarding. It is required.",
+      discard_reason: "Reason",
+      discard_placeholder: "e.g. no response, budget too low…",
+      discard_confirm: "Discard",
+      fields: {
+        zona_interes: "Area of interest",
+        presupuesto: "Budget",
+        tipo_busqueda: "Operation",
+        ventana_compra: "Buying window",
+        forma_compra: "Payment method",
+        credito_status: "Credit status",
+        canal: "Channel",
+        fuente: "Source",
+        total_mensajes: "Messages",
+        resumen_sales: "Summary",
+        asesor_asignado: "Advisor",
+      },
+    },
     action: {
       reset_password: "Réinitialiser le mot de passe",
     },
