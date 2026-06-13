@@ -85,7 +85,8 @@ select
     co.fecha_transicion_consultor,
     co.fecha_ultimo_contacto,
     co.handoff_trigger,
-    co.motivo_descarte
+    co.motivo_descarte,
+    co.sheet_id
 from public.contacts co
 group by co.id;
 

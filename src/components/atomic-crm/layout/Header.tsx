@@ -2,7 +2,6 @@ import { FileText, Settings, User, Users } from "lucide-react";
 import { CanAccess, useTranslate, useUserMenu } from "ra-core";
 import { Link, matchPath, useLocation } from "react-router";
 import { RefreshButton } from "@/components/admin/refresh-button";
-import { ThemeModeToggle } from "@/components/admin/theme-mode-toggle";
 import { UserMenu } from "@/components/admin/user-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -81,7 +80,6 @@ const Header = () => {
                 </nav>
               </div>
               <div className="flex items-center">
-                <ThemeModeToggle />
                 <RefreshButton />
                 <UserMenu>
                   <ProfileMenu />

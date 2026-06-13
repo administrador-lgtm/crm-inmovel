@@ -47,3 +47,9 @@ create or replace trigger on_auth_user_created
 create or replace trigger on_auth_user_updated
     after update on auth.users
     for each row execute function public.handle_update_user();
+
+-- Inmovel: enforce the stage-ownership frontier on contacts (S1..S5 are
+-- sync-owned and cannot be set by CRM users). See enforce_stage_frontier().
+create or replace trigger enforce_stage_frontier_trigger
+    before update on public.contacts
+    for each row execute function public.enforce_stage_frontier();

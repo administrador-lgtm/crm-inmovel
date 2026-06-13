@@ -7,6 +7,14 @@ type CanAccessParams<
   record?: RecordType;
 };
 
+/**
+ * Inmovel roles: "admin", "manager", "asesor".
+ *  - admin: full access, including the users (sales) and configuration screens.
+ *  - manager / asesor: same UI surface (no users/configuration screens). The
+ *    difference between them is row scope (a manager also sees their team's
+ *    leads), which is enforced server-side by RLS (can_access_lead), not here.
+ *    The frontend only gates which SCREENS are reachable.
+ */
 export const canAccess = <
   RecordType extends Record<string, any> = Record<string, any>,
 >(
@@ -17,12 +25,12 @@ export const canAccess = <
     return true;
   }
 
-  // Non admins can't access the sales resource
+  // Non-admins (manager, asesor) can't reach the users (sales) screen
   if (params.resource === "sales") {
     return false;
   }
 
-  // Non admins can't access the configuration resource
+  // Non-admins can't reach the configuration screen
   if (params.resource === "configuration") {
     return false;
   }

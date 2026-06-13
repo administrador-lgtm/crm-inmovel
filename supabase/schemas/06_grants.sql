@@ -129,3 +129,37 @@ alter default privileges for role postgres in schema public grant all on tables 
 alter default privileges for role postgres in schema public grant all on tables to anon;
 alter default privileges for role postgres in schema public grant all on tables to authenticated;
 alter default privileges for role postgres in schema public grant all on tables to service_role;
+
+-- Inmovel new tables
+grant all on table public.propiedades to anon;
+grant all on table public.propiedades to authenticated;
+grant all on table public.propiedades to service_role;
+grant all on table public.visitas to anon;
+grant all on table public.visitas to authenticated;
+grant all on table public.visitas to service_role;
+grant all on table public.lead_propiedad to anon;
+grant all on table public.lead_propiedad to authenticated;
+grant all on table public.lead_propiedad to service_role;
+grant all on table public.conversaciones to anon;
+grant all on table public.conversaciones to authenticated;
+grant all on table public.conversaciones to service_role;
+grant all on table public.anuncios to anon;
+grant all on table public.anuncios to authenticated;
+grant all on table public.anuncios to service_role;
+grant all on table public.nocnok_raw to anon;
+grant all on table public.nocnok_raw to authenticated;
+grant all on table public.nocnok_raw to service_role;
+grant all on table public.propiedades_summary to anon;
+grant all on table public.propiedades_summary to authenticated;
+grant all on table public.propiedades_summary to service_role;
+grant all on table public.conversaciones_by_lead to anon;
+grant all on table public.conversaciones_by_lead to authenticated;
+grant all on table public.conversaciones_by_lead to service_role;
+
+-- Inmovel sequences (identity columns on visitas/lead_propiedad)
+grant all on sequence public.visitas_id_seq to anon;
+grant all on sequence public.visitas_id_seq to authenticated;
+grant all on sequence public.visitas_id_seq to service_role;
+grant all on sequence public.lead_propiedad_id_seq to anon;
+grant all on sequence public.lead_propiedad_id_seq to authenticated;
+grant all on sequence public.lead_propiedad_id_seq to service_role;
