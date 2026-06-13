@@ -65,3 +65,4 @@ fix-config-policy.mjs
 check-sales.mjs
 check-rls.mjs
 check-rls2.mjs
+check-names.mjs

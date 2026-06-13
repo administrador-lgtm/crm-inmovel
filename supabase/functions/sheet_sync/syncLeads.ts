@@ -125,6 +125,26 @@ export async function syncLeads(
       delete payload[column];
     }
 
+    // Map the Inmovel lead fields onto the Atomic CRM display fields so the
+    // contact name, phone and timeline render (otherwise it shows "null null").
+    const fullName = (row.nombre_completo || row.nombre || "").trim();
+    if (fullName) {
+      const parts = fullName.split(/\s+/);
+      payload.first_name = parts[0];
+      payload.last_name = parts.slice(1).join(" ") || null;
+    }
+    if (row.telefono) {
+      payload.phone_jsonb = [{ number: row.telefono, type: "Work" }];
+    }
+    const firstSeen = row.created_at || row.fecha_ultimo_contacto || "";
+    if (firstSeen && !Number.isNaN(Date.parse(firstSeen))) {
+      payload.first_seen = new Date(firstSeen).toISOString();
+    }
+    const lastSeen = row.fecha_ultimo_contacto || row.created_at || "";
+    if (lastSeen && !Number.isNaN(Date.parse(lastSeen))) {
+      payload.last_seen = new Date(lastSeen).toISOString();
+    }
+
     const existing = existingBySheetId.get(row.id);
     if (!existing) {
       // New lead: set the Sheet stage (defaults to S1 if absent).
