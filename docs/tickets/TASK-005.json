@@ -24,9 +24,11 @@
     "src/components/atomic-crm/providers/fakerest/dataGenerator/contacts.ts",
     "src/components/atomic-crm/providers/fakerest/dataGenerator/types.ts"
   ],
-  "dependencies": ["TASK-001"],
+  "dependencies": [
+    "TASK-001"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/lead-schema-types",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

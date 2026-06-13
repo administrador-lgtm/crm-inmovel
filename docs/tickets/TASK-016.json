@@ -27,9 +27,11 @@
     "src/components/atomic-crm/providers/fakerest/dataGenerator/index.ts",
     "supabase/schemas/01_tables.sql"
   ],
-  "dependencies": ["TASK-005"],
+  "dependencies": [
+    "TASK-005"
+  ],
   "parallel_safe": true,
   "branch_name": "fix/remove-tag-entity",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

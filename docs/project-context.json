@@ -907,22 +907,22 @@
     {
       "ticket_id": "TASK-004",
       "title": "Remove analytics dashboard and CSV import/export features",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-005",
       "title": "Lead schema extensions: types, DB schema, and FakeRest generator",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-006",
       "title": "Propiedad schema, types, and FakeRest generator",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-007",
       "title": "Asesor schema extensions: sales table, types, and FakeRest generator",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-008",
@@ -967,7 +967,7 @@
     {
       "ticket_id": "TASK-016",
       "title": "Remove unused tag entity from default CRM",
-      "status": "pending"
+      "status": "merged"
     }
   ]
 }

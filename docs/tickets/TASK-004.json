@@ -26,9 +26,11 @@
     "src/components/atomic-crm/dashboard/MobileDashboard.tsx",
     "src/components/atomic-crm/contacts/ContactAside.tsx"
   ],
-  "dependencies": ["TASK-003"],
+  "dependencies": [
+    "TASK-003"
+  ],
   "parallel_safe": true,
   "branch_name": "fix/remove-analytics-csv",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }
