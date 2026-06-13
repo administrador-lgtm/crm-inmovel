@@ -22,7 +22,6 @@ export const cleanupContactForCreate = (data: Contact) => {
     ...data,
     first_seen: new Date().toISOString(),
     last_seen: new Date().toISOString(),
-    tags: [],
   });
 };
 

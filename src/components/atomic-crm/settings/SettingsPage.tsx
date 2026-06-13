@@ -1,12 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { RotateCcw, Save } from "lucide-react";
-import {
-  EditBase,
-  Form,
-  useInput,
-  useNotify,
-  useTranslate,
-} from "ra-core";
+import { EditBase, Form, useInput, useNotify, useTranslate } from "ra-core";
 import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";

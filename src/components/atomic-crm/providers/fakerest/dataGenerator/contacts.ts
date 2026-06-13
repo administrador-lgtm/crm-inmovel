@@ -63,6 +63,11 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
     const first_seen = randomDate().toISOString();
     const last_seen = first_seen;
 
+    const stage = random.arrayElement(defaultLeadStages).value;
+    const stageRank = defaultLeadStages.findIndex((s) => s.value === stage);
+    const isPostHandoff = stageRank >= 5 || stage === "descartado";
+    const telefono = phone_jsonb[0].number;
+
     return {
       id,
       first_name,
@@ -78,12 +83,85 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       last_seen: last_seen,
       has_newsletter: weightedBoolean(30),
       status: random.arrayElement(defaultNoteStatuses).value,
-      stage: random.arrayElement(defaultLeadStages).value,
-      tags: random
-        .arrayElements(db.tags, random.arrayElement([0, 0, 0, 1, 1, 2]))
-        .map((tag) => tag.id), // finalize
+      stage,
       sales_id: sale.id,
       linkedin_url: null,
+      // Inmovel lead fields (sync-owned in production, faked for the demo)
+      canal: "whatsapp",
+      fuente: random.arrayElement(["meta_ads", "organico", "referido"]),
+      nombre: first_name,
+      nombre_completo: `${first_name} ${last_name}`,
+      telefono,
+      estado: "nuevo",
+      desarrollos: [],
+      desarrollo_activo: "",
+      ad_id: weightedBoolean(60)
+        ? `ad_${random.number({ min: 1000, max: 9999 })}`
+        : "",
+      zona_interes: random.arrayElement([
+        "Del Valle",
+        "Narvarte",
+        "Roma Norte",
+        "Condesa",
+        "Coyoacán",
+        "Nápoles",
+        "Portales",
+        "Benito Juárez",
+      ]),
+      presupuesto: random.arrayElement([
+        "2-3 MDP",
+        "3-4 MDP",
+        "4-6 MDP",
+        "6+ MDP",
+      ]),
+      tipo_busqueda: random.arrayElement(["venta", "venta", "venta", "renta"]),
+      total_mensajes: random.number({ min: 2, max: 60 }),
+      historial_json: [],
+      ventana_compra: random.arrayElement([
+        "0-3 meses",
+        "3-6 meses",
+        "6-12 meses",
+      ]),
+      forma_compra: random.arrayElement([
+        "credito",
+        "contado",
+        "credito+contado",
+      ]),
+      credito_status: random.arrayElement([
+        "preaprobado",
+        "en_tramite",
+        "sin_iniciar",
+        "",
+      ]),
+      fecha_visita_propuesta: isPostHandoff
+        ? randomDate(new Date(first_seen)).toISOString()
+        : "",
+      intencion_visita: isPostHandoff || weightedBoolean(20),
+      asesor_asignado: isPostHandoff ? sale.id : null,
+      mensajes_post_handoff: isPostHandoff
+        ? random.number({ min: 0, max: 20 })
+        : -1,
+      resumen_sales: isPostHandoff ? lorem.sentences(2) : "",
+      renta_seleccion_pendiente: -1,
+      renta_seleccion_confirmada: false,
+      propiedad_interes: {},
+      asesor_externo: "",
+      asesor_externo_tel: "",
+      alerta_broker_externo_enviada: false,
+      fecha_transicion_consultor: "",
+      fecha_ultimo_contacto: last_seen,
+      handoff_trigger: isPostHandoff
+        ? random.arrayElement(["perfil_completo", "visita_detectada"] as const)
+        : null,
+      motivo_descarte:
+        stage === "descartado"
+          ? random.arrayElement([
+              "sin respuesta",
+              "presupuesto insuficiente",
+              "compró con otro",
+              "pausa por ahora",
+            ])
+          : "",
     };
   });
 };

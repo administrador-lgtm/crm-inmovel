@@ -85,10 +85,6 @@ export const mergeContacts = async (
           ? winnerContact.last_seen
           : loserContact.last_seen,
       sales_id: winnerContact.sales_id ?? loserContact.sales_id,
-      tags: mergeArraysUnique(
-        winnerContact.tags || [],
-        loserContact.tags || [],
-      ),
     },
     previousData: winnerContact,
   });
@@ -106,9 +102,6 @@ export const mergeContacts = async (
 // Helper functions to merge arrays and remove duplicates
 
 // For primitive arrays like tags
-const mergeArraysUnique = <T>(arr1: T[], arr2: T[]): T[] => [
-  ...new Set([...arr1, ...arr2]),
-];
 
 // For object arrays like emails and phones
 function mergeObjectArraysUnique<T>(

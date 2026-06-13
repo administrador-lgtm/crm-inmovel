@@ -1,10 +1,7 @@
 import type { Identifier, RaRecord } from "ra-core";
 import type { ComponentType } from "react";
 
-import type {
-  CONTACT_CREATED,
-  CONTACT_NOTE_CREATED,
-} from "./consts";
+import type { CONTACT_CREATED, CONTACT_NOTE_CREATED } from "./consts";
 
 export type SignUpData = {
   email: string;
@@ -30,6 +27,14 @@ export type Sale = {
   avatar?: RAFile;
   disabled?: boolean;
   user_id: string;
+
+  // Inmovel asesor fields (synced from the Sheet Asesores tab)
+  telefono?: string | null;
+  calendario?: string | null;
+  linea_negocio?: "exclusiva" | "compartida" | null;
+  activo?: boolean | null;
+  /** Manager this advisor reports to; drives manager team-scope RLS. */
+  manager_id?: Identifier | null;
 
   /**
    * This is a copy of the user's email, to make it easier to handle by react admin
@@ -65,7 +70,6 @@ export type Contact = {
   first_seen: string;
   last_seen: string;
   has_newsletter: boolean;
-  tags: number[];
   gender: string;
   sales_id?: Identifier;
   status: string;
@@ -78,7 +82,115 @@ export type Contact = {
    * Owned by the bot sync while in S1..S5; advisor-set from S6 onward.
    */
   stage?: string;
+
+  // Inmovel lead fields mirrored from the Sheet Leads tab. Sync-owned:
+  // written only by the sheet sync, rendered read-only in the CRM UI.
+  canal?: string;
+  fuente?: string;
+  nombre?: string;
+  nombre_completo?: string;
+  telefono?: string;
+  estado?: string;
+  desarrollos?: string[];
+  desarrollo_activo?: string;
+  ad_id?: string;
+  zona_interes?: string;
+  presupuesto?: string;
+  tipo_busqueda?: string;
+  total_mensajes?: number;
+  historial_json?: unknown[];
+  ventana_compra?: string;
+  forma_compra?: string;
+  credito_status?: string;
+  fecha_visita_propuesta?: string;
+  intencion_visita?: boolean;
+  /** Advisor (sales id) owning this lead; RLS keys off this column. */
+  asesor_asignado?: Identifier | null;
+  mensajes_post_handoff?: number;
+  resumen_sales?: string;
+  renta_seleccion_pendiente?: number;
+  renta_seleccion_confirmada?: boolean;
+  propiedad_interes?: Record<string, unknown>;
+  asesor_externo?: string;
+  asesor_externo_tel?: string;
+  alerta_broker_externo_enviada?: boolean;
+  fecha_transicion_consultor?: string;
+  fecha_ultimo_contacto?: string;
+
+  // CRM-owned lead fields (never touched by the sheet sync)
+  handoff_trigger?: "perfil_completo" | "visita_detectada" | null;
+  /** Required (enforced in the UI layer) when stage = "descartado". */
+  motivo_descarte?: string;
 } & Pick<RaRecord, "id">;
+
+export type Propiedad = {
+  /** Sheet/external id, e.g. "P-001" or a NocNok code. */
+  id: string;
+  tipo: "propia" | "compartida";
+  nombre: string;
+  estatus?: string;
+  operacion?: "venta" | "renta";
+  direccion?: string;
+  colonia?: string;
+  alcaldia?: string;
+  precio?: number;
+  metros?: number;
+  recamaras?: number;
+  banos?: number;
+  estacionamiento?: number;
+  pet_friendly?: string;
+  argumento1?: string;
+  argumento2?: string;
+  argumento3?: string;
+  lista_precios?: string;
+  url_anuncio?: string;
+  url_maps?: string;
+  // Dossier fields (advisor-facing sales material)
+  tipos_unidades?: string;
+  precios_por_tipo?: string;
+  caracteristicas?: string;
+  amenidades?: string;
+  argumentos_zona?: string;
+  esquema_pago?: string;
+  creditos?: string;
+  objeciones?: string;
+  precio_desde?: number;
+  precio_hasta?: number;
+  m2_desde?: number;
+  m2_hasta?: number;
+  recamaras_min?: number;
+  recamaras_max?: number;
+  unidades_disponibles?: string;
+  fecha_entrega?: string;
+  enganche_minimo_pct?: string;
+  // Shared/broker listing fields
+  features?: string;
+  destacado?: string;
+  url_ficha?: string;
+  codigo_fuente?: string;
+  fuente?: "manual" | "nocnok" | "broker_directo" | "bolsa";
+  broker_nombre?: string;
+  broker_telefono?: string;
+  broker_wa?: string;
+  comision?: string;
+  activa?: boolean;
+  orden?: number;
+  fecha_carga?: string;
+  // NocNok metadata (external broker feed)
+  account_name?: string;
+  account_id?: string;
+  shared_commission?: string;
+  status_days?: string;
+  is_exclusive?: boolean;
+  share_type?: string;
+};
+
+/**
+ * In Inmovel a lead IS a contact (1 lead = 1 person = 1 opportunity), so the
+ * Lead type is the extended Contact. Exported for UI components that speak
+ * the domain language.
+ */
+export type Lead = Contact;
 
 export type ContactNote = {
   contact_id: Identifier;
@@ -88,12 +200,6 @@ export type ContactNote = {
   status: string;
   attachments?: AttachmentNote[];
 } & Pick<RaRecord, "id">;
-
-export type Tag = {
-  id: number;
-  name: string;
-  color: string;
-};
 
 export type ActivityContactCreated = {
   type: typeof CONTACT_CREATED;
@@ -110,10 +216,7 @@ export type ActivityContactNoteCreated = {
 } & Pick<RaRecord, "id">;
 
 export type Activity = RaRecord &
-  (
-    | ActivityContactCreated
-    | ActivityContactNoteCreated
-  );
+  (ActivityContactCreated | ActivityContactNoteCreated);
 
 export interface RAFile {
   src: string;

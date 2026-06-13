@@ -3,7 +3,6 @@ import { EditButton } from "@/components/admin/edit-button";
 import { DeleteButton } from "@/components/admin";
 import { ShowButton } from "@/components/admin/show-button";
 
-import { TagsListEdit } from "./TagsListEdit";
 import { ContactStatusSelector } from "./ContactInputs";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
 import { ContactBackgroundInfo } from "./ContactBackgroundInfo";
@@ -42,12 +41,6 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
         title={translate("resources.contacts.field_categories.background_info")}
       >
         <ContactBackgroundInfo />
-      </AsideSection>
-
-      <AsideSection
-        title={translate("resources.tags.name", { smart_count: 2 })}
-      >
-        <TagsListEdit />
       </AsideSection>
 
       {link !== "edit" && (
