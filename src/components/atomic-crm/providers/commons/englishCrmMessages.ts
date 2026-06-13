@@ -215,6 +215,9 @@ export const englishCrmMessages = {
         name_placeholder: "Enter tag name",
       },
     },
+    propiedades: {
+      name: "Property |||| Properties",
+    },
   },
   crm: {
     visitas: {

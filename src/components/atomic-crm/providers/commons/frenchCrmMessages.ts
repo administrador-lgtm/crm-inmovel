@@ -220,6 +220,9 @@ export const frenchCrmMessages = {
         name_placeholder: "Saisir le nom de l'étiquette",
       },
     },
+    propiedades: {
+      name: "Propriété |||| Propriétés",
+    },
   },
   crm: {
     visitas: {

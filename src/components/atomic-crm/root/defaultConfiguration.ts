@@ -3,9 +3,9 @@ import type { ConfigurationContextValue } from "./ConfigurationContext";
 export const defaultDarkModeLogo = "./logos/logo_atomic_crm_dark.svg";
 export const defaultLightModeLogo = "./logos/logo_atomic_crm_light.svg";
 
-export const defaultCurrency = "USD";
+export const defaultCurrency = "MXN";
 
-export const defaultTitle = "Atomic CRM";
+export const defaultTitle = "Inmovel CRM";
 
 // Inmovel lead pipeline stages (S1..S10 + descartado). The stage lives on the
 // lead (a contact); S1..S5 are sync-owned and read-only in the CRM.
