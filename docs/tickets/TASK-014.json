@@ -26,9 +26,12 @@
     "src/components/atomic-crm/providers/fakerest/authProvider.ts",
     "supabase/functions/users/index.ts"
   ],
-  "dependencies": ["TASK-005", "TASK-007"],
+  "dependencies": [
+    "TASK-005",
+    "TASK-007"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/rls-policies-auth",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

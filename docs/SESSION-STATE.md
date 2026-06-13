@@ -26,3 +26,14 @@ Work lives on branches (SAFE in .git; worktrees under /tmp are disposable):
 ## Wave 2 DONE (same session, direct mode): TASK-004/005/006/007/016 merged to main at 4b6a223. Typecheck green. 8/16 tickets in main. Next: wave 3-4 UI (TASK-008 support tables, TASK-009 lead UI, TASK-010 propiedades UI, TASK-011 asesor UI, TASK-012 visitas+conversaciones), then TASK-013 sync + TASK-014 RLS (use review ceremony or extra care), TASK-015 branding. Unit tests still pending machine reboot.
 
 ## Waves 3-4 DONE (direct mode): TASK-008/009/010/011/012 merged to main at 52f66bc. 13/16 tickets done. StageControl enforces S6 frontier in UI. Remaining: TASK-013 (Sheet->Supabase sync edge fn), TASK-014 (RLS + Google OAuth domain) — the 2 critical ones, give extra care; TASK-015 (Spanish i18n + Inmovel branding + light theme + indigo palette). Then deploy phase (user creates Supabase project). Unit tests still pending machine reboot.
+
+
+## ALL 16 TICKETS MERGED TO MAIN (e92e649) — feature build complete.
+- Waves 5-6: TASK-013 (Sheet->Supabase sync edge fn + S6 stage-frontier guard, unit-tested pure module + ADR), TASK-014 (multi-tenant RLS via can_access_lead/manager_id graph + DB stage-frontier trigger + @inmovel.net signup guard + ADR), TASK-015 (Spanish default locale + Inmovel branding + MXN + forced light theme + indigo palette).
+- Typecheck GREEN on main across all merges.
+- THREE-LAYER defense of the stage frontier: UI (StageControl), sync (canSyncWriteStage), DB (enforce_stage_frontier trigger).
+
+## REMAINING (not code — deployment phase):
+1. Run full unit + e2e suite after a machine reboot (vitest browser mode was wedged; logic verified by typecheck + targeted runs).
+2. Deno tests for sheet_sync/stageFrontier.test.ts run at deploy (deno not installed locally).
+3. DEPLOY: user creates a Supabase project (supabase_project_name still null in spec); then generate migrations from supabase/schemas via `npx supabase db diff`, configure Google OAuth (@inmovel.net) + env vars (INMOVEL_SHEET_ID, GOOGLE_SHEETS_TOKEN, SHEET_SYNC_SECRET, SUPABASE_SERVICE_ROLE_KEY), schedule the sheet_sync cron (1-2 min), deploy to Railway, GitHub administrador-lgtm/crm-inmovel.

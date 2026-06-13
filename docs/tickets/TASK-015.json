@@ -24,9 +24,12 @@
     "src/components/atomic-crm/root/defaultConfiguration.ts",
     "src/components/atomic-crm/providers/commons/i18nProvider.ts"
   ],
-  "dependencies": ["TASK-003", "TASK-009"],
+  "dependencies": [
+    "TASK-003",
+    "TASK-009"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/spanish-theme-branding",
   "visual_customization": true,
-  "status": "pending"
+  "status": "merged"
 }

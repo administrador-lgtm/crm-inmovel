@@ -24,9 +24,14 @@
     "supabase/schemas/01_tables.sql",
     "supabase/functions/_shared/supabaseAdmin.ts"
   ],
-  "dependencies": ["TASK-005", "TASK-006", "TASK-007", "TASK-008"],
+  "dependencies": [
+    "TASK-005",
+    "TASK-006",
+    "TASK-007",
+    "TASK-008"
+  ],
   "parallel_safe": true,
   "branch_name": "feature/sheet-sync-edge-function",
   "visual_customization": false,
-  "status": "pending"
+  "status": "merged"
 }

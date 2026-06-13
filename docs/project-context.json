@@ -1,6 +1,6 @@
 {
   "validated": true,
-  "bootstrapped": false,
+  "bootstrapped": true,
   "project_name": "crm-inmovel",
   "github_username": "administrador-lgtm",
   "supabase_project_name": null,
@@ -952,17 +952,17 @@
     {
       "ticket_id": "TASK-013",
       "title": "Google Sheet to Supabase one-way sync Edge Function (cron)",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-014",
       "title": "RLS policies for multi-tenant advisor isolation and Google OAuth domain restriction",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-015",
       "title": "Spanish i18n, Inmovel branding, light-only theme, and Indigo/purple palette",
-      "status": "pending"
+      "status": "merged"
     },
     {
       "ticket_id": "TASK-016",
