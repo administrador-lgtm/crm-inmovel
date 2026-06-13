@@ -87,16 +87,13 @@ const dataForBulkAddTag = {
       first_name: "Ada",
       id: 1,
       last_name: "Lovelace",
-      tags: [1],
     }),
     buildContact({
       first_name: "Grace",
       id: 2,
       last_name: "Hopper",
-      tags: [],
     }),
   ],
-  tags: [{ color: "#A5B4FC", id: 1, name: "VIP" }],
 };
 
 export const BulkTagButton = () => (

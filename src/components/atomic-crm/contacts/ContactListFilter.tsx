@@ -1,13 +1,7 @@
 import { endOfYesterday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { Clock, Tag, TrendingUp, Users } from "lucide-react";
-import {
-  useGetIdentity,
-  useGetList,
-  useListContext,
-  useTranslate,
-} from "ra-core";
+import { Clock, TrendingUp, Users } from "lucide-react";
+import { useGetIdentity, useListContext, useTranslate } from "ra-core";
 import { ToggleFilterButton } from "@/components/admin/toggle-filter-button";
-import { Badge } from "@/components/ui/badge";
 
 import { FilterCategory } from "../filters/FilterCategory";
 import { Status } from "../misc/Status";
@@ -21,10 +15,6 @@ export const ContactListFilter = () => {
   const isMobile = useIsMobile();
   const { identity } = useGetIdentity();
   const translate = useTranslate();
-  const { data } = useGetList("tags", {
-    pagination: { page: 1, perPage: 10 },
-    sort: { field: "name", order: "ASC" },
-  });
 
   return (
     <ResponsiveFilters
@@ -105,29 +95,6 @@ export const ContactListFilter = () => {
         ))}
       </FilterCategory>
 
-      <FilterCategory label="resources.contacts.filters.tags" icon={<Tag />}>
-        {data &&
-          data.map((record) => (
-            <ToggleFilterButton
-              className="w-auto md:w-full justify-between h-10 md:h-8"
-              key={record.id}
-              label={
-                <Badge
-                  variant="secondary"
-                  className="text-black text-sm md:text-xs font-normal cursor-pointer"
-                  style={{
-                    backgroundColor: record?.color,
-                  }}
-                >
-                  {record?.name}
-                </Badge>
-              }
-              value={{ "tags@cs": `{${record.id}}` }}
-              size={isMobile ? "lg" : undefined}
-            />
-          ))}
-      </FilterCategory>
-
       <FilterCategory
         icon={<Users />}
         label="resources.contacts.fields.sales_id"
@@ -146,10 +113,6 @@ export const ContactListFilter = () => {
 export const ContactListFilterSummary = () => {
   const { noteStatuses } = useConfigurationContext();
   const { identity } = useGetIdentity();
-  const { data } = useGetList("tags", {
-    pagination: { page: 1, perPage: 10 },
-    sort: { field: "name", order: "ASC" },
-  });
   const { filterValues } = useListContext();
   const hasFilters = !!Object.entries(filterValues || {}).filter(
     ([key]) => key !== "q",
@@ -214,26 +177,6 @@ export const ContactListFilterSummary = () => {
           value={{ status: status.value }}
         />
       ))}
-
-      {data &&
-        data.map((record) => (
-          <ActiveFilterButton
-            className="w-auto justify-between h-8"
-            key={record.id}
-            label={
-              <Badge
-                variant="secondary"
-                className="text-black text-sm md:text-xs font-normal cursor-pointer"
-                style={{
-                  backgroundColor: record?.color,
-                }}
-              >
-                {record?.name}
-              </Badge>
-            }
-            value={{ "tags@cs": `{${record.id}}` }}
-          />
-        ))}
 
       <ActiveFilterButton
         className="w-auto justify-between h-8"

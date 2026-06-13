@@ -1,14 +1,7 @@
 import type { DataProvider, Identifier } from "ra-core";
 
-import {
-  CONTACT_CREATED,
-  CONTACT_NOTE_CREATED,
-} from "../../consts";
-import type {
-  Activity,
-  Contact,
-  ContactNote,
-} from "../../types";
+import { CONTACT_CREATED, CONTACT_NOTE_CREATED } from "../../consts";
+import type { Activity, Contact, ContactNote } from "../../types";
 
 // FIXME: Requires 4 large queries to get the latest activities.
 // Replace with a server-side view or a custom API endpoint.

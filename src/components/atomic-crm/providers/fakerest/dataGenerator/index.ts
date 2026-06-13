@@ -3,13 +3,11 @@ import { generateContacts } from "./contacts";
 import { generatePropiedades } from "./propiedades";
 import { finalize } from "./finalize";
 import { generateSales } from "./sales";
-import { generateTags } from "./tags";
 import type { Db } from "./types";
 
 export default (): Db => {
   const db = {} as Db;
   db.sales = generateSales(db);
-  db.tags = generateTags(db);
   db.contacts = generateContacts(db);
   db.propiedades = generatePropiedades(db);
   db.contact_notes = generateContactNotes(db);

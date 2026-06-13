@@ -22,8 +22,11 @@ import { isStageEditable } from "./stages";
  */
 export const LeadKanbanContent = () => {
   const { leadStages } = useConfigurationContext();
-  const { data: unorderedLeads, isPending, refetch } =
-    useListContext<Contact>();
+  const {
+    data: unorderedLeads,
+    isPending,
+    refetch,
+  } = useListContext<Contact>();
   const dataProvider = useDataProvider();
   const notify = useNotify();
   const translate = useTranslate();

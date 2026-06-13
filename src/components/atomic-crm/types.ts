@@ -70,7 +70,6 @@ export type Contact = {
   first_seen: string;
   last_seen: string;
   has_newsletter: boolean;
-  tags: number[];
   gender: string;
   sales_id?: Identifier;
   status: string;
@@ -201,12 +200,6 @@ export type ContactNote = {
   status: string;
   attachments?: AttachmentNote[];
 } & Pick<RaRecord, "id">;
-
-export type Tag = {
-  id: number;
-  name: string;
-  color: string;
-};
 
 export type ActivityContactCreated = {
   type: typeof CONTACT_CREATED;

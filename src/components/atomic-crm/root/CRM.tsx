@@ -253,7 +253,6 @@ const DesktopAdmin = (
       <Resource name="contacts" {...contacts} />
       <Resource name="contact_notes" />
       <Resource name="sales" {...sales} />
-      <Resource name="tags" />
     </Admin>
   );
 };

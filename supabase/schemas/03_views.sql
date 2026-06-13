@@ -47,7 +47,6 @@ select
     co.last_seen,
     co.has_newsletter,
     co.status,
-    co.tags,
     co.sales_id,
     co.linkedin_url,
     co.email_jsonb,

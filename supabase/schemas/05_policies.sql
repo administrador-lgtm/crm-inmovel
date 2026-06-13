@@ -7,7 +7,6 @@
 alter table public.contacts enable row level security;
 alter table public.contact_notes enable row level security;
 alter table public.sales enable row level security;
-alter table public.tags enable row level security;
 alter table public.configuration enable row level security;
 alter table public.favicons_excluded_domains enable row level security;
 
@@ -27,10 +26,6 @@ create policy "Contact Notes Delete Policy" on public.contact_notes for delete t
 create policy "Enable read access for authenticated users" on public.sales for select to authenticated using (true);
 
 -- Tags
-create policy "Enable read access for authenticated users" on public.tags for select to authenticated using (true);
-create policy "Enable insert for authenticated users only" on public.tags for insert to authenticated with check (true);
-create policy "Enable update for authenticated users only" on public.tags for update to authenticated using (true);
-create policy "Enable delete for authenticated users only" on public.tags for delete to authenticated using (true);
 
 -- Configuration (admin-only for writes)
 create policy "Enable read for authenticated" on public.configuration for select to authenticated using (true);

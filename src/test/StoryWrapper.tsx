@@ -44,7 +44,6 @@ export const createCrmDb = (overrides: Partial<Db> = {}): Db =>
     contact_notes: [],
     contacts: [],
     sales: [baseSale],
-    tags: [],
     ...overrides,
   }) as Db;
 
@@ -63,7 +62,6 @@ export const buildContact = (overrides: Partial<Contact> = {}): Contact => ({
   phone_jsonb: [],
   sales_id: 0,
   status: "warm",
-  tags: [],
   title: "CTO",
   ...overrides,
 });

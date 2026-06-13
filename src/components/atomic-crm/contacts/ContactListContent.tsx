@@ -19,7 +19,6 @@ import { Status } from "../misc/Status";
 import { formatRelativeDate } from "../misc/RelativeDate";
 import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
-import { TagsList } from "./TagsList";
 
 export const ContactListContent = () => {
   const translate = useTranslate();
@@ -130,11 +129,7 @@ const ContactItemContent = ({
             {`${contact.first_name} ${contact.last_name ?? ""}`}
           </div>
           {contact.title ? (
-            <div className="text-sm text-muted-foreground">
-              {contact.title}
-              &nbsp;&nbsp;
-              <TagsList />
-            </div>
+            <div className="text-sm text-muted-foreground">{contact.title}</div>
           ) : null}
         </div>
         {contact.last_seen && (

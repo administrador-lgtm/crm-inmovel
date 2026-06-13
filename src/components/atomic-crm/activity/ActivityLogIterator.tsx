@@ -10,10 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/admin/spinner";
 import { RotateCcw } from "lucide-react";
-import {
-  CONTACT_CREATED,
-  CONTACT_NOTE_CREATED,
-} from "../consts";
+import { CONTACT_CREATED, CONTACT_NOTE_CREATED } from "../consts";
 import type { Activity } from "../types";
 import { ActivityLogContactCreated } from "./ActivityLogContactCreated";
 import { ActivityLogContactNoteCreated } from "./ActivityLogContactNoteCreated";

@@ -7,7 +7,6 @@ import { SelectAllButton } from "@/components/admin/select-all-button";
 import { SortButton } from "@/components/admin/sort-button";
 import { Card } from "@/components/ui/card";
 
-import { BulkTagButton } from "./BulkTagButton";
 import { ContactEmpty } from "./ContactEmpty";
 import {
   ContactListContent,
@@ -66,7 +65,6 @@ const ContactListLayoutDesktop = () => {
 const ContactBulkActionButtons = () => (
   <>
     <SelectAllButton />
-    <BulkTagButton />
     <BulkDeleteButton />
   </>
 );

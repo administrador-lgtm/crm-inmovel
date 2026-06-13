@@ -36,7 +36,10 @@ export const getLeadsByStage = (
 
   // Cap each column to bound render cost on large pipelines.
   leadStages.forEach((stage) => {
-    leadsByStage[stage.value] = leadsByStage[stage.value].slice(0, maxPerColumn);
+    leadsByStage[stage.value] = leadsByStage[stage.value].slice(
+      0,
+      maxPerColumn,
+    );
   });
 
   return leadsByStage;
