@@ -54,6 +54,8 @@ export function SalesList() {
         <DataTable.Col source="first_name" />
         <DataTable.Col source="last_name" />
         <DataTable.Col source="email" />
+        <DataTable.Col source="telefono" />
+        <DataTable.Col source="linea_negocio" />
         <DataTable.Col label={false}>
           <OptionsField />
         </DataTable.Col>

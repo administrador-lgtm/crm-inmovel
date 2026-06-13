@@ -18,6 +18,11 @@ export type SalesFormData = {
   last_name: string;
   administrator: boolean;
   disabled: boolean;
+  telefono?: string | null;
+  calendario?: string | null;
+  linea_negocio?: "exclusiva" | "compartida" | null;
+  activo?: boolean | null;
+  manager_id?: Identifier | null;
 };
 
 export type Sale = {
