@@ -21,6 +21,8 @@ const Header = () => {
     currentPath = "/contacts";
   } else if (matchPath("/leads/*", location.pathname)) {
     currentPath = "/leads/kanban";
+  } else if (matchPath("/propiedades/*", location.pathname)) {
+    currentPath = "/propiedades";
   } else {
     currentPath = false;
   }
@@ -67,6 +69,14 @@ const Header = () => {
                     })}
                     to="/leads/kanban"
                     isActive={currentPath === "/leads/kanban"}
+                  />
+                  <NavigationTab
+                    label={translate("resources.propiedades.name", {
+                      _: "Propiedades",
+                      smart_count: 2,
+                    })}
+                    to="/propiedades"
+                    isActive={currentPath === "/propiedades"}
                   />
                 </nav>
               </div>
