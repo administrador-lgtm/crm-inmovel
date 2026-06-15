@@ -16,6 +16,8 @@ import {
   ContactListFilterSummary,
   ContactListFilter,
 } from "./ContactListFilter";
+import { getLeadFilters } from "../leads/leadFilters";
+import { useConfigurationContext } from "../root/ConfigurationContext";
 import { TopToolbar } from "../layout/TopToolbar";
 import { InfinitePagination } from "../misc/InfinitePagination";
 import MobileHeader from "../layout/MobileHeader";
@@ -23,6 +25,7 @@ import { MobileContent } from "../layout/MobileContent";
 
 export const ContactList = () => {
   const { identity } = useGetIdentity();
+  const { leadStages } = useConfigurationContext();
 
   if (!identity) return null;
 
@@ -32,6 +35,7 @@ export const ContactList = () => {
       actions={<ContactListActions />}
       perPage={25}
       sort={{ field: "last_seen", order: "DESC" }}
+      filters={getLeadFilters(leadStages)}
     >
       <ContactListLayoutDesktop />
     </List>
@@ -71,7 +75,16 @@ const ContactBulkActionButtons = () => (
 
 const ContactListActions = () => (
   <TopToolbar>
-    <SortButton fields={["first_name", "last_name", "last_seen"]} />
+    <SortButton
+      fields={[
+        "first_name",
+        "last_seen",
+        "first_seen",
+        "presupuesto_num",
+        "total_mensajes",
+        "stage",
+      ]}
+    />
     <CreateButton />
   </TopToolbar>
 );

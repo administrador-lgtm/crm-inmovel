@@ -76,7 +76,18 @@ select
     co.handoff_trigger,
     co.motivo_descarte,
     co.sheet_id,
-    co.asesor_nombre
+    co.asesor_nombre,
+    -- Numeric form of presupuesto for range filtering and sorting. The raw
+    -- column is free text (mixes monthly-rent and total-sale amounts, and may
+    -- hold non-numeric values like "consultar" or "NaN"); the regex guard keeps
+    -- only clean integers/decimals and maps everything else to NULL. Note the
+    -- guard is required because Postgres accepts 'NaN'::numeric. Appended at the
+    -- end of the select list so CREATE OR REPLACE VIEW can add it without
+    -- reordering existing columns.
+    case
+        when co.presupuesto ~ '^[0-9]+(\.[0-9]+)?$' then co.presupuesto::numeric
+        else null
+    end as presupuesto_num
 from public.contacts co
 group by co.id;
 

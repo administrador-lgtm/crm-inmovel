@@ -1,9 +1,11 @@
 import { useGetIdentity } from "ra-core";
 import { List } from "@/components/admin/list";
-import { SearchInput } from "@/components/admin/search-input";
+import { SortButton } from "@/components/admin/sort-button";
 
 import { TopToolbar } from "../layout/TopToolbar";
 import { LeadKanbanContent } from "./LeadKanbanContent";
+import { getLeadFilters } from "./leadFilters";
+import { useConfigurationContext } from "../root/ConfigurationContext";
 
 /**
  * Lead pipeline kanban board.
@@ -16,9 +18,8 @@ import { LeadKanbanContent } from "./LeadKanbanContent";
  */
 const LeadKanban = () => {
   const { identity } = useGetIdentity();
+  const { leadStages } = useConfigurationContext();
   if (!identity) return null;
-
-  const leadFilters = [<SearchInput source="q" alwaysOn />];
 
   return (
     <List
@@ -26,7 +27,7 @@ const LeadKanban = () => {
       perPage={200}
       title="resources.contacts.name"
       sort={{ field: "last_seen", order: "DESC" }}
-      filters={leadFilters}
+      filters={getLeadFilters(leadStages)}
       actions={<LeadKanbanActions />}
       pagination={null}
     >
@@ -37,6 +38,18 @@ const LeadKanban = () => {
   );
 };
 
-const LeadKanbanActions = () => <TopToolbar />;
+const LeadKanbanActions = () => (
+  <TopToolbar>
+    <SortButton
+      fields={[
+        "last_seen",
+        "first_seen",
+        "presupuesto_num",
+        "total_mensajes",
+        "stage",
+      ]}
+    />
+  </TopToolbar>
+);
 
 export default LeadKanban;
