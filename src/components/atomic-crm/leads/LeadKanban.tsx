@@ -1,5 +1,6 @@
 import { useGetIdentity } from "ra-core";
 import { List } from "@/components/admin/list";
+import { FilterButton } from "@/components/admin/filter-form";
 import { SortButton } from "@/components/admin/sort-button";
 
 import { TopToolbar } from "../layout/TopToolbar";
@@ -40,6 +41,7 @@ const LeadKanban = () => {
 
 const LeadKanbanActions = () => (
   <TopToolbar>
+    <FilterButton />
     <SortButton
       fields={[
         "last_seen",

@@ -2,6 +2,7 @@ import { InfiniteListBase, useGetIdentity, useListContext } from "ra-core";
 import { BulkActionsToolbar } from "@/components/admin/bulk-actions-toolbar";
 import { BulkDeleteButton } from "@/components/admin/bulk-delete-button";
 import { CreateButton } from "@/components/admin/create-button";
+import { FilterButton } from "@/components/admin/filter-form";
 import { List } from "@/components/admin/list";
 import { SelectAllButton } from "@/components/admin/select-all-button";
 import { SortButton } from "@/components/admin/sort-button";
@@ -75,6 +76,7 @@ const ContactBulkActionButtons = () => (
 
 const ContactListActions = () => (
   <TopToolbar>
+    <FilterButton />
     <SortButton
       fields={[
         "first_name",
