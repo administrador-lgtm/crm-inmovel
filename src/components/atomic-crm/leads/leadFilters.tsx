@@ -46,6 +46,32 @@ const CANAL_CHOICES = [
 
 const FUENTE_CHOICES = [{ id: "anuncio", name: "Anuncio" }];
 
+// Distinct developments and zones present in the data, ordered by frequency.
+// Static list (refresh if new developments/zones are added); kept as choices so
+// the filter offers a searchable dropdown instead of blind free text.
+const DESARROLLO_CHOICES = [
+  "obrero-mundial-636",
+  "magnolia-ahuatepec",
+  "nn-gwg761",
+  "nn-gwt720",
+  "unico-manacar",
+  "via-insurgentes",
+  "the-park-guadalupe-inn",
+  "nn-ub1000265",
+  "casa-juarez",
+  "casa-roma-222",
+  "obrero-mundial-536",
+].map((v) => ({ id: v, name: v }));
+
+const ZONA_CHOICES = [
+  "Benito Juárez",
+  "Coyoacán",
+  "Cuernavaca",
+  "Cuauhtémoc",
+  "Álvaro Obregón",
+  "Miguel Hidalgo",
+].map((v) => ({ id: v, name: v }));
+
 const saleOptionText = (record?: RaRecord) =>
   record ? `${record.first_name ?? ""} ${record.last_name ?? ""}`.trim() : "";
 
@@ -61,7 +87,12 @@ export const getLeadFilters = (leadStages: LeadStage[]) => [
     label="Operación"
     choices={OPERACION_CHOICES}
   />,
-  <TextInput key="zona_interes" source="zona_interes@ilike" label="Zona" />,
+  <AutocompleteInput
+    key="zona_interes"
+    source="zona_interes"
+    label="Zona"
+    choices={ZONA_CHOICES}
+  />,
   <NumberInput
     key="presupuesto_min"
     source="presupuesto_num@gte"
@@ -104,10 +135,11 @@ export const getLeadFilters = (leadStages: LeadStage[]) => [
     label="Fuente"
     choices={FUENTE_CHOICES}
   />,
-  <TextInput
+  <AutocompleteInput
     key="desarrollo_activo"
-    source="desarrollo_activo@ilike"
+    source="desarrollo_activo"
     label="Desarrollo"
+    choices={DESARROLLO_CHOICES}
   />,
   <TextInput
     key="credito_status"
