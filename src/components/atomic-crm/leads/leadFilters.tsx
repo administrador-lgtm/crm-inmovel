@@ -112,7 +112,7 @@ export const getLeadFilters = (leadStages: LeadStage[]) => [
     choices={FORMA_COMPRA_CHOICES}
   />,
   <ReferenceInput key="sales_id" source="sales_id" reference="sales">
-    <AutocompleteInput label="Asesor" optionText={saleOptionText} />
+    <SelectInput label="Asesor" optionText={saleOptionText} />
   </ReferenceInput>,
   <SelectInput
     key="stage"
