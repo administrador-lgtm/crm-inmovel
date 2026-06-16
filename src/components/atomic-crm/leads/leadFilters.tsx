@@ -2,6 +2,7 @@ import { SearchInput } from "@/components/admin/search-input";
 import { SelectInput } from "@/components/admin/select-input";
 import { TextInput } from "@/components/admin/text-input";
 import { NumberInput } from "@/components/admin/number-input";
+import { DateInput } from "@/components/admin/date-input";
 import { ReferenceInput } from "@/components/admin/reference-input";
 import { AutocompleteInput } from "@/components/admin/autocomplete-input";
 import type { RaRecord } from "ra-core";
@@ -104,6 +105,16 @@ export const getLeadFilters = (leadStages: LeadStage[]) => [
     source="presupuesto_num@lte"
     label="Presupuesto máx."
     min={0}
+  />,
+  <DateInput
+    key="ultimo_contacto_desde"
+    source="last_seen@gte"
+    label="Último contacto desde"
+  />,
+  <DateInput
+    key="ultimo_contacto_hasta"
+    source="last_seen@lte"
+    label="Último contacto hasta"
   />,
   <SelectInput
     key="forma_compra"
