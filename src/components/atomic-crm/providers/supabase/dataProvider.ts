@@ -254,7 +254,16 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
   {
     resource: "contacts_summary",
     beforeGetList: async (params) => {
-      return applyFullTextSearch(["first_name", "last_name"])(params);
+      // The contacts list reads this view, so its search must cover the same
+      // fields as the base "contacts" resource — notably phone and email, which
+      // map to the view's phone_fts / email_fts columns. Without these, the list
+      // could only be searched by name.
+      return applyFullTextSearch([
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+      ])(params);
     },
   },
 ];
