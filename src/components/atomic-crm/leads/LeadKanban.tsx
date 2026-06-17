@@ -28,7 +28,7 @@ const LeadKanban = () => {
       perPage={200}
       title="resources.contacts.name"
       sort={{ field: "last_seen", order: "DESC" }}
-      filters={getLeadFilters(leadStages)}
+      filters={getLeadFilters(leadStages, { asesorAlwaysOn: true })}
       actions={<LeadKanbanActions />}
       pagination={null}
     >

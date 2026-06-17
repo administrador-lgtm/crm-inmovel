@@ -79,8 +79,13 @@ const saleOptionText = (record?: RaRecord) =>
 /**
  * Build the filter-input array. `leadStages` comes from the configuration
  * context so the stage choices stay in sync with the configured pipeline.
+ * `asesorAlwaysOn` surfaces the advisor filter as an always-visible "master
+ * filter" (used by the kanban so an admin can switch all/by-advisor at a glance).
  */
-export const getLeadFilters = (leadStages: LeadStage[]) => [
+export const getLeadFilters = (
+  leadStages: LeadStage[],
+  { asesorAlwaysOn = false }: { asesorAlwaysOn?: boolean } = {},
+) => [
   <SearchInput key="q" source="q" alwaysOn />,
   <SelectInput
     key="tipo_busqueda"
@@ -122,7 +127,12 @@ export const getLeadFilters = (leadStages: LeadStage[]) => [
     label="Forma de compra"
     choices={FORMA_COMPRA_CHOICES}
   />,
-  <ReferenceInput key="sales_id" source="sales_id" reference="sales">
+  <ReferenceInput
+    key="sales_id"
+    source="sales_id"
+    reference="sales"
+    alwaysOn={asesorAlwaysOn}
+  >
     <SelectInput label="Asesor" optionText={saleOptionText} />
   </ReferenceInput>,
   <SelectInput
