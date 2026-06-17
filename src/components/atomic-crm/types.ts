@@ -176,6 +176,8 @@ export type Propiedad = {
   features?: string;
   destacado?: string;
   url_ficha?: string;
+  /** Drive folder with marketing material (own) or GDC CLIENTES EXTERNOS subfolder. */
+  material_url?: string;
   codigo_fuente?: string;
   fuente?: "manual" | "nocnok" | "broker_directo" | "bolsa";
   broker_nombre?: string;

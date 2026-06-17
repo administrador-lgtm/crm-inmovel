@@ -128,7 +128,10 @@ create table public.propiedades (
     shared_commission text,
     status_days text,
     is_exclusive boolean default false,
-    share_type text
+    share_type text,
+    -- Drive folder with marketing material: own properties point to a folder in
+    -- the Inmovel Drive; GDC properties reference their CLIENTES EXTERNOS subfolder.
+    material_url text
 );
 
 -- Advisor-recorded visit (CRM-owned; never touched by the sheet sync).

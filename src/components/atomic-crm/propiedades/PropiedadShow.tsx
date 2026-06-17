@@ -18,6 +18,24 @@ const Row = ({ label, value }: { label: string; value?: unknown }) => {
   );
 };
 
+/** A labelled clickable link; hidden when the value is empty. */
+const LinkRow = ({ label, value }: { label: string; value?: unknown }) => {
+  if (!value || typeof value !== "string") return null;
+  return (
+    <div className="flex flex-col py-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <a
+        href={value}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-primary underline truncate"
+      >
+        {value}
+      </a>
+    </div>
+  );
+};
+
 const PropiedadShowContent = () => {
   const record = useRecordContext<Propiedad>();
   if (!record) return null;
@@ -67,6 +85,28 @@ const PropiedadShowContent = () => {
           <Row label="Enganche mínimo" value={record.enganche_minimo_pct} />
         </CardContent>
       </Card>
+
+      {(record.material_url ||
+        record.url_maps ||
+        record.url_anuncio ||
+        record.url_ficha) && (
+        <Card className="md:col-span-2">
+          <CardContent className="pt-6">
+            <h3 className="text-md font-semibold mb-3">
+              📁 Material y enlaces
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <LinkRow
+                label="📁 Material de marketing"
+                value={record.material_url}
+              />
+              <LinkRow label="📍 Mapa" value={record.url_maps} />
+              <LinkRow label="🔗 Anuncio" value={record.url_anuncio} />
+              <LinkRow label="🏠 Ficha NocNok" value={record.url_ficha} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {record.tipo === "compartida" && (
         <Card className="md:col-span-2">

@@ -109,7 +109,8 @@ select
     p.recamaras,
     p.activa,
     p.fuente,
-    p.broker_nombre
+    p.broker_nombre,
+    p.material_url
 from public.propiedades p;
 
 create or replace view public.conversaciones_by_lead with (security_invoker = on) as
