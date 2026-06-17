@@ -29,6 +29,9 @@ create table public.contacts (
     -- Lead pipeline stage (S1..S10 or 'descartado'). A contact IS the lead in
     -- Inmovel, so the pipeline stage lives here. Sync-owned while in S1..S5.
     stage text,
+    -- When the lead last entered its current stage. Set by the
+    -- set_stage_changed_at trigger on any stage change; drives the kanban timer.
+    stage_changed_at timestamptz default now(),
     -- Inmovel lead fields mirrored from the Sheet Leads tab (sync-owned;
     -- written only by the sheet sync, read-only in the CRM UI).
     canal text,

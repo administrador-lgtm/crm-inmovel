@@ -468,3 +468,16 @@ begin
   return new;
 end;
 $$;
+
+-- Stamp stage_changed_at whenever a lead's stage actually changes (ignores the
+-- sync re-writing the same value). Drives the "time in stage" kanban timer.
+CREATE OR REPLACE FUNCTION "public"."set_stage_changed_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+  if new.stage is distinct from old.stage then
+    new.stage_changed_at = now();
+  end if;
+  return new;
+end;
+$$;

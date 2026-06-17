@@ -87,6 +87,8 @@ export type Contact = {
    * Owned by the bot sync while in S1..S5; advisor-set from S6 onward.
    */
   stage?: string;
+  /** When the lead last entered its current stage (drives the kanban timer). */
+  stage_changed_at?: string;
 
   // Inmovel lead fields mirrored from the Sheet Leads tab. Sync-owned:
   // written only by the sheet sync, rendered read-only in the CRM UI.

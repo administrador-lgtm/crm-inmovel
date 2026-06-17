@@ -53,3 +53,8 @@ create or replace trigger on_auth_user_updated
 create or replace trigger enforce_stage_frontier_trigger
     before update on public.contacts
     for each row execute function public.enforce_stage_frontier();
+
+-- Stamp stage_changed_at on any real stage change (kanban "time in stage" timer).
+create or replace trigger set_stage_changed_at_trigger
+    before update on public.contacts
+    for each row execute function public.set_stage_changed_at();

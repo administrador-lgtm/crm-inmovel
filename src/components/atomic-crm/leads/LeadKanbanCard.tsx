@@ -20,6 +20,28 @@ const getLeadPhone = (lead: Contact): string | undefined =>
 const getLeadName = (lead: Contact): string =>
   [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
 
+/**
+ * Compact "time in current stage" badge (e.g. "5d", "3h"). Computed on render
+ * (no live ticking). Colour escalates as the lead sits longer in the stage:
+ * muted < 3d, amber 3–6d, red ≥ 7d (likely stuck).
+ */
+const getStageAge = (
+  since?: string,
+): { text: string; className: string } | null => {
+  if (!since) return null;
+  const ms = Date.now() - new Date(since).getTime();
+  if (Number.isNaN(ms) || ms < 0) return null;
+  const days = Math.floor(ms / 86_400_000);
+  const text = days >= 1 ? `${days}d` : `${Math.floor(ms / 3_600_000)}h`;
+  const className =
+    days >= 7
+      ? "text-red-600"
+      : days >= 3
+        ? "text-amber-600"
+        : "text-muted-foreground";
+  return { text, className };
+};
+
 export const LeadKanbanCard = ({
   lead,
   index,
@@ -55,6 +77,7 @@ export const LeadKanbanCardContent = ({
   const redirect = useRedirect();
   const phone = getLeadPhone(lead);
   const stageLabel = findLeadStageLabel(leadStages, lead.stage ?? "");
+  const stageAge = getStageAge(lead.stage_changed_at);
 
   const handleClick = () => {
     redirect(`/contacts/${lead.id}/show`, undefined, undefined, undefined, {
@@ -83,11 +106,23 @@ export const LeadKanbanCardContent = ({
             {phone ? (
               <p className="text-xs text-muted-foreground">{phone}</p>
             ) : null}
-            {stageLabel ? (
-              <Badge variant="outline" className="w-fit text-xs">
-                {stageLabel}
-              </Badge>
-            ) : null}
+            <div className="flex items-center justify-between gap-2">
+              {stageLabel ? (
+                <Badge variant="outline" className="w-fit text-xs">
+                  {stageLabel}
+                </Badge>
+              ) : (
+                <span />
+              )}
+              {stageAge ? (
+                <span
+                  className={`text-xs font-medium tabular-nums ${stageAge.className}`}
+                  title="Tiempo en esta etapa"
+                >
+                  🕐 {stageAge.text}
+                </span>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
       </RecordContextProvider>
