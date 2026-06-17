@@ -6,7 +6,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Building2, Home, Plus, Settings, Users } from "lucide-react";
+import {
+  Building2,
+  Home,
+  LayoutGrid,
+  Plus,
+  Settings,
+  Users,
+} from "lucide-react";
 import { useTranslate } from "ra-core";
 import { Link, matchPath, useLocation, useMatch } from "react-router";
 import { ContactCreateSheet } from "../contacts/ContactCreateSheet";
@@ -22,6 +29,8 @@ export const MobileNavigation = () => {
     currentPath = "/";
   } else if (matchPath("/contacts/*", location.pathname)) {
     currentPath = "/contacts";
+  } else if (matchPath("/leads/*", location.pathname)) {
+    currentPath = "/leads";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
   } else {
@@ -63,6 +72,12 @@ export const MobileNavigation = () => {
             })}
             isActive={currentPath === "/contacts"}
           />
+          <NavigationButton
+            href="/leads/kanban"
+            Icon={LayoutGrid}
+            label={translate("crm.navigation.leads", { _: "Leads" })}
+            isActive={currentPath === "/leads"}
+          />
           <CreateButton />
           <NavigationButton
             href="/propiedades"
@@ -94,13 +109,15 @@ const NavigationButton = ({
     asChild
     variant="ghost"
     className={cn(
-      "flex-col gap-1 h-auto py-2 px-1 rounded-md w-16",
+      "flex-col gap-1 h-auto py-2 px-0.5 rounded-md flex-1 min-w-0",
       isActive ? null : "text-muted-foreground",
     )}
   >
     <Link to={href}>
-      <Icon className="size-6" />
-      <span className="text-[0.6rem] font-medium">{label}</span>
+      <Icon className="size-6 shrink-0" />
+      <span className="text-[0.6rem] font-medium truncate max-w-full">
+        {label}
+      </span>
     </Link>
   </Button>
 );
