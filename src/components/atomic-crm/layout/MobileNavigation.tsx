@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Home, Plus, Settings, Users } from "lucide-react";
+import { Building2, Home, Plus, Settings, Users } from "lucide-react";
 import { useTranslate } from "ra-core";
 import { Link, matchPath, useLocation, useMatch } from "react-router";
 import { ContactCreateSheet } from "../contacts/ContactCreateSheet";
@@ -22,6 +22,8 @@ export const MobileNavigation = () => {
     currentPath = "/";
   } else if (matchPath("/contacts/*", location.pathname)) {
     currentPath = "/contacts";
+  } else if (matchPath("/propiedades/*", location.pathname)) {
+    currentPath = "/propiedades";
   } else {
     currentPath = false;
   }
@@ -45,7 +47,7 @@ export const MobileNavigation = () => {
           "calc(var(--spacing)) * 6" + (isPwa && isWebiOS ? " + 15px" : ""),
       }}
     >
-      <div className="flex justify-center">
+      <div className="flex justify-around items-center px-1">
         <>
           <NavigationButton
             href="/"
@@ -62,6 +64,14 @@ export const MobileNavigation = () => {
             isActive={currentPath === "/contacts"}
           />
           <CreateButton />
+          <NavigationButton
+            href="/propiedades"
+            Icon={Building2}
+            label={translate("resources.propiedades.name", {
+              smart_count: 2,
+            })}
+            isActive={currentPath === "/propiedades"}
+          />
           <SettingsButton />
         </>
       </div>
