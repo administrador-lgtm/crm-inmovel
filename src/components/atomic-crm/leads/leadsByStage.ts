@@ -8,12 +8,14 @@ export type LeadsByStage = Record<string, Contact[]>;
  *
  * A lead whose `stage` is missing or not present in the configured stages is
  * bucketed into the default stage so it is never dropped from the board.
- * Each column is capped at 50 cards to bound render cost on large pipelines.
+ * Each column is capped at `maxPerColumn` cards; the default matches the
+ * board's `perPage` (200) so the cap never hides leads below what was fetched
+ * and the column count stays accurate (e.g. an advisor's full S5 cartera).
  */
 export const getLeadsByStage = (
   unorderedLeads: Contact[],
   leadStages: LeadStage[],
-  maxPerColumn = 50,
+  maxPerColumn = 200,
 ): LeadsByStage => {
   if (!leadStages || leadStages.length === 0) return {};
 
