@@ -2,11 +2,12 @@ import { DragDropContext, type OnDragEndResponder } from "@hello-pangea/dnd";
 import isEqual from "lodash/isEqual";
 import {
   useDataProvider,
+  useGetList,
   useListContext,
   useNotify,
   useTranslate,
 } from "ra-core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Contact } from "../types";
@@ -23,27 +24,61 @@ import { isStageEditable } from "./stages";
 export const LeadKanbanContent = () => {
   const { leadStages } = useConfigurationContext();
   const {
-    data: unorderedLeads,
+    data: recentLeads,
     isPending,
     refetch,
+    filterValues,
   } = useListContext<Contact>();
   const dataProvider = useDataProvider();
   const notify = useNotify();
   const translate = useTranslate();
+
+  // CRM-owned stages (Asesor aceptó onward) always have an advisor, so they must
+  // be shown in FULL: the board's 200-by-recency cap exists for the high-volume
+  // sync-owned funnel (S1..S5) and would otherwise hide older advisor-committed
+  // leads. A separate query fetches every CRM-owned lead (RLS still scopes it to
+  // the viewer, and any active advisor/search filter is preserved); it is
+  // skipped when the user is explicitly filtering by stage.
+  const crmOwnedStages = leadStages
+    .map((stage) => stage.value)
+    .filter((value) => isStageEditable(value));
+  const { stage: _stageFilter, ...filtersWithoutStage } = filterValues ?? {};
+  const hasStageFilter = filterValues != null && "stage" in filterValues;
+  const { data: crmOwnedLeads } = useGetList<Contact>(
+    "contacts",
+    {
+      filter: {
+        ...filtersWithoutStage,
+        "stage@in": `(${crmOwnedStages.join(",")})`,
+      },
+      pagination: { page: 1, perPage: 1000 },
+      sort: { field: "last_seen", order: "DESC" },
+    },
+    { enabled: !hasStageFilter },
+  );
+
+  // The full CRM-owned set wins for S6+ columns; the recency list fills the
+  // sync-owned funnel columns (and any lead not already present).
+  const allLeads = useMemo(() => {
+    const byId = new Map<Contact["id"], Contact>();
+    (crmOwnedLeads ?? []).forEach((lead) => byId.set(lead.id, lead));
+    (recentLeads ?? []).forEach((lead) => {
+      if (!byId.has(lead.id)) byId.set(lead.id, lead);
+    });
+    return [...byId.values()];
+  }, [recentLeads, crmOwnedLeads]);
 
   const [leadsByStage, setLeadsByStage] = useState<LeadsByStage>(
     getLeadsByStage([], leadStages),
   );
 
   useEffect(() => {
-    if (unorderedLeads) {
-      const next = getLeadsByStage(unorderedLeads, leadStages);
-      if (!isEqual(next, leadsByStage)) {
-        setLeadsByStage(next);
-      }
+    const next = getLeadsByStage(allLeads, leadStages);
+    if (!isEqual(next, leadsByStage)) {
+      setLeadsByStage(next);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unorderedLeads]);
+  }, [allLeads]);
 
   if (isPending) return null;
 

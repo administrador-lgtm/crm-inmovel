@@ -87,7 +87,8 @@ select
     case
         when co.presupuesto ~ '^[0-9]+(\.[0-9]+)?$' then co.presupuesto::numeric
         else null
-    end as presupuesto_num
+    end as presupuesto_num,
+    co.stage_changed_at
 from public.contacts co
 group by co.id;
 

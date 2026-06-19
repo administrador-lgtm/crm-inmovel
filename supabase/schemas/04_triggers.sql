@@ -58,3 +58,10 @@ create or replace trigger enforce_stage_frontier_trigger
 create or replace trigger set_stage_changed_at_trigger
     before update on public.contacts
     for each row execute function public.set_stage_changed_at();
+
+-- Inmovel: keep sales_id and asesor_asignado in lockstep (single id source of
+-- truth for ownership + RLS visibility). Named zz_ so it runs last, after
+-- set_sales_id_default has defaulted sales_id on insert.
+create or replace trigger zz_sync_advisor_id_trigger
+    before insert or update on public.contacts
+    for each row execute function public.sync_advisor_id();

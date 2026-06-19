@@ -481,3 +481,27 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: keep the two advisor-id columns in lockstep. `sales_id` is the
+-- canonical owner (standard CRM field) and `asesor_asignado` is what the RLS
+-- reads; this guarantees they can never diverge so a lead's owner is always its
+-- visible advisor. Everything is keyed by id — the Sheet's advisor NAME is
+-- resolved to an id once, in the sync. Whichever id column a writer changes,
+-- the other follows (sales_id wins on insert / simultaneous change).
+CREATE OR REPLACE FUNCTION "public"."sync_advisor_id"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+  if tg_op = 'INSERT' then
+    new.asesor_asignado := coalesce(new.sales_id, new.asesor_asignado);
+    new.sales_id := coalesce(new.sales_id, new.asesor_asignado);
+  else
+    if new.sales_id is distinct from old.sales_id then
+      new.asesor_asignado := new.sales_id;
+    elsif new.asesor_asignado is distinct from old.asesor_asignado then
+      new.sales_id := new.asesor_asignado;
+    end if;
+  end if;
+  return new;
+end;
+$$;

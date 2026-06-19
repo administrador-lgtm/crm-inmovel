@@ -422,6 +422,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/leads/leadFilters.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/leads/VisitasPanel.tsx",
           "type": "registry:component"
         },

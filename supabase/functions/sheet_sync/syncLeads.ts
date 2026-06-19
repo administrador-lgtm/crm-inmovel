@@ -47,6 +47,42 @@ function coerce(column: string, value: string): unknown {
   return value;
 }
 
+/** Normalize an advisor name for matching: lowercase, no accents, single spaces. */
+function normalizeName(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Build a normalized-name -> sales.id map so the Sheet's advisor NAME can be
+ * resolved to the bigint id the CRM keys everything on (ownership + RLS). This
+ * is the ONLY place a name is matched; downstream the lead is assigned by id.
+ */
+async function buildAdvisorMap(
+  supabase: SupabaseClient,
+): Promise<Map<string, number>> {
+  const { data, error } = await supabase
+    .from("sales")
+    .select("id, first_name, last_name");
+  if (error) throw error;
+  const map = new Map<string, number>();
+  for (const s of data ?? []) {
+    const full = `${s.first_name ?? ""} ${s.last_name ?? ""}`;
+    // Key by full name and by first_name alone so "Luis Gerardo" or "Luis" hit.
+    for (const key of [
+      normalizeName(full),
+      normalizeName(s.first_name ?? ""),
+    ]) {
+      if (key) map.set(key, s.id);
+    }
+  }
+  return map;
+}
+
 export interface SyncResult {
   processed: number;
   inserted: number;
@@ -103,6 +139,15 @@ export async function syncLeads(
     }
   }
 
+  // Resolve advisor names to ids once for the whole run.
+  const advisorMap = await buildAdvisorMap(supabase);
+
+  // sheet_id -> sales.id assignments, applied in a SEPARATE targeted update
+  // after the bulk upsert. Assignment must NOT ride in the bulk upsert: a
+  // heterogeneous upsert batch unions its columns and nulls the ones a given
+  // row omits, which would wipe sales_id on the CRM-owned rows that omit it.
+  const assignmentByAdvisor = new Map<string, number>();
+
   // Build one payload per unique sheet_id (the Sheet can repeat a lead id; an
   // upsert batch must not contain the same conflict key twice, so last wins).
   const payloadBySheetId = new Map<string, Record<string, unknown>>();
@@ -137,10 +182,15 @@ export async function syncLeads(
     if (row.telefono) {
       payload.phone_jsonb = [{ number: row.telefono, type: "Work" }];
     }
-    // The Sheet stores the advisor as a NAME (not an id); keep it as a
-    // display-only field. The RLS bigint asesor_asignado is CRM-assigned.
+    // The Sheet stores the advisor as a NAME. Keep the raw name for display
+    // (asesor_nombre) and resolve it to the bigint sales.id so the lead is
+    // assigned BY ID — the lockstep trigger mirrors sales_id -> asesor_asignado,
+    // which is what the RLS reads. Unresolved names keep display text only.
+    // sales_id itself is applied below, gated by the stage-ownership frontier.
+    let advisorId: number | null = null;
     if (row.asesor_asignado) {
       payload.asesor_nombre = row.asesor_asignado;
+      advisorId = advisorMap.get(normalizeName(row.asesor_asignado)) ?? null;
     }
     const firstSeen = row.created_at || row.fecha_ultimo_contacto || "";
     if (firstSeen && !Number.isNaN(Date.parse(firstSeen))) {
@@ -155,13 +205,16 @@ export async function syncLeads(
     if (!existing) {
       // New lead: set the Sheet stage (defaults to S1 if absent).
       payload.stage = row.stage || "S1";
+      if (advisorId != null) assignmentByAdvisor.set(row.id, advisorId);
       result.inserted++;
     } else if (canSyncWriteStage(existing.stage)) {
-      // Existing, still sync-owned: the Sheet may refresh the stage.
+      // Existing, still sync-owned: the Sheet may refresh stage and assignment.
       if (row.stage) payload.stage = row.stage;
+      if (advisorId != null) assignmentByAdvisor.set(row.id, advisorId);
       result.updated++;
     } else {
-      // CRM-owned (S6+): never send a stage — leave the advisor's value intact.
+      // CRM-owned (S6+): never send a stage or reassign — the advisor/CRM owns
+      // both once the handoff has been accepted.
       result.stageSkipped++;
       result.updated++;
     }
@@ -169,8 +222,9 @@ export async function syncLeads(
     payloadBySheetId.set(row.id, payload);
   }
 
-  // Upsert in batches keyed on sheet_id. Omitting `stage` for CRM-owned leads
-  // preserves their existing stage (PostgREST only updates provided columns).
+  // Upsert in batches keyed on sheet_id. sales_id is intentionally NOT in any
+  // payload here so the bulk upsert never touches it (assignment is applied
+  // separately below). Omitting `stage` for CRM-owned leads preserves it.
   const payloads = [...payloadBySheetId.values()];
   const UPSERT_BATCH = 200;
   for (let i = 0; i < payloads.length; i += UPSERT_BATCH) {
@@ -179,6 +233,28 @@ export async function syncLeads(
       .from("contacts")
       .upsert(batch, { onConflict: "sheet_id" });
     if (error) throw error;
+  }
+
+  // Apply advisor assignment in a separate targeted update (only sync-owned
+  // leads with a resolved advisor). Grouped by advisor so it's a handful of
+  // `IN (...)` updates, never a full-table write — CRM-owned rows are untouched.
+  // The zz_sync_advisor_id trigger mirrors sales_id -> asesor_asignado.
+  const sheetIdsByAdvisor = new Map<number, string[]>();
+  for (const [sheetId, advisorId] of assignmentByAdvisor) {
+    const list = sheetIdsByAdvisor.get(advisorId) ?? [];
+    list.push(sheetId);
+    sheetIdsByAdvisor.set(advisorId, list);
+  }
+  const ASSIGN_BATCH = 100;
+  for (const [advisorId, ids] of sheetIdsByAdvisor) {
+    for (let i = 0; i < ids.length; i += ASSIGN_BATCH) {
+      const batch = ids.slice(i, i + ASSIGN_BATCH);
+      const { error } = await supabase
+        .from("contacts")
+        .update({ sales_id: advisorId })
+        .in("sheet_id", batch);
+      if (error) throw error;
+    }
   }
 
   return result;
