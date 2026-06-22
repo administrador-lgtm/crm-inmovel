@@ -3,6 +3,7 @@ import {
   Form,
   useDelete,
   useGetIdentity,
+  useGetList,
   useNotify,
   useResourceContext,
   useTranslate,
@@ -26,6 +27,34 @@ import type { ContactNote } from "../types";
 import { NoteAttachments } from "./NoteAttachments";
 import { NoteInputs } from "./NoteInputs";
 import { useGetSalesName } from "../sales/useGetSalesName";
+
+interface MentionRow {
+  id: string | number;
+  recipient_name?: string;
+  read_at?: string | null;
+}
+
+/** Shows, on the author's note, who was @notified and whether they read it. */
+const NoteMentionStatus = ({ noteId }: { noteId: string | number }) => {
+  const { data } = useGetList<MentionRow>("note_mentions_inbox", {
+    filter: { note_id: noteId },
+    pagination: { page: 1, perPage: 20 },
+    sort: { field: "id", order: "ASC" },
+  });
+  if (!data || data.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+      {data.map((m) => (
+        <span
+          key={String(m.id)}
+          className="text-[0.7rem] text-muted-foreground"
+        >
+          {m.read_at ? "✓ Leído" : "📣 Avisado"} · {m.recipient_name}
+        </span>
+      ))}
+    </div>
+  );
+};
 
 export const Note = ({
   showStatus,
@@ -208,6 +237,9 @@ export const Note = ({
           )}
 
           {note.attachments && <NoteAttachments note={note} />}
+          {note.mentions && note.mentions.length > 0 ? (
+            <NoteMentionStatus noteId={note.id} />
+          ) : null}
         </div>
       )}
     </div>

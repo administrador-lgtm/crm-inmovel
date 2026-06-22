@@ -482,6 +482,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/layout/NotificationsBell.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/layout/MobileNavigation.tsx",
           "type": "registry:component"
         },
