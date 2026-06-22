@@ -155,6 +155,14 @@ from public.nocnok_raw p
 -- most recent fecha_carga keeps the finder showing only current inventory.
 where p.fecha_carga = (select max(fecha_carga) from public.nocnok_raw);
 
+-- Distinct colonias of the current NocNok inventory, for the finder's
+-- multi-select zone filter (id = colonia so it maps straight to `colonia@in`).
+create or replace view public.nocnok_colonias with (security_invoker = on) as
+select colonia as id, colonia, count(*)::int as n
+from public.nocnok
+where colonia is not null and colonia <> ''
+group by colonia;
+
 create or replace view public.conversaciones_by_lead with (security_invoker = on) as
 select
     c.id,

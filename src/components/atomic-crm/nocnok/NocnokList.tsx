@@ -1,11 +1,11 @@
-import { useRecordContext } from "ra-core";
+import { useGetList, useRecordContext } from "ra-core";
 import { DataTable } from "@/components/admin/data-table";
 import { List } from "@/components/admin/list";
 import { FilterButton } from "@/components/admin/filter-form";
 import { SortButton } from "@/components/admin/sort-button";
 import { SearchInput } from "@/components/admin/search-input";
 import { SelectInput } from "@/components/admin/select-input";
-import { TextInput } from "@/components/admin/text-input";
+import { AutocompleteArrayInput } from "@/components/admin/autocomplete-array-input";
 import { NumberInput } from "@/components/admin/number-input";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,8 +32,30 @@ const ALCALDIA_CHOICES = [
   "Cuernavaca",
 ].map((a) => ({ id: a, name: a }));
 
-// Operators follow the ra-data-postgrest convention (`field@operator`); the
-// adapter auto-wraps `ilike` with wildcards, so text inputs behave as "contains".
+/**
+ * Multi-select colonia filter. Lets the user stack several colonias (San Pedro,
+ * then another, then another) — results match ANY selected colonia via
+ * `colonia@in`. Choices come from the `nocnok_colonias` view (distinct colonias
+ * of the current inventory, `id` = colonia so it maps straight to the filter).
+ */
+const ColoniaFilter = (props: { source?: string; alwaysOn?: boolean }) => {
+  const { data } = useGetList("nocnok_colonias", {
+    pagination: { page: 1, perPage: 1000 },
+    sort: { field: "colonia", order: "ASC" },
+  });
+  return (
+    <AutocompleteArrayInput
+      {...props}
+      label="Colonia(s)"
+      choices={data ?? []}
+      optionText={(record) => `${record.colonia} (${record.n})`}
+    />
+  );
+};
+
+// Operators follow the ra-data-postgrest convention (`field@operator`). `@in`
+// takes an array, so the alcaldía and colonia filters are multi-select: pick
+// several zones and results match ANY of them.
 const filters = [
   <SearchInput
     source="title@ilike"
@@ -46,8 +68,12 @@ const filters = [
     choices={OPERACION_CHOICES}
     alwaysOn
   />,
-  <SelectInput source="alcaldia" label="Alcaldía" choices={ALCALDIA_CHOICES} />,
-  <TextInput source="colonia@ilike" label="Colonia" />,
+  <AutocompleteArrayInput
+    source="alcaldia@in"
+    label="Alcaldía(s)"
+    choices={ALCALDIA_CHOICES}
+  />,
+  <ColoniaFilter source="colonia@in" />,
   <SelectInput source="type_text" label="Tipo" choices={TIPO_CHOICES} />,
   <NumberInput source="precio@gte" label="Precio desde" />,
   <NumberInput source="precio@lte" label="Precio hasta" />,

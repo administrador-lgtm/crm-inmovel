@@ -322,6 +322,22 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/nocnok/types.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/nocnok/index.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/nocnok/NocnokShow.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/nocnok/NocnokList.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/misc/useAppBarHeight.ts",
           "type": "registry:component"
         },
