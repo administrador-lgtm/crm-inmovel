@@ -505,3 +505,20 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: the CRM derives the funnel stage from events (it does not let the bot
+-- push stage). When a handoff alert ('alerta') lands in conversaciones, promote
+-- the lead to S5 (handoff enviado) if it's still in an earlier funnel stage.
+CREATE OR REPLACE FUNCTION "public"."promote_stage_on_handoff"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+  if new.rol = 'alerta' then
+    update public.contacts
+    set stage = 'S5'
+    where id = new.lead_id
+      and (stage is null or stage in ('S1', 'S2', 'S3', 'S4'));
+  end if;
+  return new;
+end;
+$$;

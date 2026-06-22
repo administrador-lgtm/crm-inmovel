@@ -65,3 +65,9 @@ create or replace trigger set_stage_changed_at_trigger
 create or replace trigger zz_sync_advisor_id_trigger
     before insert or update on public.contacts
     for each row execute function public.sync_advisor_id();
+
+-- Inmovel: CRM-side stage derivation — a synced handoff alert promotes the lead
+-- to S5 (the bot never pushes stage; the CRM reacts to the event).
+create or replace trigger promote_stage_on_handoff_trigger
+    after insert on public.conversaciones
+    for each row execute function public.promote_stage_on_handoff();
