@@ -334,6 +334,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/nocnok/NocnokMap.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/nocnok/NocnokList.tsx",
           "type": "registry:component"
         },

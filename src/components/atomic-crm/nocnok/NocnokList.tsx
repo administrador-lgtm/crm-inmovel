@@ -135,18 +135,33 @@ const FILTER_LABELS: Record<string, string> = {
 const opName = (id: string) =>
   OPERACION_CHOICES.find((c) => c.id === id)?.name ?? id;
 
+const AREA_KEYS = ["lat_num@gte", "lat_num@lte", "lng_num@gte", "lng_num@lte"];
+const SPATIAL_KEYS = [...AREA_KEYS, "codigo@in"];
+
 /** Always-visible chips for every active filter, each removable with its ✕, so
- *  a stored filter can never silently narrow the results without being seen. */
+ *  a stored filter can never silently narrow the results without being seen.
+ *  Spatial selections (map area / drawn polygon) collapse into a single chip. */
 const ActiveFilterChips = () => {
   const { filterValues, setFilters, displayedFilters } = useListContext();
-  const entries = Object.entries(filterValues ?? {}).filter(
-    ([, v]) => v != null && v !== "" && !(Array.isArray(v) && v.length === 0),
-  );
-  if (entries.length === 0) return null;
+  const fv = filterValues ?? {};
 
-  const remove = (key: string) => {
-    const next = { ...filterValues };
-    delete next[key];
+  const attrEntries = Object.entries(fv).filter(
+    ([k, v]) =>
+      !SPATIAL_KEYS.includes(k) &&
+      v != null &&
+      v !== "" &&
+      !(Array.isArray(v) && v.length === 0),
+  );
+  const hasArea = AREA_KEYS.some((k) => fv[k] != null);
+  const drawn = fv["codigo@in"];
+  const hasPolygon =
+    Array.isArray(drawn) && drawn.length >= 0 && "codigo@in" in fv;
+
+  if (attrEntries.length === 0 && !hasArea && !hasPolygon) return null;
+
+  const removeKeys = (keys: string[]) => {
+    const next = { ...fv };
+    keys.forEach((k) => delete next[k]);
     setFilters(next, displayedFilters);
   };
 
@@ -157,24 +172,45 @@ const ActiveFilterChips = () => {
     return arr.map((v) => String(v)).join(", ");
   };
 
+  const Chip = ({
+    label,
+    onRemove,
+  }: {
+    label: string;
+    onRemove: () => void;
+  }) => (
+    <Badge variant="secondary" className="gap-1 pr-1">
+      <span className="text-xs">{label}</span>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Quitar ${label}`}
+        className="rounded-full hover:bg-muted-foreground/20 p-0.5"
+      >
+        <X className="size-3" />
+      </button>
+    </Badge>
+  );
+
   return (
     <div className="flex flex-wrap items-center gap-2 px-2 py-2">
       <span className="text-xs text-muted-foreground">Filtros activos:</span>
-      {entries.map(([key, value]) => (
-        <Badge key={key} variant="secondary" className="gap-1 pr-1">
-          <span className="text-xs">
-            {FILTER_LABELS[key] ?? key}: {display(key, value)}
-          </span>
-          <button
-            type="button"
-            onClick={() => remove(key)}
-            aria-label={`Quitar ${FILTER_LABELS[key] ?? key}`}
-            className="rounded-full hover:bg-muted-foreground/20 p-0.5"
-          >
-            <X className="size-3" />
-          </button>
-        </Badge>
+      {attrEntries.map(([key, value]) => (
+        <Chip
+          key={key}
+          label={`${FILTER_LABELS[key] ?? key}: ${display(key, value)}`}
+          onRemove={() => removeKeys([key])}
+        />
       ))}
+      {hasArea ? (
+        <Chip label="📍 Área del mapa" onRemove={() => removeKeys(AREA_KEYS)} />
+      ) : null}
+      {hasPolygon ? (
+        <Chip
+          label={`✏️ Zona dibujada (${Array.isArray(drawn) ? drawn.length : 0})`}
+          onRemove={() => removeKeys(["codigo@in"])}
+        />
+      ) : null}
       <button
         type="button"
         onClick={() => setFilters({}, displayedFilters)}

@@ -148,7 +148,11 @@ select
     p.status_date,
     p.fotos,
     p.broker_tel,
-    p.broker_wa
+    p.broker_wa,
+    -- Numeric coordinates for server-side bounding-box filtering (the raw
+    -- columns are text; string comparison would order coords wrong).
+    case when p.lat ~ '^-?[0-9.]+$' then p.lat::numeric end as lat_num,
+    case when p.lon ~ '^-?[0-9.]+$' then p.lon::numeric end as lng_num
 from public.nocnok_raw p
 -- Only the latest refresh batch. The sync upserts but never deletes, so old
 -- listings NocNok has dropped accumulate in the base table; filtering to the

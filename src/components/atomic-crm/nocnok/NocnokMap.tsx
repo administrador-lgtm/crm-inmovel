@@ -18,10 +18,26 @@ interface Point extends Nocnok {
   lng_num: number;
 }
 
-type SpatialMode = "none" | "area" | "polygon";
 type BoundsLiteral = google.maps.LatLngBoundsLiteral;
 
 const CDMX_CENTER = { lat: 19.401, lng: -99.16 };
+
+/** Filter keys that represent a spatial selection (viewport box or polygon).
+ *  Living in the shared list filter means the zone applies to BOTH the map and
+ *  the list, shows as a chip, and survives switching views. */
+const SPATIAL_KEYS = [
+  "lat_num@gte",
+  "lat_num@lte",
+  "lng_num@gte",
+  "lng_num@lte",
+  "codigo@in",
+];
+
+const stripSpatial = (f: Record<string, unknown>) => {
+  const next = { ...f };
+  SPATIAL_KEYS.forEach((k) => delete next[k]);
+  return next;
+};
 
 /** Clustered markers for the visible points. Fits the viewport only when no
  *  spatial filter is active (so panning/drawing doesn't yank the view back). */
@@ -100,6 +116,37 @@ const DrawingLayer = ({
   return null;
 };
 
+/** Google Places autocomplete (colonias / alcaldías, restricted to Mexico).
+ *  Picking a place pans+filters the map to that zone. */
+const PlaceSearch = ({
+  onPlace,
+}: {
+  onPlace: (place: google.maps.places.PlaceResult) => void;
+}) => {
+  const placesLib = useMapsLibrary("places");
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!placesLib || !inputRef.current) return;
+    const ac = new placesLib.Autocomplete(inputRef.current, {
+      componentRestrictions: { country: "mx" },
+      fields: ["geometry", "name", "formatted_address"],
+      types: ["geocode"],
+    });
+    const listener = ac.addListener("place_changed", () => {
+      const place = ac.getPlace();
+      if (place.geometry) onPlace(place);
+    });
+    return () => listener.remove();
+  }, [placesLib, onPlace]);
+  return (
+    <input
+      ref={inputRef}
+      placeholder="Buscar colonia o alcaldía…"
+      className="w-64 max-w-[70vw] rounded-md border bg-background px-3 py-2 text-sm shadow"
+    />
+  );
+};
+
 /** Notifies when the user pans/zooms, to surface the "search this area" button. */
 const MoveWatcher = ({ onMove }: { onMove: () => void }) => {
   const map = useMap();
@@ -168,111 +215,153 @@ const MiniFicha = ({ p }: { p: Point }) => {
 const MapView = ({ allPoints }: { allPoints: Point[] }) => {
   const map = useMap();
   const geometryLib = useMapsLibrary("geometry");
+  const { filterValues, setFilters, displayedFilters } = useListContext();
 
-  const [mode, setMode] = useState<SpatialMode>("none");
-  const [areaBounds, setAreaBounds] = useState<BoundsLiteral | null>(null);
-  const [polygonPath, setPolygonPath] = useState<
-    google.maps.LatLngLiteral[] | null
-  >(null);
   const [drawing, setDrawing] = useState(false);
   const [showAreaBtn, setShowAreaBtn] = useState(false);
   const [selected, setSelected] = useState<Point | null>(null);
   const polyRef = useRef<google.maps.Polygon | null>(null);
 
+  // Refs keep the spatial callbacks stable so they don't re-bind the map
+  // listeners / autocomplete every time the filters change.
+  const fvRef = useRef(filterValues);
+  fvRef.current = filterValues;
+  const dfRef = useRef(displayedFilters);
+  dfRef.current = displayedFilters;
+  const pointsRef = useRef(allPoints);
+  pointsRef.current = allPoints;
+
+  const hasSpatial = SPATIAL_KEYS.some((k) => filterValues?.[k] != null);
+  const hasAttr = Object.keys(filterValues ?? {}).some(
+    (k) =>
+      !SPATIAL_KEYS.includes(k) &&
+      filterValues[k] != null &&
+      filterValues[k] !== "",
+  );
+
   const onSelect = useCallback((p: Point) => setSelected(p), []);
   const onMove = useCallback(() => setShowAreaBtn(true), []);
 
-  const visible = useMemo<Point[]>(() => {
-    if (mode === "area" && areaBounds) {
-      return allPoints.filter(
-        (p) =>
-          p.lat_num >= areaBounds.south &&
-          p.lat_num <= areaBounds.north &&
-          p.lng_num >= areaBounds.west &&
-          p.lng_num <= areaBounds.east,
-      );
-    }
-    if (mode === "polygon" && polygonPath && geometryLib) {
-      const poly = new google.maps.Polygon({ paths: polygonPath });
-      return allPoints.filter((p) =>
-        geometryLib.poly.containsLocation(
-          new google.maps.LatLng(p.lat_num, p.lng_num),
-          poly,
-        ),
-      );
-    }
-    return allPoints;
-  }, [allPoints, mode, areaBounds, polygonPath, geometryLib]);
-
-  const searchThisArea = () => {
-    const b = map?.getBounds()?.toJSON();
-    if (!b) return;
-    clearPolygon();
-    setAreaBounds(b);
-    setMode("area");
-    setShowAreaBtn(false);
-  };
-
-  const onPolygonComplete = useCallback((poly: google.maps.Polygon) => {
-    polyRef.current = poly;
-    setPolygonPath(
-      poly
-        .getPath()
-        .getArray()
-        .map((ll) => ll.toJSON()),
-    );
-    setAreaBounds(null);
-    setMode("polygon");
-    setDrawing(false);
-    setShowAreaBtn(false);
-  }, []);
-
-  const clearPolygon = () => {
+  const clearPolygonVisual = () => {
     if (polyRef.current) {
       polyRef.current.setMap(null);
       polyRef.current = null;
     }
-    setPolygonPath(null);
   };
 
+  // Apply a bounding box as the shared zone filter (works on list + map).
+  const applyBounds = useCallback(
+    (b: BoundsLiteral) => {
+      clearPolygonVisual();
+      setFilters(
+        {
+          ...stripSpatial(fvRef.current ?? {}),
+          "lat_num@gte": b.south,
+          "lat_num@lte": b.north,
+          "lng_num@gte": b.west,
+          "lng_num@lte": b.east,
+        },
+        dfRef.current,
+      );
+      setShowAreaBtn(false);
+    },
+    [setFilters],
+  );
+
+  // Place picked from the Google autocomplete: pan + filter to that zone.
+  const onPlace = useCallback(
+    (place: google.maps.places.PlaceResult) => {
+      if (!map || !place.geometry) return;
+      const vp = place.geometry.viewport;
+      if (vp) {
+        map.fitBounds(vp);
+        applyBounds(vp.toJSON());
+      } else if (place.geometry.location) {
+        map.panTo(place.geometry.location);
+        map.setZoom(14);
+        setShowAreaBtn(true);
+      }
+    },
+    [map, applyBounds],
+  );
+
+  const searchThisArea = () => {
+    const b = map?.getBounds()?.toJSON();
+    if (b) applyBounds(b);
+  };
+
+  // Polygon drawn: filter by the exact ids inside it (shared, so the list shows
+  // the same set). Computed client-side over the loaded points.
+  const onPolygonComplete = useCallback(
+    (poly: google.maps.Polygon) => {
+      clearPolygonVisual();
+      polyRef.current = poly;
+      const ids = geometryLib
+        ? pointsRef.current
+            .filter((p) =>
+              geometryLib.poly.containsLocation(
+                new google.maps.LatLng(p.lat_num, p.lng_num),
+                poly,
+              ),
+            )
+            .map((p) => p.id)
+        : [];
+      setFilters(
+        {
+          ...stripSpatial(fvRef.current ?? {}),
+          // sentinel when nothing falls inside, so the query returns 0 cleanly
+          "codigo@in": ids.length ? ids : ["__none__"],
+        },
+        dfRef.current,
+      );
+      setDrawing(false);
+      setShowAreaBtn(false);
+    },
+    [geometryLib, setFilters],
+  );
+
   const clearSpatial = () => {
-    clearPolygon();
-    setAreaBounds(null);
-    setMode("none");
+    clearPolygonVisual();
+    setFilters(stripSpatial(fvRef.current ?? {}), dfRef.current);
     setDrawing(false);
     setShowAreaBtn(false);
   };
 
   return (
     <div className="relative">
-      {/* Spatial controls overlay */}
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-2 justify-center">
-        {showAreaBtn && mode !== "polygon" ? (
-          <Button size="sm" onClick={searchThisArea} className="shadow">
-            🔍 Buscar en esta zona
-          </Button>
-        ) : null}
-        <Button
-          size="sm"
-          variant={drawing ? "default" : "secondary"}
-          className="shadow"
-          onClick={() => {
-            clearSpatial();
-            setDrawing((d) => !d);
-          }}
-        >
-          {drawing ? "Cancela dibujo" : "✏️ Dibujar zona"}
-        </Button>
-        {mode !== "none" ? (
+      {/* Controls overlay: place search (left) + spatial actions (right) */}
+      <div className="absolute top-2 left-2 right-2 z-10 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
+        <div className="pointer-events-auto">
+          <PlaceSearch onPlace={onPlace} />
+        </div>
+        <div className="pointer-events-auto flex flex-wrap gap-2 justify-end">
+          {showAreaBtn ? (
+            <Button size="sm" onClick={searchThisArea} className="shadow">
+              🔍 Buscar en esta zona
+            </Button>
+          ) : null}
           <Button
             size="sm"
-            variant="outline"
+            variant={drawing ? "default" : "secondary"}
             className="shadow"
-            onClick={clearSpatial}
+            onClick={() => {
+              clearSpatial();
+              setDrawing((d) => !d);
+            }}
           >
-            ✕ Quitar zona
+            {drawing ? "Cancela dibujo" : "✏️ Dibujar zona"}
           </Button>
-        ) : null}
+          {hasSpatial ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="shadow"
+              onClick={clearSpatial}
+            >
+              ✕ Quitar zona
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="h-[70vh] w-full rounded-md overflow-hidden border">
@@ -280,13 +369,16 @@ const MapView = ({ allPoints }: { allPoints: Point[] }) => {
           defaultCenter={CDMX_CENTER}
           defaultZoom={11}
           gestureHandling="greedy"
-          disableDefaultUI={false}
+          zoomControl={true}
+          mapTypeControl={true}
+          fullscreenControl={true}
+          streetViewControl={false}
           clickableIcons={false}
         >
           <MarkersLayer
-            points={visible}
+            points={allPoints}
             onSelect={onSelect}
-            fit={mode === "none"}
+            fit={hasAttr && !hasSpatial}
           />
           <DrawingLayer drawing={drawing} onComplete={onPolygonComplete} />
           <MoveWatcher onMove={onMove} />
@@ -301,8 +393,8 @@ const MapView = ({ allPoints }: { allPoints: Point[] }) => {
         </Map>
       </div>
       <p className="text-xs text-muted-foreground mt-1">
-        {visible.length} propiedades en el mapa
-        {mode !== "none" ? " (en la zona seleccionada)" : ""}
+        {allPoints.length} propiedades en el mapa
+        {hasSpatial ? " (en la zona seleccionada)" : ""}
       </p>
     </div>
   );
