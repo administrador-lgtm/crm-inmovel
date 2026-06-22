@@ -11,6 +11,7 @@ import {
   Home,
   LayoutGrid,
   Plus,
+  Search,
   Settings,
   Users,
 } from "lucide-react";
@@ -33,6 +34,8 @@ export const MobileNavigation = () => {
     currentPath = "/leads";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
+  } else if (matchPath("/nocnok/*", location.pathname)) {
+    currentPath = "/nocnok";
   } else {
     currentPath = false;
   }
@@ -86,6 +89,12 @@ export const MobileNavigation = () => {
               smart_count: 2,
             })}
             isActive={currentPath === "/propiedades"}
+          />
+          <NavigationButton
+            href="/nocnok"
+            Icon={Search}
+            label={translate("crm.navigation.nocnok", { _: "Bolsa" })}
+            isActive={currentPath === "/nocnok"}
           />
           <SettingsButton />
         </>

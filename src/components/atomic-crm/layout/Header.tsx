@@ -22,6 +22,8 @@ const Header = () => {
     currentPath = "/leads/kanban";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
+  } else if (matchPath("/nocnok/*", location.pathname)) {
+    currentPath = "/nocnok";
   } else {
     currentPath = false;
   }
@@ -76,6 +78,13 @@ const Header = () => {
                     })}
                     to="/propiedades"
                     isActive={currentPath === "/propiedades"}
+                  />
+                  <NavigationTab
+                    label={translate("crm.navigation.nocnok", {
+                      _: "Bolsa compartida",
+                    })}
+                    to="/nocnok"
+                    isActive={currentPath === "/nocnok"}
                   />
                 </nav>
               </div>

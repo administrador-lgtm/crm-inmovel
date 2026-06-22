@@ -29,6 +29,7 @@ import {
 } from "../providers/supabase";
 import sales from "../sales";
 import propiedades from "../propiedades";
+import nocnok from "../nocnok";
 import { SettingsPageMobile } from "../settings/SettingsPageMobile";
 import { ProfilePage } from "../settings/ProfilePage";
 import { SettingsPage } from "../settings/SettingsPage";
@@ -254,6 +255,7 @@ const DesktopAdmin = (
       <Resource name="contacts" {...contacts} />
       <Resource name="contact_notes" />
       <Resource name="propiedades" {...propiedades} />
+      <Resource name="nocnok" {...nocnok} />
       <Resource name="sales" {...sales} />
     </Admin>
   );
@@ -320,6 +322,7 @@ const MobileAdmin = (
           <Route path=":id/notes/:noteId" element={<NoteShowPage />} />
         </Resource>
         <Resource name="propiedades" {...propiedades} />
+        <Resource name="nocnok" {...nocnok} />
       </Admin>
     </PersistQueryClientProvider>
   );

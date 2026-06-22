@@ -114,6 +114,47 @@ select
     p.material_url
 from public.propiedades p;
 
+-- NocNok shared-inventory finder. The base table's primary key is `codigo`,
+-- but react-admin needs an `id`; this view aliases it (and exposes only the
+-- fields the CRM finder shows). security_invoker keeps nocnok_raw's RLS.
+create or replace view public.nocnok with (security_invoker = on) as
+select
+    p.codigo as id,
+    p.codigo,
+    p.title,
+    p.operacion,
+    p.type_text,
+    p.precio,
+    p.recamaras,
+    p.full_bathrooms,
+    p.half_bathrooms,
+    p.m2,
+    p.lot_size,
+    p.colonia,
+    p.alcaldia,
+    p.estado,
+    p.cp,
+    p.estacionamiento,
+    p.year_built,
+    p.levels,
+    p.url_ficha,
+    p.lat,
+    p.lon,
+    p.account_name,
+    p.shared_commission,
+    p.is_exclusive,
+    p.share_type,
+    p.status_days,
+    p.status_date,
+    p.fotos,
+    p.broker_tel,
+    p.broker_wa
+from public.nocnok_raw p
+-- Only the latest refresh batch. The sync upserts but never deletes, so old
+-- listings NocNok has dropped accumulate in the base table; filtering to the
+-- most recent fecha_carga keeps the finder showing only current inventory.
+where p.fecha_carga = (select max(fecha_carga) from public.nocnok_raw);
+
 create or replace view public.conversaciones_by_lead with (security_invoker = on) as
 select
     c.id,
