@@ -78,3 +78,8 @@ create or replace trigger promote_stage_on_handoff_trigger
 create or replace trigger derive_lead_stage_trigger
     before insert or update on public.contacts
     for each row execute function public.derive_lead_stage();
+
+-- Inmovel: a note's @mentions spawn per-recipient notifications.
+create or replace trigger create_note_mentions_trigger
+    after insert on public.contact_notes
+    for each row execute function public.create_note_mentions();

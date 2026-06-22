@@ -182,3 +182,15 @@ select
     c.nombre_lead
 from public.conversaciones c
 order by c.timestamp asc;
+
+-- Readable inbox of @mention notifications for the bell (lead name, sender,
+-- note text). security_invoker keeps note_mentions' per-recipient RLS.
+create or replace view public.note_mentions_inbox with (security_invoker = on) as
+select m.id, m.note_id, m.contact_id, m.recipient_id, m.sender_id, m.created_at, m.read_at,
+    coalesce(c.nombre, c.first_name) as lead_name,
+    n.text as note_text,
+    trim(s.first_name || ' ' || coalesce(s.last_name, '')) as sender_name
+from public.note_mentions m
+left join public.contacts c on c.id = m.contact_id
+left join public.contact_notes n on n.id = m.note_id
+left join public.sales s on s.id = m.sender_id;

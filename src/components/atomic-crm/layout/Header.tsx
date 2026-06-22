@@ -7,6 +7,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 import { useConfigurationContext } from "../root/ConfigurationContext";
 import { ChangelogPage } from "../misc/ChangelogPage";
+import { NotificationsBell } from "./NotificationsBell";
 
 const Header = () => {
   const { darkModeLogo, lightModeLogo, title } = useConfigurationContext();
@@ -89,6 +90,7 @@ const Header = () => {
                 </nav>
               </div>
               <div className="flex items-center">
+                <NotificationsBell />
                 <RefreshButton />
                 <UserMenu>
                   <ProfileMenu />

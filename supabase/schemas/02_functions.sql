@@ -553,3 +553,23 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: fan a note's @mentions out into per-recipient note_mentions rows
+-- (skipping the author). SECURITY DEFINER so it can write past note_mentions RLS.
+CREATE OR REPLACE FUNCTION "public"."create_note_mentions"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare r bigint;
+begin
+  if new.mentions is not null then
+    foreach r in array new.mentions loop
+      if r is distinct from new.sales_id then
+        insert into public.note_mentions(note_id, contact_id, recipient_id, sender_id)
+        values (new.id, new.contact_id, r, new.sales_id);
+      end if;
+    end loop;
+  end if;
+  return new;
+end;
+$$;

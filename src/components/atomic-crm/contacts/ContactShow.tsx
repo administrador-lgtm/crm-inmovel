@@ -16,6 +16,7 @@ import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 
 import MobileHeader from "../layout/MobileHeader";
+import { MarkMentionsRead } from "../layout/NotificationsBell";
 import { MobileContent } from "../layout/MobileContent";
 import { NoteCreate, NotesIterator, NotesIteratorMobile } from "../notes";
 import { NoteCreateSheet } from "../notes/NoteCreateSheet";
@@ -46,6 +47,7 @@ export const ContactShow = (props: ShowBaseProps = {}) => {
       }}
       {...props}
     >
+      <MarkMentionsRead />
       {isMobile ? <ContactShowContentMobile /> : <ContactShowContent />}
     </ShowBase>
   );

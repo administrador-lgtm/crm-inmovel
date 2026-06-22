@@ -15,8 +15,17 @@ import { getCurrentDate } from "./utils";
 import { AttachmentField } from "./AttachmentField";
 import { foreignKeyMapping } from "./foreignKeyMapping";
 import { AutocompleteInput, ReferenceInput } from "@/components/admin";
+import { ReferenceArrayInput } from "@/components/admin/reference-array-input";
+import { AutocompleteArrayInput } from "@/components/admin/autocomplete-array-input";
 import { contactOptionText } from "../misc/ContactOption";
 import { validateNoteOrAttachmentRequired } from "./noteModel";
+
+/** Display "First Last" for a sales person in the @mention picker. */
+const saleOptionText = (record?: {
+  first_name?: string;
+  last_name?: string;
+}) =>
+  record ? `${record.first_name ?? ""} ${record.last_name ?? ""}`.trim() : "";
 
 export const NoteInputs = ({
   defaultStatus,
@@ -107,6 +116,20 @@ export const NoteInputs = ({
         onBlur={() => setIsFocused(false)}
         validate={validateNoteOrAttachmentRequired}
       />
+
+      {/* Whom to notify about this note (in-app + WhatsApp). Empty = silent note. */}
+      <ReferenceArrayInput
+        source="mentions"
+        reference="sales"
+        filter={{ "disabled@neq": true }}
+      >
+        <AutocompleteArrayInput
+          label="Avisar a"
+          placeholder="@ Avisar a…"
+          optionText={saleOptionText}
+          helperText={false}
+        />
+      </ReferenceArrayInput>
 
       {selectReference && reference && (
         <ReferenceInput

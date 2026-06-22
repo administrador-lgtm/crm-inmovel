@@ -247,6 +247,19 @@ export type ContactNote = {
   sales_id: Identifier;
   status: string;
   attachments?: AttachmentNote[];
+  /** sales ids to notify about this note (in-app + WhatsApp). */
+  mentions?: Identifier[];
+} & Pick<RaRecord, "id">;
+
+/** A per-recipient notification spawned from a note @mention. */
+export type NoteMention = {
+  id: Identifier;
+  note_id: Identifier;
+  contact_id: Identifier;
+  recipient_id: Identifier;
+  sender_id: Identifier;
+  created_at: string;
+  read_at?: string | null;
 } & Pick<RaRecord, "id">;
 
 export type ActivityContactCreated = {

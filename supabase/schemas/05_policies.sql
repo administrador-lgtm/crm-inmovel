@@ -97,3 +97,13 @@ create policy "Enable update for admins" on public.configuration for update to a
 
 -- Favicons excluded domains
 create policy "Enable access for authenticated users only" on public.favicons_excluded_domains to authenticated using (true) with check (true);
+
+-- Note mentions — visible to the recipient, the sender, or admins; only the
+-- recipient marks their own as read.
+alter table public.note_mentions enable row level security;
+create policy "Mentions visible to recipient sender or admin" on public.note_mentions
+  for select to authenticated using (
+    recipient_id = public.current_sale_id() or sender_id = public.current_sale_id() or public.is_admin());
+create policy "Recipient marks own mention read" on public.note_mentions
+  for update to authenticated using (recipient_id = public.current_sale_id())
+  with check (recipient_id = public.current_sale_id());

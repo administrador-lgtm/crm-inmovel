@@ -74,11 +74,13 @@ const NoteCreateButton = ({
     date: string;
     text: null;
     attachments: null;
+    mentions: null;
     status?: string;
   } = {
     date: getCurrentDate(),
     text: null,
     attachments: null,
+    mentions: null,
   };
 
   const handleSuccess = (data: any) => {
