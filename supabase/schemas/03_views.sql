@@ -88,8 +88,13 @@ select
         when co.presupuesto ~ '^[0-9]+(\.[0-9]+)?$' then co.presupuesto::numeric
         else null
     end as presupuesto_num,
-    co.stage_changed_at
+    co.stage_changed_at,
+    -- Readable name of the lead's active property of interest (the kanban card
+    -- shows it instead of the redundant stage badge). desarrollo_activo holds the
+    -- property id (own slug or nocnok code), both present in propiedades.
+    max(prop.nombre) as desarrollo_activo_nombre
 from public.contacts co
+left join public.propiedades prop on prop.id = co.desarrollo_activo
 group by co.id;
 
 create or replace view public.init_state with (security_invoker = off) as

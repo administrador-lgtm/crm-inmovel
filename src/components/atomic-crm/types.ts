@@ -100,6 +100,8 @@ export type Contact = {
   estado?: string;
   desarrollos?: string[];
   desarrollo_activo?: string;
+  /** Readable name of the active property of interest (from contacts_summary). */
+  desarrollo_activo_nombre?: string;
   ad_id?: string;
   zona_interes?: string;
   presupuesto?: string;

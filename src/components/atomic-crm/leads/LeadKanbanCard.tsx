@@ -8,9 +8,7 @@ import { useRedirect, RecordContextProvider } from "ra-core";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-import { useConfigurationContext } from "../root/ConfigurationContext";
 import type { Contact } from "../types";
-import { findLeadStageLabel } from "./stages";
 
 /** First non-empty phone number on the lead, if any. */
 const getLeadPhone = (lead: Contact): string | undefined =>
@@ -73,10 +71,8 @@ export const LeadKanbanCardContent = ({
   snapshot?: DraggableStateSnapshot;
   lead: Contact;
 }) => {
-  const { leadStages } = useConfigurationContext();
   const redirect = useRedirect();
   const phone = getLeadPhone(lead);
-  const stageLabel = findLeadStageLabel(leadStages, lead.stage ?? "");
   const stageAge = getStageAge(lead.stage_changed_at);
 
   const handleClick = () => {
@@ -107,9 +103,13 @@ export const LeadKanbanCardContent = ({
               <p className="text-xs text-muted-foreground">{phone}</p>
             ) : null}
             <div className="flex items-center justify-between gap-2">
-              {stageLabel ? (
-                <Badge variant="outline" className="w-fit text-xs">
-                  {stageLabel}
+              {lead.desarrollo_activo_nombre ? (
+                <Badge
+                  variant="outline"
+                  className="w-fit text-xs font-normal max-w-[70%] truncate"
+                  title="Propiedad de interés"
+                >
+                  🏠 {lead.desarrollo_activo_nombre}
                 </Badge>
               ) : (
                 <span />

@@ -86,10 +86,14 @@ const DrawingLayer = ({
 }) => {
   const map = useMap();
   const drawingLib = useMapsLibrary("drawing");
+  // Ref so the DrawingManager is created once when drawing turns on and is NOT
+  // torn down by onComplete changing identity on every render.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   useEffect(() => {
     if (!map || !drawingLib || !drawing) return;
     const manager = new drawingLib.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingMode: drawingLib.OverlayType.POLYGON,
       drawingControl: false,
       map,
       polygonOptions: {
@@ -105,14 +109,14 @@ const DrawingLayer = ({
       "polygoncomplete",
       (poly: google.maps.Polygon) => {
         manager.setDrawingMode(null);
-        onComplete(poly);
+        onCompleteRef.current(poly);
       },
     );
     return () => {
       listener.remove();
       manager.setMap(null);
     };
-  }, [map, drawingLib, drawing, onComplete]);
+  }, [map, drawingLib, drawing]);
   return null;
 };
 
@@ -125,6 +129,8 @@ const PlaceSearch = ({
 }) => {
   const placesLib = useMapsLibrary("places");
   const inputRef = useRef<HTMLInputElement>(null);
+  const onPlaceRef = useRef(onPlace);
+  onPlaceRef.current = onPlace;
   useEffect(() => {
     if (!placesLib || !inputRef.current) return;
     const ac = new placesLib.Autocomplete(inputRef.current, {
@@ -134,10 +140,10 @@ const PlaceSearch = ({
     });
     const listener = ac.addListener("place_changed", () => {
       const place = ac.getPlace();
-      if (place.geometry) onPlace(place);
+      if (place.geometry) onPlaceRef.current(place);
     });
     return () => listener.remove();
-  }, [placesLib, onPlace]);
+  }, [placesLib]);
   return (
     <input
       ref={inputRef}
