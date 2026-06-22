@@ -1,4 +1,6 @@
-import { useGetList, useRecordContext } from "ra-core";
+import { useGetList, useListContext, useRecordContext } from "ra-core";
+import { useState } from "react";
+import { List as ListIcon, MapPin, X } from "lucide-react";
 import { DataTable } from "@/components/admin/data-table";
 import { List } from "@/components/admin/list";
 import { FilterButton } from "@/components/admin/filter-form";
@@ -8,9 +10,13 @@ import { SelectInput } from "@/components/admin/select-input";
 import { AutocompleteArrayInput } from "@/components/admin/autocomplete-array-input";
 import { NumberInput } from "@/components/admin/number-input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import { TopToolbar } from "../layout/TopToolbar";
+import { NocnokMap } from "./NocnokMap";
 import { type Nocnok, operacionLabel, formatPrecio } from "./types";
+
+type ViewMode = "list" | "map";
 
 const OPERACION_CHOICES = [
   { id: "Sale", name: "Venta" },
@@ -82,12 +88,103 @@ const filters = [
   <NumberInput source="estacionamiento@gte" label="Estac. (mín)" />,
 ];
 
-const NocnokListActions = () => (
+const NocnokListActions = ({
+  mode,
+  setMode,
+}: {
+  mode: ViewMode;
+  setMode: (m: ViewMode) => void;
+}) => (
   <TopToolbar>
     <FilterButton />
-    <SortButton fields={["precio", "m2", "recamaras", "status_date"]} />
+    {mode === "list" ? (
+      <SortButton fields={["precio", "m2", "recamaras", "status_date"]} />
+    ) : null}
+    <div className="flex">
+      <Button
+        variant={mode === "list" ? "default" : "outline"}
+        size="sm"
+        onClick={() => setMode("list")}
+      >
+        <ListIcon className="size-4" /> Lista
+      </Button>
+      <Button
+        variant={mode === "map" ? "default" : "outline"}
+        size="sm"
+        onClick={() => setMode("map")}
+      >
+        <MapPin className="size-4" /> Mapa
+      </Button>
+    </div>
   </TopToolbar>
 );
+
+const FILTER_LABELS: Record<string, string> = {
+  "title@ilike": "Búsqueda",
+  operacion: "Operación",
+  "alcaldia@in": "Alcaldía",
+  "colonia@in": "Colonia",
+  type_text: "Tipo",
+  "precio@gte": "Precio desde",
+  "precio@lte": "Precio hasta",
+  "recamaras@gte": "Recámaras ≥",
+  "full_bathrooms@gte": "Baños ≥",
+  "estacionamiento@gte": "Estac. ≥",
+};
+
+const opName = (id: string) =>
+  OPERACION_CHOICES.find((c) => c.id === id)?.name ?? id;
+
+/** Always-visible chips for every active filter, each removable with its ✕, so
+ *  a stored filter can never silently narrow the results without being seen. */
+const ActiveFilterChips = () => {
+  const { filterValues, setFilters, displayedFilters } = useListContext();
+  const entries = Object.entries(filterValues ?? {}).filter(
+    ([, v]) => v != null && v !== "" && !(Array.isArray(v) && v.length === 0),
+  );
+  if (entries.length === 0) return null;
+
+  const remove = (key: string) => {
+    const next = { ...filterValues };
+    delete next[key];
+    setFilters(next, displayedFilters);
+  };
+
+  const display = (key: string, value: unknown): string => {
+    const arr = Array.isArray(value) ? value : [value];
+    if (key === "operacion")
+      return arr.map((v) => opName(String(v))).join(", ");
+    return arr.map((v) => String(v)).join(", ");
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-2 py-2">
+      <span className="text-xs text-muted-foreground">Filtros activos:</span>
+      {entries.map(([key, value]) => (
+        <Badge key={key} variant="secondary" className="gap-1 pr-1">
+          <span className="text-xs">
+            {FILTER_LABELS[key] ?? key}: {display(key, value)}
+          </span>
+          <button
+            type="button"
+            onClick={() => remove(key)}
+            aria-label={`Quitar ${FILTER_LABELS[key] ?? key}`}
+            className="rounded-full hover:bg-muted-foreground/20 p-0.5"
+          >
+            <X className="size-3" />
+          </button>
+        </Badge>
+      ))}
+      <button
+        type="button"
+        onClick={() => setFilters({}, displayedFilters)}
+        className="text-xs text-primary underline"
+      >
+        Limpiar todo
+      </button>
+    </div>
+  );
+};
 
 const OperacionField = () => {
   const record = useRecordContext<Nocnok>();
@@ -146,32 +243,39 @@ const AccionesField = () => {
 };
 
 export function NocnokList() {
+  const [mode, setMode] = useState<ViewMode>("list");
   return (
     <List
       filters={filters}
-      actions={<NocnokListActions />}
+      actions={<NocnokListActions mode={mode} setMode={setMode} />}
       sort={{ field: "status_date", order: "DESC" }}
       perPage={25}
+      pagination={mode === "map" ? null : undefined}
     >
-      <DataTable>
-        <DataTable.Col source="title" label="Título" />
-        <DataTable.Col source="type_text" label="Tipo" />
-        <DataTable.Col label="Operación">
-          <OperacionField />
-        </DataTable.Col>
-        <DataTable.Col source="colonia" label="Colonia" />
-        <DataTable.Col source="alcaldia" label="Alcaldía" />
-        <DataTable.Col label="Precio">
-          <PrecioField />
-        </DataTable.Col>
-        <DataTable.Col source="recamaras" label="Rec." />
-        <DataTable.Col source="m2" label="m²" />
-        <DataTable.Col source="shared_commission" label="Comisión" />
-        <DataTable.Col source="account_name" label="Broker" />
-        <DataTable.Col label="Acciones">
-          <AccionesField />
-        </DataTable.Col>
-      </DataTable>
+      <ActiveFilterChips />
+      {mode === "map" ? (
+        <NocnokMap />
+      ) : (
+        <DataTable>
+          <DataTable.Col source="title" label="Título" />
+          <DataTable.Col source="type_text" label="Tipo" />
+          <DataTable.Col label="Operación">
+            <OperacionField />
+          </DataTable.Col>
+          <DataTable.Col source="colonia" label="Colonia" />
+          <DataTable.Col source="alcaldia" label="Alcaldía" />
+          <DataTable.Col label="Precio">
+            <PrecioField />
+          </DataTable.Col>
+          <DataTable.Col source="recamaras" label="Rec." />
+          <DataTable.Col source="m2" label="m²" />
+          <DataTable.Col source="shared_commission" label="Comisión" />
+          <DataTable.Col source="account_name" label="Broker" />
+          <DataTable.Col label="Acciones">
+            <AccionesField />
+          </DataTable.Col>
+        </DataTable>
+      )}
     </List>
   );
 }
