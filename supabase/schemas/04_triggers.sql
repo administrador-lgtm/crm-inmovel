@@ -71,3 +71,10 @@ create or replace trigger zz_sync_advisor_id_trigger
 create or replace trigger promote_stage_on_handoff_trigger
     after insert on public.conversaciones
     for each row execute function public.promote_stage_on_handoff();
+
+-- Inmovel: derive the pre-handoff funnel stage (S1..S4) from the lead's fields
+-- on every sync write. Runs before set_stage_changed_at so the timer stamps the
+-- derived change. (Name sorts before enforce_/set_ so it fires first.)
+create or replace trigger derive_lead_stage_trigger
+    before insert or update on public.contacts
+    for each row execute function public.derive_lead_stage();

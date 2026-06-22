@@ -522,3 +522,34 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: CRM derives the pre-handoff funnel stage (S1..S4) from the lead's own
+-- fields, so the board reflects reality without the bot pushing stage. Only the
+-- sync (service role; auth.uid() is null) derives, and only while the lead is
+-- still pre-handoff — S5+ is owned by the handoff flow / advisor.
+CREATE OR REPLACE FUNCTION "public"."derive_lead_stage"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+  if auth.uid() is not null then
+    return new;
+  end if;
+  if new.stage is not null and new.stage not in ('S1', 'S2', 'S3', 'S4') then
+    return new;
+  end if;
+  if nullif(trim(new.zona_interes), '') is not null
+     and nullif(trim(new.presupuesto), '') is not null then
+    new.stage := 'S4';
+  elsif nullif(trim(new.zona_interes), '') is not null
+     or nullif(trim(new.presupuesto), '') is not null
+     or nullif(trim(new.tipo_busqueda), '') is not null
+     or nullif(trim(new.forma_compra), '') is not null then
+    new.stage := 'S3';
+  elsif coalesce(new.total_mensajes, 0) >= 3 then
+    new.stage := 'S2';
+  else
+    new.stage := 'S1';
+  end if;
+  return new;
+end;
+$$;
