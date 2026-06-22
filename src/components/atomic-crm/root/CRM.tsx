@@ -6,7 +6,7 @@ import type {
 } from "ra-core";
 import { CustomRoutes, localStorageStore, Resource } from "ra-core";
 import { lazy, useEffect, useMemo } from "react";
-import { Route } from "react-router";
+import { Navigate, Route, useParams } from "react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
@@ -60,6 +60,12 @@ const defaultStore = localStorageStore(undefined, "CRM");
 const LeadKanban = lazy(() => import("../leads/LeadKanban"));
 
 export const LEAD_KANBAN_PATH = "/leads/kanban";
+
+/** Short link target for the WhatsApp mention button (/l/:id -> the lead). */
+const LeadRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/contacts/${id}/show`} replace />;
+};
 
 export type CRMProps = {
   dataProvider?: CrmDataProvider;
@@ -251,6 +257,7 @@ const DesktopAdmin = (
         <Route path={SettingsPage.path} element={<SettingsPage />} />
         <Route path={ChangelogPage.path} element={<ChangelogPage />} />
         <Route path={LEAD_KANBAN_PATH} element={<LeadKanban />} />
+        <Route path="/l/:id" element={<LeadRedirect />} />
       </CustomRoutes>
       <Resource name="contacts" {...contacts} />
       <Resource name="contact_notes" />

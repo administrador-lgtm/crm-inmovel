@@ -83,3 +83,8 @@ create or replace trigger derive_lead_stage_trigger
 create or replace trigger create_note_mentions_trigger
     after insert on public.contact_notes
     for each row execute function public.create_note_mentions();
+
+-- Inmovel: a new @mention pings the recipient on WhatsApp (edge function).
+create or replace trigger notify_mention_wa_trigger
+    after insert on public.note_mentions
+    for each row execute function public.notify_mention_wa();

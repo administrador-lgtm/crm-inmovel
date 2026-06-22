@@ -573,3 +573,25 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: on a new @mention, ping the recipient on WhatsApp via the
+-- notify_mention edge function (pg_net). The shared secret lives in app_config
+-- (not in this definition) so it is never committed.
+CREATE OR REPLACE FUNCTION "public"."notify_mention_wa"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare secret text;
+begin
+  select value into secret from public.app_config where key = 'notify_secret';
+  perform net.http_post(
+    url := 'https://yvowokyomykvntupibpp.supabase.co/functions/v1/notify_mention',
+    body := jsonb_build_object('mention_id', new.id),
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-notify-secret', secret
+    )
+  );
+  return new;
+end;
+$$;

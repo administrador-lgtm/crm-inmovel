@@ -107,3 +107,7 @@ create policy "Mentions visible to recipient sender or admin" on public.note_men
 create policy "Recipient marks own mention read" on public.note_mentions
   for update to authenticated using (recipient_id = public.current_sale_id())
   with check (recipient_id = public.current_sale_id());
+
+-- App config — RLS on with no policies: only SECURITY DEFINER functions / the
+-- service role can read it (holds the notify_mention shared secret).
+alter table public.app_config enable row level security;
