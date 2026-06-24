@@ -64,23 +64,27 @@ function normalizeName(s: string): string {
  */
 async function buildAdvisorMap(
   supabase: SupabaseClient,
-): Promise<Map<string, number>> {
+): Promise<{ nameToId: Map<string, number>; idToName: Map<number, string> }> {
   const { data, error } = await supabase
     .from("sales")
     .select("id, first_name, last_name");
   if (error) throw error;
-  const map = new Map<string, number>();
+  const nameToId = new Map<string, number>();
+  // Canonical display name per advisor id. asesor_nombre is set from this (never
+  // from the raw Sheet value) so a corrupt asesor_asignado can't leak into it.
+  const idToName = new Map<number, string>();
   for (const s of data ?? []) {
     const full = `${s.first_name ?? ""} ${s.last_name ?? ""}`;
+    idToName.set(s.id, full.replace(/\s+/g, " ").trim());
     // Key by full name and by first_name alone so "Luis Gerardo" or "Luis" hit.
     for (const key of [
       normalizeName(full),
       normalizeName(s.first_name ?? ""),
     ]) {
-      if (key) map.set(key, s.id);
+      if (key) nameToId.set(key, s.id);
     }
   }
-  return map;
+  return { nameToId, idToName };
 }
 
 export interface SyncResult {
@@ -140,7 +144,7 @@ export async function syncLeads(
   }
 
   // Resolve advisor names to ids once for the whole run.
-  const advisorMap = await buildAdvisorMap(supabase);
+  const { nameToId: advisorMap, idToName } = await buildAdvisorMap(supabase);
 
   // sheet_id -> sales.id assignments, applied in a SEPARATE targeted update
   // after the bulk upsert. Assignment must NOT ride in the bulk upsert: a
@@ -179,17 +183,28 @@ export async function syncLeads(
       payload.first_name = parts[0];
       payload.last_name = parts.slice(1).join(" ") || null;
     }
-    if (row.telefono) {
-      payload.phone_jsonb = [{ number: row.telefono, type: "Work" }];
+    // Phone: the bot normally writes the 10 national digits to `telefono`, but a
+    // batch of older WhatsApp leads only kept the full sender id (521XXXXXXXXXX)
+    // as the Sheet row id, leaving `telefono` empty. Fall back to the 10 digits
+    // after the 521 prefix so the number is never lost.
+    let phone = (row.telefono || "").trim();
+    if (!phone && /^521\d{10}$/.test(row.id)) {
+      phone = row.id.slice(3);
     }
-    // The Sheet stores the advisor as a NAME. Keep the raw name for display
-    // (asesor_nombre) and resolve it to the bigint sales.id so the lead is
-    // assigned BY ID — the lockstep trigger mirrors sales_id -> asesor_asignado,
-    // which is what the RLS reads. Unresolved names keep display text only.
-    // sales_id itself is applied below, gated by the stage-ownership frontier.
+    payload.telefono = phone || null;
+    if (phone) {
+      payload.phone_jsonb = [{ number: phone, type: "Work" }];
+    }
+    // The Sheet stores the advisor as a NAME; resolve it to the bigint sales.id
+    // so the lead is assigned BY ID — the lockstep trigger mirrors sales_id ->
+    // asesor_asignado, which is what the RLS reads. asesor_nombre is NOT written
+    // here: the handoff pipeline sometimes writes the lead's own message text
+    // into asesor_asignado, so the raw value is unsafe to mirror as a display
+    // name. It is set from the canonical sales name in the assignment update
+    // below, only for resolved advisors. sales_id itself is applied there too,
+    // gated by the stage-ownership frontier.
     let advisorId: number | null = null;
     if (row.asesor_asignado) {
-      payload.asesor_nombre = row.asesor_asignado;
       advisorId = advisorMap.get(normalizeName(row.asesor_asignado)) ?? null;
     }
     const firstSeen = row.created_at || row.fecha_ultimo_contacto || "";
@@ -247,11 +262,14 @@ export async function syncLeads(
   }
   const ASSIGN_BATCH = 100;
   for (const [advisorId, ids] of sheetIdsByAdvisor) {
+    // Set asesor_nombre from the canonical sales name here (not in the bulk
+    // upsert) so it is always a real advisor name, never a stray Sheet value.
+    const advisorName = idToName.get(advisorId) ?? null;
     for (let i = 0; i < ids.length; i += ASSIGN_BATCH) {
       const batch = ids.slice(i, i + ASSIGN_BATCH);
       const { error } = await supabase
         .from("contacts")
-        .update({ sales_id: advisorId })
+        .update({ sales_id: advisorId, asesor_nombre: advisorName })
         .in("sheet_id", batch);
       if (error) throw error;
     }
