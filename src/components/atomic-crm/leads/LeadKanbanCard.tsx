@@ -10,10 +10,6 @@ import { Badge } from "@/components/ui/badge";
 
 import type { Contact } from "../types";
 
-/** First non-empty phone number on the lead, if any. */
-const getLeadPhone = (lead: Contact): string | undefined =>
-  lead.phone_jsonb?.find((entry) => entry.number)?.number;
-
 /** Display name for a lead (contact). */
 const getLeadName = (lead: Contact): string =>
   [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
@@ -72,7 +68,6 @@ export const LeadKanbanCardContent = ({
   lead: Contact;
 }) => {
   const redirect = useRedirect();
-  const phone = getLeadPhone(lead);
   const stageAge = getStageAge(lead.stage_changed_at);
 
   const handleClick = () => {
@@ -99,8 +94,14 @@ export const LeadKanbanCardContent = ({
         >
           <CardContent className="px-3 flex flex-col gap-1">
             <p className="text-sm font-medium">{getLeadName(lead)}</p>
-            {phone ? (
-              <p className="text-xs text-muted-foreground">{phone}</p>
+            {lead.asesor_nombre ? (
+              <Badge
+                variant="outline"
+                className="w-fit text-xs font-normal max-w-full truncate"
+                title="Asesor asignado"
+              >
+                👤 {lead.asesor_nombre}
+              </Badge>
             ) : null}
             <div className="flex items-center justify-between gap-2">
               {lead.desarrollo_activo_nombre ? (
@@ -123,15 +124,6 @@ export const LeadKanbanCardContent = ({
                 </span>
               ) : null}
             </div>
-            {lead.asesor_nombre ? (
-              <Badge
-                variant="outline"
-                className="w-fit text-xs font-normal max-w-full truncate"
-                title="Asesor asignado"
-              >
-                👤 {lead.asesor_nombre}
-              </Badge>
-            ) : null}
           </CardContent>
         </Card>
       </RecordContextProvider>
