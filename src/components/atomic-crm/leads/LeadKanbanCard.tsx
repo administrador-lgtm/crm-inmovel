@@ -123,6 +123,15 @@ export const LeadKanbanCardContent = ({
                 </span>
               ) : null}
             </div>
+            {lead.asesor_nombre ? (
+              <Badge
+                variant="outline"
+                className="w-fit text-xs font-normal max-w-full truncate"
+                title="Asesor asignado"
+              >
+                👤 {lead.asesor_nombre}
+              </Badge>
+            ) : null}
           </CardContent>
         </Card>
       </RecordContextProvider>
