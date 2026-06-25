@@ -595,3 +595,39 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: when a reactivated lead (phone in public.reactivaciones) replies, the
+-- bot only records it in conversaciones — advisors never see it. Surface that
+-- reply as a note on the lead's ficha so it gets followed up. One note per lead
+-- (idempotent); fires on each new inbound conversacion row.
+CREATE OR REPLACE FUNCTION "public"."create_reactivation_note"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare
+  v_tel text;
+  v_grupo text;
+  v_template text;
+begin
+  if new.rol is distinct from 'lead' then return new; end if;
+  select right(regexp_replace(coalesce(c.telefono, c.sheet_id, ''), '\D', '', 'g'), 10)
+    into v_tel from public.contacts c where c.id = new.lead_id;
+  if v_tel is null or v_tel = '' then return new; end if;
+  select grupo, template into v_grupo, v_template
+    from public.reactivaciones where telefono = v_tel;
+  if not found then return new; end if;
+  if exists (select 1 from public.contact_notes n
+             where n.contact_id = new.lead_id and n.text like '[Reactivación]%') then
+    return new;
+  end if;
+  insert into public.contact_notes (contact_id, text, date, sales_id)
+  values (
+    new.lead_id,
+    '[Reactivación] Template: ' || coalesce(v_template, v_grupo) ||
+      ' | Respuesta: "' || coalesce(new.texto, '') || '"',
+    coalesce(new."timestamp", now()),
+    (select sales_id from public.contacts where id = new.lead_id)
+  );
+  return new;
+end;
+$$;

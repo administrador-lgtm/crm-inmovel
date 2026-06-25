@@ -111,3 +111,8 @@ create policy "Recipient marks own mention read" on public.note_mentions
 -- App config — RLS on with no policies: only SECURITY DEFINER functions / the
 -- service role can read it (holds the notify_mention shared secret).
 alter table public.app_config enable row level security;
+
+-- Reactivaciones — RLS on with no policies: only the SECURITY DEFINER
+-- create_reactivation_note trigger / the service role reads it. The CRM never
+-- queries it directly.
+alter table public.reactivaciones enable row level security;

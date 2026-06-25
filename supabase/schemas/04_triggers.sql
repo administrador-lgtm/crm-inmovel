@@ -88,3 +88,8 @@ create or replace trigger create_note_mentions_trigger
 create or replace trigger notify_mention_wa_trigger
     after insert on public.note_mentions
     for each row execute function public.notify_mention_wa();
+
+-- Inmovel: a reactivated lead's reply becomes a note on their ficha.
+create or replace trigger create_reactivation_note_trigger
+    after insert on public.conversaciones
+    for each row execute function public.create_reactivation_note();
