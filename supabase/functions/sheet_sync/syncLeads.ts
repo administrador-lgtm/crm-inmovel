@@ -121,7 +121,7 @@ export async function syncLeads(
   const sheetIds = rows.map((r) => r.id).filter(Boolean);
   const existingBySheetId = new Map<
     string,
-    { id: number; stage: string | null }
+    { id: number; stage: string | null; sales_id: number | null }
   >();
   // Look up existing leads in batches — a single IN() over hundreds of sheet
   // ids would blow past the REST URL length limit.
@@ -130,7 +130,7 @@ export async function syncLeads(
     const batch = sheetIds.slice(i, i + LOOKUP_BATCH);
     const { data, error } = await supabase
       .from("contacts")
-      .select("id, sheet_id, stage")
+      .select("id, sheet_id, stage, sales_id")
       .in("sheet_id", batch);
     if (error) throw error;
     for (const row of data ?? []) {
@@ -138,6 +138,7 @@ export async function syncLeads(
         existingBySheetId.set(String(row.sheet_id), {
           id: row.id,
           stage: row.stage,
+          sales_id: row.sales_id,
         });
       }
     }
@@ -223,9 +224,14 @@ export async function syncLeads(
       if (advisorId != null) assignmentByAdvisor.set(row.id, advisorId);
       result.inserted++;
     } else if (canSyncWriteStage(existing.stage)) {
-      // Existing, still sync-owned: the Sheet may refresh stage and assignment.
+      // Existing, still sync-owned: the Sheet may refresh the stage. Advisor
+      // assignment, however, is CRM-owned once set — take the Sheet's advisor
+      // ONLY when the lead has none yet (first handoff). Otherwise a CRM/admin
+      // reassignment would be reverted on the next sync. (Stage frontier still
+      // governs the stage column; assignment is decoupled from it.)
       if (row.stage) payload.stage = row.stage;
-      if (advisorId != null) assignmentByAdvisor.set(row.id, advisorId);
+      if (advisorId != null && existing.sales_id == null)
+        assignmentByAdvisor.set(row.id, advisorId);
       result.updated++;
     } else {
       // CRM-owned (S6+): never send a stage or reassign — the advisor/CRM owns
