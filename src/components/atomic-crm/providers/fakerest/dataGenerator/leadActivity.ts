@@ -4,7 +4,7 @@ import type { Conversacion, LeadPropiedad, Visita } from "../../../types";
 import type { Db } from "./types";
 import { randomDate } from "./utils";
 
-// Stage ranks at or beyond "S7 Visita agendada" get visit records.
+// Stage ranks at or beyond "S7 Visita solicitada" get visit records.
 const VISIT_STAGES = ["S7", "S8", "S9", "S10"];
 
 const LEAD_LINES = [

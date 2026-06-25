@@ -16,7 +16,7 @@ export const defaultLeadStages = [
   { value: "S4", label: "Handoff ready" },
   { value: "S5", label: "Handoff enviado" },
   { value: "S6", label: "Asesor aceptó" },
-  { value: "S7", label: "Visita agendada" },
+  { value: "S7", label: "Visita solicitada" },
   { value: "S8", label: "Visita realizada" },
   { value: "S9", label: "Negociación" },
   { value: "S10", label: "Cierre" },
