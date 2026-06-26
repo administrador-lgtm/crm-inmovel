@@ -58,6 +58,11 @@ const defaultStore = localStorageStore(undefined, "CRM");
 // Lead pipeline kanban (retargeted from the former deal board). Lazy-loaded
 // because it pulls in the drag-and-drop library only when the route is visited.
 const LeadKanban = lazy(() => import("../leads/LeadKanban"));
+// Mobile pipeline view (chips + list) — the desktop kanban's drag-and-drop board
+// doesn't fit a phone, so /leads/kanban renders this on mobile instead.
+const LeadStageListMobile = lazy(
+  () => import("../leads/LeadStageListMobile"),
+);
 
 export const LEAD_KANBAN_PATH = "/leads/kanban";
 
@@ -319,10 +324,10 @@ const MobileAdmin = (
             element={<SettingsPageMobile />}
           />
           <Route path={ChangelogPage.path} element={<ChangelogPage />} />
-          {/* The mobile bottom nav links to the leads kanban; register it here
-              too (it was desktop-only, so mobile got a 404). /l/:id is the
-              WhatsApp @mention deep-link target. */}
-          <Route path={LEAD_KANBAN_PATH} element={<LeadKanban />} />
+          {/* The mobile bottom nav links to /leads/kanban; on mobile render the
+              chips+list pipeline (the drag-and-drop board is desktop-only).
+              /l/:id is the WhatsApp @mention deep-link target. */}
+          <Route path={LEAD_KANBAN_PATH} element={<LeadStageListMobile />} />
           <Route path="/l/:id" element={<LeadRedirect />} />
         </CustomRoutes>
         <Resource

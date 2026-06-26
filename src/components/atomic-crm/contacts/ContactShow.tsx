@@ -29,6 +29,7 @@ import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
 import { VisitasPanel } from "../leads/VisitasPanel";
 import { ConversacionLog } from "../leads/ConversacionLog";
+import { StageSelector } from "../leads/StageSelector";
 import { MobileBackButton } from "../misc/MobileBackButton";
 
 export const ContactShow = (props: ShowBaseProps = {}) => {
@@ -155,6 +156,15 @@ const ContactShowContentMobile = () => {
 
           <TabsContent value="details" className="mt-4">
             <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {translate("crm.leads.stage", { _: "Etapa" })}
+                </h3>
+                <Separator />
+                <div className="mt-3">
+                  <StageSelector />
+                </div>
+              </div>
               <div>
                 <h3 className="text-lg font-semibold">
                   {translate("resources.notes.fields.status")}
