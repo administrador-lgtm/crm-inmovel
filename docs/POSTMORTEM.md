@@ -179,3 +179,50 @@
 
 ## One-line lesson
 **The design held its first real test:** adding a second advisor to the listener needed zero CRM work, and the deliberate last-10-digit normalization quietly saved half the new advisor's messages from a format mismatch — proof that absorbing upstream messiness in one curated view (not the UI) was the right call.
+
+---
+
+# Post-Mortem — Visits ↔ Google Calendar feature (build + live validation)
+
+**EVENT:** Designed and shipped the full "Agendar visita" feature (2026-06-26) — Calendar as source of truth, CRM as editor, with a templated invite + WhatsApp confirmation. Validated end-to-end in production by the user with his personal number.
+**EXPECTED:** A "schedule a visit" button.
+**ACTUAL:** A complete flow — guided journey (confirm property/date/time) → Google Calendar event (admin all-copy host + advisor attendee, lead_id tag) → CRM visita mirror → WhatsApp confirmation to the lead (maps/calendar/wa.me) → a 5-min `calendar_sync` reflecting reschedules/cancellations. Heavy iteration on the WhatsApp template.
+
+## Timeline
+- **Design** (over several turns): Calendar = source of truth ("not in Calendar = not scheduled"); the advisor lives in the **CRM + WhatsApp, not GSuite**, so the CRM/bot is the editor and Calendar the authoritative store (write-through); `visitas` is a queryable mirror; split ownership (Calendar owns scheduling, CRM owns resultado/notas).
+- **Steps 1–6:** populate `sales.calendario` (primary email calendars; Josafat-advisor = josafat@, all-copy = administrador@) → `visitas.gcal_event_id`/`estado` → journey UI → `agendar_visita` edge fn (Calendar event) → WhatsApp send → `calendar_sync` (pg_cron).
+- **Two diagnosed traps:** (1) **"No se pudo agendar" was CORS** — the function succeeded server-side but the browser couldn't read the response, so the UI showed an error and the user retried → duplicate events. (2) **The maps URL format**: `/maps/search/?api=1&query=` opened a broken search; `https://maps.google.com/?q=` (the property's `url_maps`) opens cleanly.
+- **WhatsApp template churn:** can't preview buttons via free text; 2-URL-button limit (maps + calendar buttons, wa.me in body); edited the approved template (maps base + {{5}} wa.me) → Meta re-approved → validated.
+- **Side root-cause fix:** the recurring "Pending" advisor name — `handle_update_user` wiped `sales.first_name` to 'Pending' on every login when auth metadata had no name; fixed to fall back to the existing name.
+
+## 5 Whys (the headline trap: the lying error)
+1. Why did "No se pudo agendar" show when the visit WAS created? → The browser blocked the response.
+2. Why? → The edge function returned no CORS headers and didn't handle the OPTIONS preflight.
+3. Why wasn't that caught? → The other edge functions are server-side (cron/trigger), which don't need CORS; this was the first browser-called one.
+4. Why did it cause duplicates? → A false "failed" made the user retry, and each retry actually succeeded server-side.
+
+**ROOT CAUSE:** A browser-invoked edge function without CORS — the success was real but invisible, turning one click into several phantom events.
+
+## Contributing factors
+- WhatsApp template constraints are non-obvious: free text can't show buttons, URL buttons cap at 2, and dynamic URL buttons only take a suffix — so a long maps URL must be a button (hidden) or coords.
+- Template edits require Meta re-approval (minutes here, but a dependency).
+- `derive_lead_stage` could have overridden an inserted S7 test lead, but didn't (it only derives S1–S4) — worth remembering when seeding test data.
+
+## Warning signs / handled well
+- Diagnosed CORS by the tell: **direct API call works, UI call fails** → not the logic, the browser.
+- Validated every layer live: the raw calendar create/tag/query/delete; the function e2e (temp-phone to route a real WA to the user); the template render; and finally the **user's own end-to-end** with his personal number (the real acceptance test).
+- Cleaned up all test events/visitas/leads from production afterward.
+
+## In control vs out of control
+**In control:** the design discipline (Calendar source of truth, split ownership, write-through), incremental step-by-step build with a live check each step, CORS/format fixes at the source.
+**Out of control:** Meta template approval latency; WhatsApp URL-button quirks (the maps format); the legacy `handle_update_user` defaulting to 'Pending'.
+
+## Change register
+| Action | Owner | Due | Verification |
+|---|---|---|---|
+| Populate `propiedades` lat/lng → even shorter/bulletproof maps (`?q=lat,lng`) | backlog | when convenient | maps button drops an exact pin |
+| New browser-called edge function → always add CORS + OPTIONS | process | every such fn | UI reads the response |
+| New advisor → set `sales` name + `whatsapp` + `calendario` | process | every activation | name sticks; visits route to their calendar |
+
+## One-line lesson
+**A failed-looking UI can be a successful backend** — "No se pudo agendar" was a CORS lie while every click really created an event. Build incrementally, validate each layer live, and let the user's own end-to-end run be the acceptance test; the truth was in "direct call works, browser doesn't."
