@@ -236,10 +236,14 @@ CREATE OR REPLACE FUNCTION "public"."handle_update_user"() RETURNS "trigger"
     SET "search_path" TO ''
     AS $$
 begin
+  -- Fall back to the EXISTING sales name, NOT 'Pending'. This trigger fires on
+  -- every auth.users UPDATE (including login, which touches last_sign_in_at); an
+  -- advisor whose raw_user_meta_data has no name would otherwise have their CRM
+  -- name wiped to 'Pending' on every login.
   update public.sales
   set
-    first_name = coalesce(new.raw_user_meta_data ->> 'first_name', new.raw_user_meta_data -> 'custom_claims' ->> 'first_name', 'Pending'),
-    last_name = coalesce(new.raw_user_meta_data ->> 'last_name', new.raw_user_meta_data -> 'custom_claims' ->> 'last_name', 'Pending'),
+    first_name = coalesce(new.raw_user_meta_data ->> 'first_name', new.raw_user_meta_data -> 'custom_claims' ->> 'first_name', first_name),
+    last_name = coalesce(new.raw_user_meta_data ->> 'last_name', new.raw_user_meta_data -> 'custom_claims' ->> 'last_name', last_name),
     email = new.email
   where user_id = new.id;
 
