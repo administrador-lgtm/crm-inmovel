@@ -151,7 +151,9 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       fecha_transicion_consultor: "",
       fecha_ultimo_contacto: last_seen,
       sheet_id: `L-${id}`,
-      asesor_nombre: isPostHandoff ? sale.first_name + " " + sale.last_name : null,
+      asesor_nombre: isPostHandoff
+        ? sale.first_name + " " + sale.last_name
+        : null,
       handoff_trigger: isPostHandoff
         ? random.arrayElement(["perfil_completo", "visita_detectada"] as const)
         : null,

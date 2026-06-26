@@ -21,11 +21,14 @@ const formatTime = (value: string) =>
 export const AdvisorConversacionLog = () => {
   const lead = useRecordContext<Contact>();
 
-  const { data: mensajes } = useGetList<AdvisorMessage>("advisor_conversation", {
-    filter: { lead_id: lead?.id },
-    sort: { field: "sent_at", order: "ASC" },
-    pagination: { page: 1, perPage: 200 },
-  });
+  const { data: mensajes } = useGetList<AdvisorMessage>(
+    "advisor_conversation",
+    {
+      filter: { lead_id: lead?.id },
+      sort: { field: "sent_at", order: "ASC" },
+      pagination: { page: 1, perPage: 200 },
+    },
+  );
 
   if (!lead) return null;
 
