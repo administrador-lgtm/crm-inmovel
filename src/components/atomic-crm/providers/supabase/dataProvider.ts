@@ -258,12 +258,9 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
       // fields as the base "contacts" resource — notably phone and email, which
       // map to the view's phone_fts / email_fts columns. Without these, the list
       // could only be searched by name.
-      return applyFullTextSearch([
-        "first_name",
-        "last_name",
-        "email",
-        "phone",
-      ])(params);
+      return applyFullTextSearch(["first_name", "last_name", "email", "phone"])(
+        params,
+      );
     },
   },
 ];

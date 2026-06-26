@@ -43,14 +43,13 @@ create policy "Enable read access for authenticated users" on public.sales for s
 create policy "Propiedades selectable by authenticated" on public.propiedades
   for select to authenticated using (true);
 
--- Visitas — advisor-owned. Visible/insertable when the parent lead is accessible.
-create policy "Visitas selectable for accessible leads" on public.visitas
-  for select to authenticated using (
-    exists (
-      select 1 from public.contacts c
-      where c.id = visitas.lead_id and public.can_access_lead(c.asesor_asignado)
-    )
-  );
+-- Visitas — advisor-owned writes, team-wide reads. SELECT is intentionally
+-- loosened to any authenticated user so the Visits Agenda screen shows the whole
+-- team's visits regardless of lead ownership. INSERT/UPDATE stay
+-- can_access_lead-gated below so writes remain advisor-scoped.
+-- See adr/ADR-TASK-001-visitas-team-wide-select.md
+create policy "Visitas selectable by authenticated" on public.visitas
+  for select to authenticated using (true);
 create policy "Visitas insertable for accessible leads" on public.visitas
   for insert to authenticated with check (
     exists (

@@ -60,9 +60,7 @@ const defaultStore = localStorageStore(undefined, "CRM");
 const LeadKanban = lazy(() => import("../leads/LeadKanban"));
 // Mobile pipeline view (chips + list) — the desktop kanban's drag-and-drop board
 // doesn't fit a phone, so /leads/kanban renders this on mobile instead.
-const LeadStageListMobile = lazy(
-  () => import("../leads/LeadStageListMobile"),
-);
+const LeadStageListMobile = lazy(() => import("../leads/LeadStageListMobile"));
 
 export const LEAD_KANBAN_PATH = "/leads/kanban";
 

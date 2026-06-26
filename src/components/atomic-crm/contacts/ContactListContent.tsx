@@ -143,7 +143,9 @@ const ContactItemContent = ({
                 {contact.tipo_busqueda}
               </Badge>
             ) : null}
-            {contact.zona_interes ? <span>📍 {contact.zona_interes}</span> : null}
+            {contact.zona_interes ? (
+              <span>📍 {contact.zona_interes}</span>
+            ) : null}
             {contact.presupuesto ? <span>💰 {contact.presupuesto}</span> : null}
             {contact.desarrollo_activo ? (
               <span>🏢 {contact.desarrollo_activo}</span>

@@ -1,10 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  useGetList,
-  useNotify,
-  useRecordContext,
-  useRefresh,
-} from "ra-core";
+import { useGetList, useNotify, useRecordContext, useRefresh } from "ra-core";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -201,7 +196,9 @@ export const AgendarVisitaDialog = ({
               <p className="text-muted-foreground">
                 ¡Hola {leadName}! 👋 Confirmamos tu visita: 🏠 {""}
                 {propiedad?.nombre ?? "…"} · {formatHuman(fecha)} · 👤 {asesor}.
-                {leadPhone(lead) ? "" : " (el lead no tiene teléfono — no se enviará WhatsApp)"}
+                {leadPhone(lead)
+                  ? ""
+                  : " (el lead no tiene teléfono — no se enviará WhatsApp)"}
               </p>
             </div>
           </div>

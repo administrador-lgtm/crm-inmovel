@@ -155,6 +155,9 @@ grant all on table public.propiedades_summary to service_role;
 grant all on table public.conversaciones_by_lead to anon;
 grant all on table public.conversaciones_by_lead to authenticated;
 grant all on table public.conversaciones_by_lead to service_role;
+grant all on table public.visitas_agenda to anon;
+grant all on table public.visitas_agenda to authenticated;
+grant all on table public.visitas_agenda to service_role;
 
 -- Inmovel sequences (identity columns on visitas/lead_propiedad)
 grant all on sequence public.visitas_id_seq to anon;
