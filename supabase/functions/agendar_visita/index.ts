@@ -29,7 +29,13 @@ async function googleToken(): Promise<string> {
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { lead_id, propiedad_id, fecha, duracion = 60 } = body;
+    const {
+      lead_id,
+      propiedad_id,
+      fecha,
+      duracion = 60,
+      enviar_confirmacion = false,
+    } = body;
     if (!lead_id || !propiedad_id || !fecha) {
       return json({ error: "lead_id, propiedad_id, fecha required" }, 400);
     }
@@ -132,7 +138,77 @@ Deno.serve(async (req) => {
     );
     if (vErr) return json({ error: "visita upsert", detail: vErr.message }, 500);
 
-    return json({ ok: true, gcal_event_id: ev.id, htmlLink: ev.htmlLink });
+    // WhatsApp confirmation to the lead — UTILITY template `confirmacion_cita`.
+    // Only when the advisor opted in (toggle) and the lead has a phone.
+    let wa: unknown = null;
+    if (enviar_confirmacion && lead.telefono) {
+      const to = "521" + String(lead.telefono).replace(/\D/g, "").slice(-10);
+      const fmtUTC = (d: Date) =>
+        d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+      const fechaTxt = start.toLocaleString("es-MX", {
+        timeZone: TZ,
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      const address = prop?.direccion || propNombre;
+      const mapsParam = encodeURIComponent(address);
+      const calParam =
+        `text=${encodeURIComponent("Visita " + propNombre)}` +
+        `&dates=${fmtUTC(start)}/${fmtUTC(end)}` +
+        `&location=${encodeURIComponent(address)}`;
+      const waRes = await fetch(
+        `https://graph.facebook.com/v19.0/${Deno.env.get("WA_PHONE_NUMBER_ID")}/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + Deno.env.get("WHATSAPP_ACCESS_TOKEN"),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to,
+            type: "template",
+            template: {
+              name: "confirmacion_cita",
+              language: { code: "es_MX" },
+              components: [
+                {
+                  type: "body",
+                  parameters: [
+                    { type: "text", text: leadName },
+                    { type: "text", text: propNombre },
+                    { type: "text", text: fechaTxt },
+                    { type: "text", text: lead.asesor_nombre || "tu asesor" },
+                  ],
+                },
+                {
+                  type: "button",
+                  sub_type: "url",
+                  index: "0",
+                  parameters: [{ type: "text", text: mapsParam }],
+                },
+                {
+                  type: "button",
+                  sub_type: "url",
+                  index: "1",
+                  parameters: [{ type: "text", text: calParam }],
+                },
+              ],
+            },
+          }),
+        },
+      );
+      wa = {
+        ok: waRes.ok,
+        status: waRes.status,
+        body: (await waRes.text()).slice(0, 300),
+      };
+    }
+
+    return json({ ok: true, gcal_event_id: ev.id, htmlLink: ev.htmlLink, wa });
   } catch (e) {
     return json({ error: String((e as Error).message) }, 500);
   }
