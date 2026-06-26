@@ -14,8 +14,8 @@ const formatTime = (value: string) =>
 /**
  * Read-only transcript of the real advisor↔lead WhatsApp conversation, captured
  * by the Baileys listener and exposed via public.advisor_conversation (joined to
- * the lead, RLS-scoped). Only advisors with the Baileys companion produce data,
- * so this card is HIDDEN when there are no messages (most leads, for now) and
+ * the lead, RLS-scoped). The card always renders for discoverability; it shows an
+ * empty state when no conversation is captured yet (most leads, for now) and
  * fills in automatically as the listener matures / more advisors onboard.
  */
 export const AdvisorConversacionLog = () => {
@@ -27,40 +27,49 @@ export const AdvisorConversacionLog = () => {
     pagination: { page: 1, perPage: 200 },
   });
 
-  if (!lead || !mensajes || mensajes.length === 0) return null;
+  if (!lead) return null;
+
+  const mensajesList = mensajes ?? [];
 
   return (
     <Card className="mt-4">
       <CardContent className="pt-6">
         <h3 className="text-md font-semibold mb-3">Conversación del asesor</h3>
-        <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
-          {mensajes.map((mensaje) => {
-            const fromAdvisor = mensaje.from_advisor;
-            return (
-              <div
-                key={mensaje.id}
-                className={cn(
-                  "flex flex-col max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                  fromAdvisor
-                    ? "self-end bg-primary text-primary-foreground"
-                    : "self-start bg-muted",
-                )}
-              >
-                <span>{mensaje.text}</span>
-                <span
+        {mensajesList.length > 0 ? (
+          <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
+            {mensajesList.map((mensaje) => {
+              const fromAdvisor = mensaje.from_advisor;
+              return (
+                <div
+                  key={mensaje.id}
                   className={cn(
-                    "text-[10px] mt-1",
+                    "flex flex-col max-w-[80%] rounded-lg px-3 py-2 text-sm",
                     fromAdvisor
-                      ? "text-primary-foreground/70"
-                      : "text-muted-foreground",
+                      ? "self-end bg-primary text-primary-foreground"
+                      : "self-start bg-muted",
                   )}
                 >
-                  {formatTime(mensaje.sent_at)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+                  <span>{mensaje.text}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] mt-1",
+                      fromAdvisor
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {formatTime(mensaje.sent_at)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Sin conversación capturada aún. Aparecerá cuando el asesor tenga el
+            listener activo.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
