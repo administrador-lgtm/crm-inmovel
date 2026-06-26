@@ -402,6 +402,16 @@ export const frenchCrmMessages = {
     navigation: {
       label: "Navigation CRM",
       leads: "Prospects",
+      visitas: "Visites",
+    },
+    agenda: {
+      today: "Aujourd'hui",
+      prev_week: "Semaine précédente",
+      next_week: "Semaine suivante",
+      empty: "Aucune visite ce jour.",
+      unassigned: "Sans conseiller",
+      no_property: "Sans bien",
+      maps: "Maps",
     },
     profile: {
       inbound: {

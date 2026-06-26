@@ -214,6 +214,26 @@ export type Visita = {
   estado?: string | null;
 } & Pick<RaRecord, "id">;
 
+/**
+ * Flattened row from the `visitas_agenda` view: one visit joined with its lead,
+ * advisor and property. Read-only — feeds the Visits Agenda screen. The advisor
+ * (`asesor_id`/`asesor_name`) is derived from the lead's `asesor_asignado`, the
+ * source of truth, not from `visitas.asesor_id`.
+ */
+export type VisitaAgenda = {
+  fecha: string;
+  lead_id: Identifier;
+  lead_name?: string | null;
+  lead_phone?: { number: string; type?: string }[] | null;
+  asesor_id?: Identifier | null;
+  asesor_name?: string | null;
+  propiedad_id?: string | null;
+  propiedad_name?: string | null;
+  url_maps?: string | null;
+  estado?: string | null;
+  stage?: string | null;
+} & Pick<RaRecord, "id">;
+
 export type LeadPropiedad = {
   lead_id: Identifier;
   propiedad_id: string;

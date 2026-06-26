@@ -395,6 +395,16 @@ export const englishCrmMessages = {
     navigation: {
       label: "CRM navigation",
       leads: "Leads",
+      visitas: "Visits",
+    },
+    agenda: {
+      today: "Today",
+      prev_week: "Previous week",
+      next_week: "Next week",
+      empty: "No visits this day.",
+      unassigned: "Unassigned",
+      no_property: "No property",
+      maps: "Maps",
     },
     profile: {
       inbound: {

@@ -89,6 +89,16 @@ export const spanishCrmMessages: PartialCrmMessages = {
     navigation: {
       label: "Navegación",
       leads: "Leads",
+      visitas: "Visitas",
+    },
+    agenda: {
+      today: "Hoy",
+      prev_week: "Semana anterior",
+      next_week: "Semana siguiente",
+      empty: "Sin visitas este día.",
+      unassigned: "Sin asesor",
+      no_property: "Sin propiedad",
+      maps: "Maps",
     },
     leads: {
       stage: "Etapa del lead",

@@ -450,7 +450,15 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/leads/StageSelector.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/leads/StageControl.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/leads/LeadStageListMobile.tsx",
           "type": "registry:component"
         },
         {
@@ -475,6 +483,14 @@
         },
         {
           "path": "src/components/atomic-crm/leads/ConversacionLog.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/leads/AgendarVisitaDialog.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/leads/AdvisorConversacionLog.tsx",
           "type": "registry:component"
         },
         {

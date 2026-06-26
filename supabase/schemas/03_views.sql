@@ -228,9 +228,16 @@ where public.can_access_lead(co.asesor_asignado)
 -- come from the lead's owning advisor (contacts.asesor_asignado), NOT
 -- visitas.asesor_id, so the agenda always reflects the current lead owner. stage
 -- is the lead's pipeline stage (contacts.stage); estado is the visit's calendar
--- status (visitas.estado). security_invoker keeps visitas' RLS (loosened to any
--- authenticated user — see 05_policies.sql).
-create or replace view public.visitas_agenda with (security_invoker = on) as
+-- status (visitas.estado).
+--
+-- security_invoker = off (definer): the agenda is intentionally team-wide read.
+-- Running as the view owner bypasses the per-advisor RLS on the joined contacts
+-- table so EVERY authenticated user sees ALL visits (with lead name/phone,
+-- advisor and property) — the agreed "open team, read-only" model. It exposes
+-- only these agenda columns; the underlying contacts/sales tables stay
+-- RLS-restricted for every other access path. Scheduling/editing visits remains
+-- gated by visitas INSERT/UPDATE RLS (see 05_policies.sql).
+create or replace view public.visitas_agenda with (security_invoker = off) as
 select
     v.id,
     v.fecha,

@@ -61,8 +61,11 @@ const LeadKanban = lazy(() => import("../leads/LeadKanban"));
 // Mobile pipeline view (chips + list) — the desktop kanban's drag-and-drop board
 // doesn't fit a phone, so /leads/kanban renders this on mobile instead.
 const LeadStageListMobile = lazy(() => import("../leads/LeadStageListMobile"));
+// Visits agenda (day + timeline). Reads the visitas_agenda view; lazy-loaded.
+const VisitasAgenda = lazy(() => import("../leads/VisitasAgenda"));
 
 export const LEAD_KANBAN_PATH = "/leads/kanban";
+export const VISITAS_PATH = "/visitas";
 
 /** Short link target for the WhatsApp mention button (/l/:id -> the lead). */
 const LeadRedirect = () => {
@@ -260,6 +263,7 @@ const DesktopAdmin = (
         <Route path={SettingsPage.path} element={<SettingsPage />} />
         <Route path={ChangelogPage.path} element={<ChangelogPage />} />
         <Route path={LEAD_KANBAN_PATH} element={<LeadKanban />} />
+        <Route path={VISITAS_PATH} element={<VisitasAgenda />} />
         <Route path="/l/:id" element={<LeadRedirect />} />
       </CustomRoutes>
       <Resource name="contacts" {...contacts} />
@@ -326,6 +330,9 @@ const MobileAdmin = (
               chips+list pipeline (the drag-and-drop board is desktop-only).
               /l/:id is the WhatsApp @mention deep-link target. */}
           <Route path={LEAD_KANBAN_PATH} element={<LeadStageListMobile />} />
+          {/* Reachable on mobile by route; a bottom-nav entry is deferred to the
+              mobile navigation redesign (the bar is already full). */}
+          <Route path={VISITAS_PATH} element={<VisitasAgenda />} />
           <Route path="/l/:id" element={<LeadRedirect />} />
         </CustomRoutes>
         <Resource

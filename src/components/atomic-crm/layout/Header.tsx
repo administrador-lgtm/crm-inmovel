@@ -21,6 +21,8 @@ const Header = () => {
     currentPath = "/contacts";
   } else if (matchPath("/leads/*", location.pathname)) {
     currentPath = "/leads/kanban";
+  } else if (matchPath("/visitas/*", location.pathname)) {
+    currentPath = "/visitas";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
   } else if (matchPath("/nocnok/*", location.pathname)) {
@@ -71,6 +73,13 @@ const Header = () => {
                     })}
                     to="/leads/kanban"
                     isActive={currentPath === "/leads/kanban"}
+                  />
+                  <NavigationTab
+                    label={translate("crm.navigation.visitas", {
+                      _: "Visitas",
+                    })}
+                    to="/visitas"
+                    isActive={currentPath === "/visitas"}
                   />
                   <NavigationTab
                     label={translate("resources.propiedades.name", {
