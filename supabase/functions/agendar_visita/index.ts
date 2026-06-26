@@ -5,6 +5,7 @@
 // carries extendedProperties.private.lead_id so the Calendar<->CRM sync can link
 // it. The WhatsApp confirmation to the lead is sent separately (see step 6).
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { corsHeaders } from "../_shared/cors.ts";
 
 const ADMIN_CAL = "administrador@inmovel.net"; // all-copy host (sees every visit)
 const TZ = "America/Mexico_City";
@@ -27,6 +28,9 @@ async function googleToken(): Promise<string> {
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
   try {
     const body = await req.json();
     const {
@@ -227,6 +231,6 @@ Deno.serve(async (req) => {
 function json(obj: unknown, status = 200): Response {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...corsHeaders },
   });
 }
