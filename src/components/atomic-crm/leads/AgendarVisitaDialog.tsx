@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import {
-  useCreate,
-  useGetIdentity,
   useGetList,
   useNotify,
   useRecordContext,
+  useRefresh,
 } from "ra-core";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 import type { Contact, Propiedad } from "../types";
+import { getSupabaseClient } from "../providers/supabase/supabase";
 
 /** Lead's first non-empty phone (jsonb or the synced `telefono`). */
 const leadPhone = (lead: Contact): string | undefined =>
@@ -67,8 +67,8 @@ export const AgendarVisitaDialog = ({
 }) => {
   const lead = useRecordContext<Contact>();
   const notify = useNotify();
-  const { identity } = useGetIdentity();
-  const [create, { isPending }] = useCreate();
+  const refresh = useRefresh();
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: propiedades } = useGetList<Propiedad>("propiedades", {
     sort: { field: "nombre", order: "ASC" },
@@ -101,27 +101,29 @@ export const AgendarVisitaDialog = ({
   // the advisor's choice at confirm time.
   const willNotify = enviarConfirmacion && hasPhone;
 
-  const submit = () => {
+  const submit = async () => {
     if (!ready) return;
-    create(
-      "visitas",
+    setSubmitting(true);
+    const { data, error } = await getSupabaseClient().functions.invoke(
+      "agendar_visita",
       {
-        data: {
+        body: {
           lead_id: lead.id,
           propiedad_id: propiedadId,
           fecha: new Date(fecha).toISOString(),
-          asesor_id: lead.asesor_asignado ?? identity?.id,
+          duracion: Number(duracion),
+          enviar_confirmacion: willNotify,
         },
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          notify("Visita agendada", { type: "info" });
-        },
-        onError: () =>
-          notify("No se pudo agendar la visita", { type: "error" }),
       },
     );
+    setSubmitting(false);
+    if (error || (data && (data as { error?: string }).error)) {
+      notify("No se pudo agendar la visita", { type: "error" });
+      return;
+    }
+    onOpenChange(false);
+    notify("Visita agendada", { type: "info" });
+    refresh();
   };
 
   return (
@@ -227,7 +229,7 @@ export const AgendarVisitaDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={submit} disabled={!ready || isPending}>
+          <Button onClick={submit} disabled={!ready || submitting}>
             Confirmar y agendar
           </Button>
         </DialogFooter>
