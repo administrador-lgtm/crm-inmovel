@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 
 import type { Contact, Propiedad, Visita } from "../types";
+import { AgendarVisitaDialog } from "./AgendarVisitaDialog";
 
 const formatDate = (value: string, locale: string) =>
   new Date(value).toLocaleString(locale, {
@@ -47,6 +48,7 @@ export const VisitasPanel = () => {
   const { identity } = useGetIdentity();
   const [create] = useCreate();
   const [open, setOpen] = useState(false);
+  const [agendarOpen, setAgendarOpen] = useState(false);
   const [propiedadId, setPropiedadId] = useState("");
   const [fecha, setFecha] = useState("");
   const [resultado, setResultado] = useState("");
@@ -110,10 +112,21 @@ export const VisitasPanel = () => {
           <h3 className="text-md font-semibold">
             {translate("crm.visitas.title", { _: "Visitas" })}
           </h3>
-          <Button size="sm" onClick={() => setOpen(true)}>
-            {translate("crm.visitas.add", { _: "Registrar visita" })}
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => setAgendarOpen(true)}>
+              {translate("crm.visitas.schedule", { _: "Agendar visita" })}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpen(true)}
+            >
+              {translate("crm.visitas.add", { _: "Registrar" })}
+            </Button>
+          </div>
         </div>
+
+        <AgendarVisitaDialog open={agendarOpen} onOpenChange={setAgendarOpen} />
 
         {visitas && visitas.length > 0 ? (
           <ul className="flex flex-col gap-2">
