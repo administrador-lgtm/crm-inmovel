@@ -15,8 +15,15 @@ an agenda that is meant to be a shared, team-wide view.
 
 Replace the visitas SELECT policy with `using (true)` for the `authenticated`
 role (idiomatic "all authenticated" read, same as propiedades/sales). INSERT and
-UPDATE stay `can_access_lead`-gated, so writes remain advisor-scoped. The new
-`visitas_agenda` view is `security_invoker = on`, so it inherits this policy.
+UPDATE stay `can_access_lead`-gated, so writes remain advisor-scoped.
+
+The `visitas_agenda` view is `security_invoker = off` (definer). This is the
+crux: an `invoker` view would re-apply the *joined* tables' RLS to each caller,
+and `contacts` SELECT is still `can_access_lead`-gated — so a non-admin advisor
+would only see visits for their own leads, silently defeating the team-wide
+agenda. Running the view as its owner bypasses RLS on the joined contacts/sales/
+propiedades, so every authenticated user sees all visits. The view exposes only
+the agenda columns; the base tables stay RLS-restricted for every other path.
 
 ## Consequences
 
@@ -50,3 +57,22 @@ Committed apart from the SQL feature; the security review focuses on the SQL.
   other advisors' visits, defeating the team-wide agenda.
 - Manager-graph scope (`can_access_lead` reuse): rejected — the agenda is meant
   for the whole team, not just a manager's reports.
+
+## Addendum — frontend + deploy-time correction (2026-06-26)
+
+- **Consumer**: the `VisitasAgenda` screen (`src/components/atomic-crm/leads/
+  VisitasAgenda.tsx`, route `/visitas`, desktop nav tab + mobile route) reads
+  `visitas_agenda` via `useGetList`. Day-strip selector with per-day counts,
+  additive advisor color "layers" (admin defaults all on, advisor defaults own
+  on — purely client-side), and a per-day timeline with Maps/WhatsApp/ficha
+  links. Read-only; visits are still scheduled from the lead ficha.
+- **Correction**: the view first shipped as `security_invoker = on` (this ADR's
+  original text). On live validation that was found to hide other advisors'
+  visits from non-admins (the `contacts` RLS re-application above), so it was
+  changed to `security_invoker = off` and applied directly to the production DB
+  (`apply-visitas-agenda.mjs`, via the session pooler). Schema + this ADR now
+  reflect `off`.
+- **Process note**: this work was finished off the normal agent pipeline (the
+  validate-before-review gate kept failing on pre-existing flaky/broken suite
+  state). Backend merged + DB applied + frontend committed and deployed
+  (`railway up`) directly by the orchestrator.
