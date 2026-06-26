@@ -319,6 +319,11 @@ const MobileAdmin = (
             element={<SettingsPageMobile />}
           />
           <Route path={ChangelogPage.path} element={<ChangelogPage />} />
+          {/* The mobile bottom nav links to the leads kanban; register it here
+              too (it was desktop-only, so mobile got a 404). /l/:id is the
+              WhatsApp @mention deep-link target. */}
+          <Route path={LEAD_KANBAN_PATH} element={<LeadKanban />} />
+          <Route path="/l/:id" element={<LeadRedirect />} />
         </CustomRoutes>
         <Resource
           name="contacts"
