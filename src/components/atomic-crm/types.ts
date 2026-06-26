@@ -224,6 +224,18 @@ export type Conversacion = {
   nombre_lead?: string | null;
 } & Pick<RaRecord, "id">;
 
+/**
+ * One captured advisor↔lead WhatsApp message (Baileys listener), exposed via the
+ * public.advisor_conversation view. `from_advisor` gives the bubble side.
+ */
+export type AdvisorMessage = {
+  lead_id: Identifier;
+  from_advisor: boolean;
+  text: string;
+  sent_at: string;
+  advisor_sales_id?: number | null;
+} & Pick<RaRecord, "id">;
+
 export type Anuncio = {
   /** Meta ad id (primary key). */
   id: string;

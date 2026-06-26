@@ -196,3 +196,29 @@ left join public.contacts c on c.id = m.contact_id
 left join public.contact_notes n on n.id = m.note_id
 left join public.sales s on s.id = m.sender_id
 left join public.sales sr on sr.id = m.recipient_id;
+
+-- Advisor↔lead WhatsApp transcript captured by the Baileys listener
+-- (`wa_listener` schema, not exposed to the API). This curated view in public is
+-- the ONLY bridge: it joins the listener's raw_messages -> chats -> contacts,
+-- normalizing the device number to its last 10 digits (the listener's number/jid
+-- formats aren't fully consistent yet). SECURITY DEFINER (security_invoker off)
+-- so it can read wa_listener without granting the API roles access to that
+-- schema; access is gated by `can_access_lead` in the WHERE so each advisor only
+-- sees their own leads' conversations. Requires:
+--   grant select on public.advisor_conversation to authenticated, anon;
+create or replace view public.advisor_conversation with (security_invoker = off) as
+select
+    rm.id,
+    co.id as lead_id,
+    rm.from_advisor,
+    rm.text,
+    to_timestamp(rm.ts) as sent_at,
+    c.advisor_sales_id
+from wa_listener.raw_messages rm
+join wa_listener.chats c
+    on right(regexp_replace(c.number, '\D', '', 'g'), 10)
+     = right(regexp_replace(rm.number, '\D', '', 'g'), 10)
+   and (c.lid = rm.chat_id or c.phone = rm.chat_id)
+join public.contacts co on co.id = c.contact_id
+where public.can_access_lead(co.asesor_asignado)
+  and rm.text is not null and rm.text <> '';

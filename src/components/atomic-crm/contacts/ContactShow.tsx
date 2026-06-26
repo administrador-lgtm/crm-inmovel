@@ -29,6 +29,7 @@ import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
 import { VisitasPanel } from "../leads/VisitasPanel";
 import { ConversacionLog } from "../leads/ConversacionLog";
+import { AdvisorConversacionLog } from "../leads/AdvisorConversacionLog";
 import { StageSelector } from "../leads/StageSelector";
 import { MobileBackButton } from "../misc/MobileBackButton";
 
@@ -200,6 +201,7 @@ const ContactShowContentMobile = () => {
           </TabsContent>
           <TabsContent value="activity" className="mt-2">
             <VisitasPanel />
+            <AdvisorConversacionLog />
             <ConversacionLog />
           </TabsContent>
         </Tabs>
@@ -244,6 +246,7 @@ const ContactShowContent = () => {
           </CardContent>
         </Card>
         <VisitasPanel />
+        <AdvisorConversacionLog />
         <ConversacionLog />
       </div>
       <ContactAside />
