@@ -150,3 +150,32 @@
 
 ## One-line lesson
 **The tax this round was duplication *inside* the CRM** — code vs DB config, desktop vs mobile, two schemas. Fixes mean touching every surface, and a "deploy FAILED" almost never means "site down" — check the HTTP and the ACTIVE deploy first.
+
+---
+
+# Post-Mortem — Baileys 2nd-advisor rollout: design validated (checkpoint)
+
+**EVENT:** A second advisor work number (Josafat's) was added to the Baileys listener (2026-06-26). Verified whether the CRM picks it up with no code change.
+**EXPECTED:** The `advisor_conversation` view + panel light up for the new advisor automatically (the "scales by design" bet from round 2).
+**ACTUAL:** It did. `wa_listener.chats` now has `number=5215516569427 → advisor_sales_id=1`, the device is actively writing (32 msgs, last one minutes old), and the view links his conversations — zero code/deploy needed. This is a verification checkpoint, not an incident.
+
+## What was confirmed
+- **Auto-scale held.** No CRM change was required for the 2nd advisor — the curated view + RLS-by-`can_access_lead` design absorbed the new device. As more advisors onboard Baileys, they light up the same way.
+- **The "immaturity absorbed by the view" bet paid off, concretely.** The listener recorded Josafat's *same* device under two number formats — `5215516569427` (32 msgs) and `525516569427` (29 msgs, missing the `1`). The view's last-10-digit normalization (`right(digits,10)='5516569427'`) merged both; nothing lost. Had the join used the raw number, half his messages would have been dropped silently.
+- **The CRM's number for Josafat** (`sales`: tel `5516569427`, wa `5215516569427`) matches the listener device — which is *why* it links. Advisor whatsapp ↔ listener device number is the implicit contract.
+
+## 5 Whys (short — no failure, a design check)
+1. Why did the 2nd advisor work with no change? → The view joins any chat with a `contact_id` and gates by lead access, not by a hardcoded advisor.
+2. Why did both number formats link? → The join normalizes to the last 10 digits, anticipating the listener's `52`/`521` inconsistency.
+3. Why was that normalization already there? → Round 2 chose to absorb listener immaturity inside the view on purpose.
+
+**TAKEAWAY:** The round-2 architectural bets (scale-by-design + curated view absorbs messy cross-schema data) were validated by the first real rollout step.
+
+## Change register
+| Action | Owner | Due | Verification |
+|---|---|---|---|
+| Keep advisor `sales.whatsapp` in sync with their Baileys device number | process | every advisor onboard | their conversations link on the ficha |
+| Watch link rate as more advisors onboard; if the last-10 normalization ever collides, revisit the join | me | ongoing | linked-message count tracks captured count |
+
+## One-line lesson
+**The design held its first real test:** adding a second advisor to the listener needed zero CRM work, and the deliberate last-10-digit normalization quietly saved half the new advisor's messages from a format mismatch — proof that absorbing upstream messiness in one curated view (not the UI) was the right call.
