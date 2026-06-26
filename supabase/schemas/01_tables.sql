@@ -149,7 +149,10 @@ create table public.visitas (
     created_at timestamp with time zone not null default now(),
     -- Google Calendar event id: the visit is created as a calendar event (source
     -- of truth) and mirrored here; this keys the Calendar<->CRM sync.
-    gcal_event_id text unique
+    gcal_event_id text unique,
+    -- Mirrored from the calendar event status (confirmada | cancelada). The
+    -- calendar_sync sets this; resultado/notas stay CRM-owned.
+    estado text default 'confirmada'
 );
 
 create index visitas_lead_id_idx on public.visitas using btree (lead_id);
