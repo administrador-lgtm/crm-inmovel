@@ -77,9 +77,10 @@ the moment of scheduling, instead of trusting whatever the lead carried):
 
 The **summary is composed from the confirmed fields** — nothing invented. On
 confirm the CRM:
-- **Creates the event in the advisor's calendar** (`sales.calendario`), advisor as
-  `attendee` (`sales.email`, linked), with templated `summary` /`description` /
-  `location` (teléfono, presupuesto, zona, ventana/forma de compra, resumen, ficha
+- **Creates the event on `administrador@inmovel.net`** (the all-copy host → admin
+  sees every visit) with the assigned advisor's `sales.calendario` as **attendee**
+  (their own copy; Josafat-advisor → `josafat@`), templated `summary` /`description`
+  /`location` (teléfono, presupuesto, zona, ventana/forma de compra, resumen, ficha
   deep-link `/l/{lead_id}` — degrades gracefully when fields are missing) and
   `extendedProperties.private.lead_id/propiedad_id`; saves `gcal_event_id`.
 - **Triggers a WhatsApp confirmation to the lead** (bot/WABA) — "Tu visita a
@@ -96,14 +97,18 @@ Both create the same tagged event; the CRM button stays as a manual fallback.
 
 ## Existing infrastructure (already in place)
 
-- Advisor group calendars under `administrador@inmovel.net`, read/write/delete
-  validated — IDs in `~/inmovel/code/references/google-calendar-asesores.md`
-  (Luis Gerardo, Josafat, shared "Visitas JAAC").
-- OAuth token already has the `calendar` scope (same GOOGLE_CLIENT_ID/SECRET/
-  REFRESH_TOKEN used by the Sheet sync).
-- `sales.calendario` column exists (empty — to populate with each advisor's
-  Calendar ID). Calendar = the advisor's/broker's own calendar (per-advisor), with
-  admin subscribed to all.
+- **Use each person's NORMAL primary calendar (their email)** — no special/group
+  calendars. The OAuth account `administrador@inmovel.net` owns the domain and can
+  invite any `@inmovel.net` calendar. Token already has the `calendar` scope (same
+  GOOGLE_CLIENT_ID/SECRET/REFRESH_TOKEN as the Sheet sync).
+- **`sales.calendario` (populated) = the advisor's primary calendar email** (where
+  THEIR visits go): Ana `avargas@`, Luis Gerardo `luis@`, Luis Antonio
+  `antoniosolis@`, and **Josafat-as-advisor `josafat@inmovel.net`** (distinct from
+  his admin login `administrador@`).
+- **Calendar fan-out rule:** every visit event is hosted on
+  **`administrador@inmovel.net` (the all-copy — admin sees ALL visits)** and adds
+  the assigned advisor's `sales.calendario` as an **attendee** (so each advisor gets
+  only their own; Josafat-advisor's land on `josafat@`).
 
 ## Phase 1 scope (when we build)
 
