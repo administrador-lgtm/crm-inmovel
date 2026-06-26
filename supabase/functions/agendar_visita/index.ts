@@ -69,13 +69,15 @@ Deno.serve(async (req) => {
       .single();
 
     let advisorCal: string | null = null;
+    let advisorWa: string | null = null;
     if (lead.asesor_asignado) {
       const { data: adv } = await supabase
         .from("sales")
-        .select("calendario, email")
+        .select("calendario, email, whatsapp")
         .eq("id", lead.asesor_asignado)
         .single();
       advisorCal = adv?.calendario || adv?.email || null;
+      advisorWa = adv?.whatsapp || null;
     }
 
     const leadName = lead.nombre || lead.first_name || "Lead";
@@ -154,7 +156,14 @@ Deno.serve(async (req) => {
         minute: "2-digit",
       });
       const address = prop?.direccion || propNombre;
-      const mapsParam = encodeURIComponent(address);
+      // Maps button base in the template is `https://maps.google.com/?q=` (the
+      // format that opens reliably). Pass the suffix from the property's url_maps
+      // when present, else the encoded address.
+      const mapsParam =
+        prop?.url_maps && prop.url_maps.includes("?q=")
+          ? prop.url_maps.split("?q=")[1]
+          : encodeURIComponent(address);
+      const waBody = `wa.me/${advisorWa ?? "5215540203511"}`;
       const calParam =
         `text=${encodeURIComponent("Visita " + propNombre)}` +
         `&dates=${fmtUTC(start)}/${fmtUTC(end)}` +
@@ -182,6 +191,7 @@ Deno.serve(async (req) => {
                     { type: "text", text: propNombre },
                     { type: "text", text: fechaTxt },
                     { type: "text", text: lead.asesor_nombre || "tu asesor" },
+                    { type: "text", text: waBody },
                   ],
                 },
                 {
