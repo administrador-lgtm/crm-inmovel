@@ -99,3 +99,54 @@
 
 ## One-line lesson
 **Every fire this session was the same fire** — the Sheet and the CRM both claiming to own the data. Patching each field restores calm for a day; the only real fix is one source of truth, which is why the migration doc — not any single patch — is the actual deliverable.
+
+---
+
+# Post-Mortem — Inmovel CRM live-ops round 2: UI/mobile + Baileys surfacing
+
+**EVENT:** Second live-ops stretch (2026-06-25) — UI features, mobile pipeline, and connecting the ficha to the Baileys advisor conversation.
+**EXPECTED:** A few small UI tweaks.
+**ACTUAL:** Shipped 5 features, fixed a mobile 404, parked a 20-lead Sheet corruption correctly, and wired the advisor↔lead conversation into the ficha. One deploy "outage" scare that wasn't one.
+**IMPACT:** Advisors get a usable mobile pipeline and see the real advisor↔lead WhatsApp conversation on the ficha.
+
+## Timeline
+- **Stage rename** S7 "Visita agendada"→"Visita solicitada" — needed editing BOTH `defaultConfiguration.ts` AND the live `public.configuration` row (DB wins at runtime).
+- **Kanban card**: advisor badge (👤) replaces the useless phone.
+- **Deploy "failed!" scare**: a FAILED deploy was a Railway transient registry-auth error (`oauth token: denied` pulling nixpacks), retryable; separately, "still shows the phone" was the PWA service worker serving a stale bundle. Site returned 200 throughout — never down.
+- **Mobile kanban 404**: `/leads/kanban` was registered only in DesktopAdmin → mobile got "No encontrado". Registered it (and `/l/:id`) in MobileAdmin.
+- **"Pending Pending" advisor**: Luis Antonio's `sales` row was created with the default name and never set; fixed name + refreshed his 18 leads.
+- **`asesor_asignado` Sheet corruption** (visit phrases overwrote the advisor for ~20 visit-intent leads): parked them on Josafat (persists now), Selene's 15 left alone, descriptive brief handed to the inmovel builder.
+- **Mobile stages UX**: chips+list pipeline view + per-lead stage picker (S6+ only).
+- **Baileys surfacing**: the ficha now shows the real advisor↔lead conversation via a curated `public.advisor_conversation` view.
+
+## 5 Whys (this round's theme: duplication WITHIN the CRM)
+1. Why did the S7 rename, the mobile 404, and the "Pending" name each need an extra, easy-to-miss step? → The same fact lived in two places.
+2. Which places? → code default vs DB `configuration` row; DesktopAdmin routes vs MobileAdmin routes; `auth.users` vs the `sales` display name.
+3. Why two places? → The app has parallel surfaces (desktop/mobile admin, code config vs DB config, multiple schemas) kept in sync by hand.
+4. Why by hand? → No single source per concern; each surface was added independently.
+
+**ROOT CAUSE:** Duplicated sources of truth — this round *inside* the CRM (code vs DB config, desktop vs mobile routes), the same disease as the Sheet-vs-Supabase macro problem, one scale down.
+
+## Contributing factors
+- **PWA cache + Railway transient** make "did it ship?" / "is it down?" ambiguous → burned a cycle on a non-outage.
+- **Cross-schema immaturity**: the Baileys `wa_listener` data is young and inconsistent (number `52`/`521`, jid `@lid`/`@s.whatsapp.net`); only ~29 messages link cleanly today.
+
+## Warning signs / handled well
+- "failed!" → checked `curl` HTTP 200 + which deploy was ACTIVE before concluding outage. **A FAILED deploy badge ≠ a down site.**
+- Verified every fix: typecheck before each deploy, monitored deploys to SUCCESS, inspected the live JS bundle to prove the phone was gone server-side, simulated/queried data for the trigger and the conversation join.
+- For the immature Baileys data, chose a **curated `public` view** that absorbs the messy join in one place — so the UI never changes as the listener matures.
+
+## In control vs out of control
+**In control:** registering mobile routes, dual-writing config (code + DB), the curated definer view for cross-schema access, single deploy + monitor, honest "it's sparse now, grows later".
+**Out of control:** Railway registry hiccup; PWA cache TTL; Baileys listener data maturity (inmovel side).
+
+## Change register
+| Action | Owner | Due | Verification |
+|---|---|---|---|
+| Stage label / config change → update BOTH `defaultConfiguration.ts` AND the DB `configuration` row | process | every config change | new label shows after reload |
+| New route → register in BOTH DesktopAdmin and MobileAdmin | process | every new route | no 404 on mobile |
+| New advisor → set `sales` name + `whatsapp` (not default 'Pending') | process | every activation | advisor shows by name immediately |
+| Baileys "suggestions" accept-cards on the ficha | backlog | when `wa_listener.suggestions` produces rows | suggested stage/note appliable from the lead |
+
+## One-line lesson
+**The tax this round was duplication *inside* the CRM** — code vs DB config, desktop vs mobile, two schemas. Fixes mean touching every surface, and a "deploy FAILED" almost never means "site down" — check the HTTP and the ACTIVE deploy first.
