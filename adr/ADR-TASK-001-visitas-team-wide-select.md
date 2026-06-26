@@ -27,6 +27,17 @@ UPDATE stay `can_access_lead`-gated, so writes remain advisor-scoped. The new
 - Deliberate, documented departure from the per-advisor read isolation in
   ADR-TASK-014, scoped to the visitas table only.
 
+## Note — baseline repair
+
+To pass the validate-before-review gate, TASK-001 also had to repair a
+pre-existing baseline failure on the session branch (unrelated to the RLS/view
+change): `google.maps` types missing from `tsconfig.app.json`'s `types` array,
+`Contact` MessageSchema/fake-generator drift, a deprecated `DrawingManager` API
+in `NocnokMap.tsx` (stripped from `@types/google.maps@3.65`) typed via a localized
+cast, and stale `i18nProvider.test.ts` assertions (the app now registers an `es`
+locale and defaults to Spanish). Committed separately (`fix: repair pre-existing
+typecheck baseline …`); the security review focuses on the SQL.
+
 ## Alternatives considered
 
 - Keep `can_access_lead` on SELECT and filter client-side: rejected — would hide

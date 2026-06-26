@@ -84,6 +84,7 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       has_newsletter: weightedBoolean(30),
       status: random.arrayElement(defaultNoteStatuses).value,
       stage,
+      stage_changed_at: randomDate(new Date(first_seen)).toISOString(),
       sales_id: sale.id,
       linkedin_url: null,
       // Inmovel lead fields (sync-owned in production, faked for the demo)
@@ -95,6 +96,7 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       estado: "nuevo",
       desarrollos: [],
       desarrollo_activo: "",
+      desarrollo_activo_nombre: "",
       ad_id: weightedBoolean(60)
         ? `ad_${random.number({ min: 1000, max: 9999 })}`
         : "",

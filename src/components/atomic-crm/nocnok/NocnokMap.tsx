@@ -92,7 +92,18 @@ const DrawingLayer = ({
   onCompleteRef.current = onComplete;
   useEffect(() => {
     if (!map || !drawingLib || !drawing) return;
-    const manager = new drawingLib.DrawingManager({
+    // @types/google.maps@3.65 reduced DrawingManager to an empty deprecated stub
+    // (the drawing library was dropped from the typed API surface) while the
+    // runtime still provides it via importLibrary. Re-declare the slice of the
+    // legacy API this component uses so tsc stays green without an `any`.
+    type LegacyDrawingManager = google.maps.MVCObject & {
+      setDrawingMode(mode: string | null): void;
+      setMap(map: google.maps.Map | null): void;
+    };
+    const DrawingManagerCtor = drawingLib.DrawingManager as unknown as new (
+      opts: Record<string, unknown>,
+    ) => LegacyDrawingManager;
+    const manager = new DrawingManagerCtor({
       drawingMode: drawingLib.OverlayType.POLYGON,
       drawingControl: false,
       map,
