@@ -208,6 +208,10 @@ export type Visita = {
   notas?: string | null;
   asesor_id?: Identifier | null;
   created_at?: string;
+  /** Google Calendar event id (Calendar is the source of truth for visits). */
+  gcal_event_id?: string | null;
+  /** confirmada | cancelada — mirrored from the calendar event status. */
+  estado?: string | null;
 } & Pick<RaRecord, "id">;
 
 export type LeadPropiedad = {
