@@ -61,23 +61,31 @@ v1 only links CRM-created events; a phone-in-title fallback is possible later.
 
 ## Flows
 
-**v1 — CRM (manual, now):** "Agendar visita" button on the lead ficha. The advisor
-picks a date/time; the CRM:
-1. **Creates the event in the advisor's calendar** (`sales.calendario`), with the
-   advisor added as an **attendee** (`sales.email` — already linked) so it lands in
-   their personal agenda with reminders, and `extendedProperties.private.lead_id`.
-2. **Pre-fills the invite from CRM data** — a template in the event `summary` +
-   `description` + `location`, e.g.:
-   - summary: `Visita — {lead nombre} — {propiedad nombre}`
-   - location: the property address (`propiedades.direccion`)
-   - description (templated): teléfono, presupuesto, zona de interés, ventana/forma
-     de compra, resumen, and the ficha deep-link (`/l/{lead_id}`). One template,
-     filled from the lead + propiedad row.
-3. **Triggers a WhatsApp confirmation to the lead** (bot/WABA) — "Tu visita a
-   {propiedad} quedó agendada para {fecha}…". Same pipeline as the @mention notify
-   (DB trigger → edge function → WABA template). Needs an approved visit-confirm
-   template.
-4. The `calendar_sync` then mirrors the event back into `visitas` for the ficha.
+**v1 — CRM (manual, now):** "Agendar visita" is a short guided **journey** on the
+ficha that makes the advisor confirm the key fields (so clean data is captured at
+the moment of scheduling, instead of trusting whatever the lead carried):
+
+1. **Propiedad** — dropdown, default = the lead's `desarrollo_activo`, overridable
+   (a lead may visit a different property than their entry ad). Drives the address.
+   *Optional:* write the confirmed property back to the lead's `desarrollo_activo`
+   with the CRM-owned-once-set guard (same anti-revert pattern as `sales_id`) so the
+   journey also cleans the lead's data.
+2. **Fecha** — date picker (default = `fecha_visita_propuesta` if present).
+3. **Hora** (+ duration, default 1h).
+4. **Preview** — the advisor sees the composed invite (title, address, body) AND
+   the WhatsApp message the lead will get → **Confirm**.
+
+The **summary is composed from the confirmed fields** — nothing invented. On
+confirm the CRM:
+- **Creates the event in the advisor's calendar** (`sales.calendario`), advisor as
+  `attendee` (`sales.email`, linked), with templated `summary` /`description` /
+  `location` (teléfono, presupuesto, zona, ventana/forma de compra, resumen, ficha
+  deep-link `/l/{lead_id}` — degrades gracefully when fields are missing) and
+  `extendedProperties.private.lead_id/propiedad_id`; saves `gcal_event_id`.
+- **Triggers a WhatsApp confirmation to the lead** (bot/WABA) — "Tu visita a
+  {propiedad} quedó agendada para {fecha}…". Same pipeline as `notify_mention` (DB
+  trigger → edge function → WABA template). Needs an approved visit-confirm template.
+- `calendar_sync` then mirrors the event back into `visitas` for the ficha.
 
 **v2 — bot (future):** the visit falls out of the conversation, two paths:
 1. **Bot directly with the lead** (consulting the advisor/broker first for
