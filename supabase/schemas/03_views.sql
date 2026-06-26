@@ -222,3 +222,29 @@ join wa_listener.chats c
 join public.contacts co on co.id = c.contact_id
 where public.can_access_lead(co.asesor_asignado)
   and rm.text is not null and rm.text <> '';
+
+-- Visits Agenda — one flat row per scheduled visit with the lead, advisor, and
+-- property context the agenda screen needs in a single read. asesor_id/asesor_name
+-- come from the lead's owning advisor (contacts.asesor_asignado), NOT
+-- visitas.asesor_id, so the agenda always reflects the current lead owner. stage
+-- is the lead's pipeline stage (contacts.stage); estado is the visit's calendar
+-- status (visitas.estado). security_invoker keeps visitas' RLS (loosened to any
+-- authenticated user — see 05_policies.sql).
+create or replace view public.visitas_agenda with (security_invoker = on) as
+select
+    v.id,
+    v.fecha,
+    v.lead_id,
+    coalesce(c.nombre, c.first_name) as lead_name,
+    c.phone_jsonb as lead_phone,
+    c.asesor_asignado as asesor_id,
+    trim(s.first_name || ' ' || coalesce(s.last_name, '')) as asesor_name,
+    v.propiedad_id,
+    p.nombre as propiedad_name,
+    p.url_maps,
+    v.estado,
+    c.stage
+from public.visitas v
+join public.contacts c on c.id = v.lead_id
+left join public.sales s on s.id = c.asesor_asignado
+left join public.propiedades p on p.id = v.propiedad_id;
