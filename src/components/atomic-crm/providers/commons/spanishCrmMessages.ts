@@ -3,14 +3,15 @@ import type { PartialCrmMessages } from "./englishCrmMessages";
 /**
  * Spanish CRM catalog for Inmovel. Only the high-visibility domain strings are
  * translated here; everything else falls back to the English catalog (layered
- * underneath in i18nProvider) so no key is ever missing. In Inmovel the
- * "contacts" resource is presented as "Leads" — a contact IS a lead.
+ * underneath in i18nProvider) so no key is ever missing. The "contacts"
+ * resource is labelled "Contactos" (matching the English "Contacts"); the
+ * lead pipeline is the separate "Leads" kanban tab, so the two are distinct.
  */
 export const spanishCrmMessages: PartialCrmMessages = {
   resources: {
     contacts: {
-      name: "Lead |||| Leads",
-      forcedCaseName: "Lead",
+      name: "Contacto |||| Contactos",
+      forcedCaseName: "Contacto",
       fields: {
         first_name: "Nombre",
         last_name: "Apellido",
