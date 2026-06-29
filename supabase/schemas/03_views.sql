@@ -172,6 +172,50 @@ from public.nocnok
 where colonia is not null and colonia <> ''
 group by colonia;
 
+-- Unified external inventory: NocNok + Lamudi in one shape, discriminated by
+-- `fuente`. The CRM finder shows ONE source at a time (a master Nocnok/Lamudi
+-- selector sets `fuente@eq`); the feeds are never mixed in a single list
+-- because their data quality differs. Each side is filtered to its own latest
+-- fecha_carga (the syncs upsert but never delete). `title` falls back to
+-- "tipo · colonia" because Lamudi rows often have no title. id = codigo (codes
+-- are source-prefixed: NN-… / LM-…, so they don't collide across feeds).
+create or replace view public.inventario_externo with (security_invoker = on) as
+select
+    'nocnok'::text as fuente,
+    p.codigo as id, p.codigo,
+    coalesce(nullif(p.title, ''), concat_ws(' · ', nullif(p.type_text, ''), nullif(p.colonia, ''))) as title,
+    p.operacion, p.type_text, p.precio, p.recamaras, p.full_bathrooms, p.half_bathrooms,
+    p.m2, p.lot_size, p.colonia, p.alcaldia, p.estado, p.cp, p.estacionamiento,
+    p.year_built, p.levels, p.url_ficha, p.lat, p.lon, p.account_name,
+    p.shared_commission, p.is_exclusive, p.share_type, p.status_days, p.status_date,
+    p.fotos, p.broker_tel, p.broker_wa,
+    case when p.lat ~ '^-?[0-9.]+$' then p.lat::numeric end as lat_num,
+    case when p.lon ~ '^-?[0-9.]+$' then p.lon::numeric end as lng_num
+from public.nocnok_raw p
+where p.fecha_carga = (select max(fecha_carga) from public.nocnok_raw)
+union all
+select
+    'lamudi'::text as fuente,
+    p.codigo as id, p.codigo,
+    coalesce(nullif(p.title, ''), concat_ws(' · ', nullif(p.type_text, ''), nullif(p.colonia, ''))) as title,
+    p.operacion, p.type_text, p.precio, p.recamaras, p.full_bathrooms, p.half_bathrooms,
+    p.m2, p.lot_size, p.colonia, p.alcaldia, p.estado, p.cp, p.estacionamiento,
+    p.year_built, p.levels, p.url_ficha, p.lat, p.lon, p.account_name,
+    p.shared_commission, p.is_exclusive, p.share_type, p.status_days, p.status_date,
+    p.fotos, p.broker_tel, p.broker_wa,
+    case when p.lat ~ '^-?[0-9.]+$' then p.lat::numeric end as lat_num,
+    case when p.lon ~ '^-?[0-9.]+$' then p.lon::numeric end as lng_num
+from public.lamudi_raw p
+where p.fecha_carga = (select max(fecha_carga) from public.lamudi_raw);
+
+-- Distinct colonias per source, for the finder's multi-select zone filter
+-- (scoped by `fuente@eq` to match the active master source).
+create or replace view public.inventario_externo_colonias with (security_invoker = on) as
+select fuente, colonia as id, colonia, count(*)::int as n
+from public.inventario_externo
+where colonia is not null and colonia <> ''
+group by fuente, colonia;
+
 create or replace view public.conversaciones_by_lead with (security_invoker = on) as
 select
     c.id,

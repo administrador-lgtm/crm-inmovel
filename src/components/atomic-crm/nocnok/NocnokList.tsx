@@ -45,7 +45,10 @@ const ALCALDIA_CHOICES = [
  * of the current inventory, `id` = colonia so it maps straight to the filter).
  */
 const ColoniaFilter = (props: { source?: string; alwaysOn?: boolean }) => {
-  const { data } = useGetList("nocnok_colonias", {
+  const { filterValues } = useListContext();
+  const fuente = filterValues?.["fuente@eq"] ?? "nocnok";
+  const { data } = useGetList("inventario_externo_colonias", {
+    filter: { "fuente@eq": fuente },
     pagination: { page: 1, perPage: 1000 },
     sort: { field: "colonia", order: "ASC" },
   });
@@ -138,6 +141,37 @@ const opName = (id: string) =>
 const AREA_KEYS = ["lat_num@gte", "lat_num@lte", "lng_num@gte", "lng_num@lte"];
 const SPATIAL_KEYS = [...AREA_KEYS, "codigo@in"];
 
+// Master source filter — the finder shows ONE feed at a time (never mixed).
+const MASTER_KEY = "fuente@eq";
+const FUENTE_CHOICES = [
+  { id: "nocnok", name: "Nocnok" },
+  { id: "lamudi", name: "Lamudi" },
+];
+
+/** The "first" master filter: pick Nocnok or Lamudi. Switching source resets the
+ *  other filters (colonias/zones differ per feed) so results never carry over. */
+const FuenteSelector = () => {
+  const { filterValues, setFilters, displayedFilters } = useListContext();
+  const current = (filterValues?.[MASTER_KEY] as string) ?? "nocnok";
+  return (
+    <div className="flex items-center gap-2 px-2 pt-2">
+      <span className="text-xs text-muted-foreground">Fuente:</span>
+      <div className="flex gap-1">
+        {FUENTE_CHOICES.map((f) => (
+          <Button
+            key={f.id}
+            variant={current === f.id ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilters({ [MASTER_KEY]: f.id }, displayedFilters)}
+          >
+            {f.name}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /** Always-visible chips for every active filter, each removable with its ✕, so
  *  a stored filter can never silently narrow the results without being seen.
  *  Spatial selections (map area / drawn polygon) collapse into a single chip. */
@@ -147,6 +181,7 @@ const ActiveFilterChips = () => {
 
   const attrEntries = Object.entries(fv).filter(
     ([k, v]) =>
+      k !== MASTER_KEY &&
       !SPATIAL_KEYS.includes(k) &&
       v != null &&
       v !== "" &&
@@ -283,11 +318,13 @@ export function NocnokList() {
   return (
     <List
       filters={filters}
+      filterDefaultValues={{ [MASTER_KEY]: "nocnok" }}
       actions={<NocnokListActions mode={mode} setMode={setMode} />}
       sort={{ field: "status_date", order: "DESC" }}
       perPage={25}
       pagination={mode === "map" ? null : undefined}
     >
+      <FuenteSelector />
       <ActiveFilterChips />
       {mode === "map" ? (
         <NocnokMap />

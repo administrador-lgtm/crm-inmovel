@@ -34,8 +34,8 @@ export const MobileNavigation = () => {
     currentPath = "/leads";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
-  } else if (matchPath("/nocnok/*", location.pathname)) {
-    currentPath = "/nocnok";
+  } else if (matchPath("/inventario_externo/*", location.pathname)) {
+    currentPath = "/inventario_externo";
   } else {
     currentPath = false;
   }
@@ -91,10 +91,10 @@ export const MobileNavigation = () => {
             isActive={currentPath === "/propiedades"}
           />
           <NavigationButton
-            href="/nocnok"
+            href="/inventario_externo"
             Icon={Search}
-            label={translate("crm.navigation.nocnok", { _: "Bolsa" })}
-            isActive={currentPath === "/nocnok"}
+            label={translate("crm.navigation.bolsa", { _: "Bolsa" })}
+            isActive={currentPath === "/inventario_externo"}
           />
           <SettingsButton />
         </>

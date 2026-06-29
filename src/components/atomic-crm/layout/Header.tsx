@@ -25,8 +25,8 @@ const Header = () => {
     currentPath = "/visitas";
   } else if (matchPath("/propiedades/*", location.pathname)) {
     currentPath = "/propiedades";
-  } else if (matchPath("/nocnok/*", location.pathname)) {
-    currentPath = "/nocnok";
+  } else if (matchPath("/inventario_externo/*", location.pathname)) {
+    currentPath = "/inventario_externo";
   } else {
     currentPath = false;
   }
@@ -90,11 +90,11 @@ const Header = () => {
                     isActive={currentPath === "/propiedades"}
                   />
                   <NavigationTab
-                    label={translate("crm.navigation.nocnok", {
-                      _: "Bolsa compartida",
+                    label={translate("crm.navigation.bolsa", {
+                      _: "Bolsa",
                     })}
-                    to="/nocnok"
-                    isActive={currentPath === "/nocnok"}
+                    to="/inventario_externo"
+                    isActive={currentPath === "/inventario_externo"}
                   />
                 </nav>
               </div>

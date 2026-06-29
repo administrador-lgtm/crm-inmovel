@@ -418,10 +418,12 @@ const MapView = ({ allPoints }: { allPoints: Point[] }) => {
 };
 
 export const NocnokMap = () => {
-  const { filterValues } = useListContext();
+  const { resource, filterValues } = useListContext();
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
-  const { data } = useGetList<Nocnok>("nocnok", {
+  // Read the same resource the list is bound to (inventario_externo), so the map
+  // honours the active master source (fuente) carried in filterValues.
+  const { data } = useGetList<Nocnok>(resource, {
     filter: filterValues,
     pagination: { page: 1, perPage: 1000 },
     sort: { field: "status_date", order: "DESC" },

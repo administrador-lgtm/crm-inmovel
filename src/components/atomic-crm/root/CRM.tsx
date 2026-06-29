@@ -269,7 +269,7 @@ const DesktopAdmin = (
       <Resource name="contacts" {...contacts} />
       <Resource name="contact_notes" />
       <Resource name="propiedades" {...propiedades} />
-      <Resource name="nocnok" {...nocnok} />
+      <Resource name="inventario_externo" {...nocnok} />
       <Resource name="sales" {...sales} />
     </Admin>
   );
@@ -344,7 +344,7 @@ const MobileAdmin = (
           <Route path=":id/notes/:noteId" element={<NoteShowPage />} />
         </Resource>
         <Resource name="propiedades" {...propiedades} />
-        <Resource name="nocnok" {...nocnok} />
+        <Resource name="inventario_externo" {...nocnok} />
       </Admin>
     </PersistQueryClientProvider>
   );

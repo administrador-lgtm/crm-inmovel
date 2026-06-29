@@ -450,6 +450,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/leads/VisitasAgenda.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/leads/StageSelector.tsx",
           "type": "registry:component"
         },
