@@ -71,11 +71,7 @@ export const PropertyMatchList = ({ leadId }: PropertyMatchListProps) => {
 };
 
 /** Render the matches grouped by tier, best-ranked first within each tier. */
-const PropertyMatchGroups = ({
-  matches,
-}: {
-  matches: LeadPropertyMatch[];
-}) => {
+const PropertyMatchGroups = ({ matches }: { matches: LeadPropertyMatch[] }) => {
   const groups = TIER_ORDER.map((tier) => ({
     tier,
     rows: matches
