@@ -5,6 +5,7 @@ import type {
   DraggableStateSnapshot,
 } from "@hello-pangea/dnd";
 import { useRedirect, RecordContextProvider } from "ra-core";
+import { Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -69,6 +70,9 @@ export const LeadKanbanCardContent = ({
 }) => {
   const redirect = useRedirect();
   const stageAge = getStageAge(lead.stage_changed_at);
+  // Property Matcher: contacts_summary already carries match_count, so the
+  // badge is purely presentational — no extra fetch (see TASK-001 / TASK-003).
+  const matchCount = lead.match_count ?? 0;
 
   const handleClick = () => {
     redirect(`/contacts/${lead.id}/show`, undefined, undefined, undefined, {
@@ -104,17 +108,27 @@ export const LeadKanbanCardContent = ({
               </Badge>
             ) : null}
             <div className="flex items-center justify-between gap-2">
-              {lead.desarrollo_activo_nombre ? (
-                <Badge
-                  variant="outline"
-                  className="w-fit text-xs font-normal max-w-[70%] truncate"
-                  title="Propiedad de interés"
-                >
-                  🏠 {lead.desarrollo_activo_nombre}
-                </Badge>
-              ) : (
-                <span />
-              )}
+              <div className="flex items-center gap-1 min-w-0">
+                {lead.desarrollo_activo_nombre ? (
+                  <Badge
+                    variant="outline"
+                    className="w-fit text-xs font-normal max-w-[70%] truncate"
+                    title="Propiedad de interés"
+                  >
+                    🏠 {lead.desarrollo_activo_nombre}
+                  </Badge>
+                ) : null}
+                {matchCount >= 1 ? (
+                  <Badge
+                    variant="outline"
+                    className="w-fit text-xs font-normal shrink-0 gap-1"
+                    title="Propiedades sugeridas para este lead"
+                  >
+                    <Home className="size-3" aria-hidden="true" />
+                    {matchCount}
+                  </Badge>
+                ) : null}
+              </div>
               {stageAge ? (
                 <span
                   className={`text-xs font-medium tabular-nums ${stageAge.className}`}

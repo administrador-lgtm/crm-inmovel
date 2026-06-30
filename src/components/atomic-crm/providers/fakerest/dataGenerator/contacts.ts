@@ -168,6 +168,9 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
               "pausa por ahora",
             ])
           : "",
+      // Property Matcher count (real value comes from contacts_summary). Most
+      // leads have no matches (~70%); the rest get a small handful.
+      match_count: weightedBoolean(70) ? 0 : random.number({ min: 1, max: 8 }),
     };
   });
 };
