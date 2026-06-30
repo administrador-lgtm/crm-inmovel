@@ -1,0 +1,150 @@
+import { useGetList, useTranslate } from "ra-core";
+import type { Identifier } from "ra-core";
+
+import { Card, CardContent } from "@/components/ui/card";
+
+import type { LeadPropertyMatch } from "../types";
+import { formatPrecio } from "../nocnok/types";
+
+/**
+ * Source-tier label, in Spanish (the advisor-facing UI language). Lower tier is
+ * a better source: own inventory first, then the qualified pool, then Lamudi.
+ */
+const TIER_LABELS: Record<number, string> = {
+  1: "Propias",
+  2: "Bolsa calificada",
+  3: "Lamudi",
+};
+
+const TIER_ORDER = [1, 2, 3];
+
+interface PropertyMatchListProps {
+  leadId: Identifier;
+}
+
+/**
+ * Read-only "Propiedades sugeridas" section on the lead ficha. Reads the
+ * `lead_property_matches` view (RLS-scoped to the lead owner) for one lead and
+ * renders the suggestions grouped by source tier. A lead with no match profile
+ * (not matchable) yields zero rows from the view and shows the empty-state —
+ * never an error and never an endless spinner.
+ */
+export const PropertyMatchList = ({ leadId }: PropertyMatchListProps) => {
+  const translate = useTranslate();
+  const { data, isPending, error } = useGetList<LeadPropertyMatch>(
+    "lead_property_matches",
+    {
+      filter: { lead_id: leadId },
+      sort: { field: "tier", order: "ASC" },
+      pagination: { page: 1, perPage: 50 },
+    },
+  );
+
+  // Keep the section hidden until the first fetch settles, so a not-matchable
+  // lead never flashes a spinner on the ficha.
+  if (isPending) return null;
+
+  // A query error is treated like "no suggestions" — the section degrades to the
+  // empty-state rather than surfacing an error on the ficha.
+  const matches = error ? [] : (data ?? []);
+
+  return (
+    <Card className="mt-4">
+      <CardContent className="pt-6">
+        <h3 className="text-md font-semibold mb-3">
+          {translate("crm.propertyMatch.title", {
+            _: "Propiedades sugeridas",
+          })}
+        </h3>
+        {matches.length > 0 ? (
+          <PropertyMatchGroups matches={matches} />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {translate("crm.propertyMatch.empty", {
+              _: "Sin propiedades sugeridas.",
+            })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+/** Render the matches grouped by tier, best-ranked first within each tier. */
+const PropertyMatchGroups = ({
+  matches,
+}: {
+  matches: LeadPropertyMatch[];
+}) => {
+  const groups = TIER_ORDER.map((tier) => ({
+    tier,
+    rows: matches
+      .filter((match) => match.tier === tier)
+      .sort((a, b) => b.rank_score - a.rank_score),
+  })).filter((group) => group.rows.length > 0);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {groups.map((group) => (
+        <div key={group.tier}>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">
+            {TIER_LABELS[group.tier] ?? `Tier ${group.tier}`}
+          </h4>
+          <ul className="flex flex-col gap-2">
+            {group.rows.map((match) => (
+              <PropertyMatchRow key={match.id} match={match} />
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/**
+ * One suggested-property row. The whole row is the listing link (own ficha
+ * preferred, anuncio as fallback) with a >=44px tap target for mobile; rows
+ * without any URL render as a plain, non-interactive card.
+ */
+const PropertyMatchRow = ({ match }: { match: LeadPropertyMatch }) => {
+  const href = match.url_ficha ?? match.url_anuncio ?? null;
+  const precio = formatPrecio(match.precio ?? undefined);
+  const location = [match.colonia, match.alcaldia].filter(Boolean).join(" · ");
+
+  const content = (
+    <>
+      {match.title && (
+        <span className="font-medium break-words">{match.title}</span>
+      )}
+      <span className="text-sm">
+        {precio ?? "Precio no disponible"}
+        {match.recamaras != null ? ` · ${match.recamaras} rec.` : ""}
+      </span>
+      {location && (
+        <span className="text-xs text-muted-foreground break-words">
+          {location}
+        </span>
+      )}
+    </>
+  );
+
+  const rowClasses =
+    "flex min-h-[44px] flex-col justify-center rounded-md border p-3";
+
+  if (href) {
+    return (
+      <li>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${rowClasses} hover:bg-accent`}
+        >
+          {content}
+        </a>
+      </li>
+    );
+  }
+
+  return <li className={rowClasses}>{content}</li>;
+};
