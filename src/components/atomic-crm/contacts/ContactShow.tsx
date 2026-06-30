@@ -24,6 +24,7 @@ import { ContactEditSheet } from "./ContactEditSheet";
 import { ContactStatusSelector } from "./ContactInputs";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
 import { ContactBackgroundInfo } from "./ContactBackgroundInfo";
+import { PropertyMatchList } from "./PropertyMatchList";
 import type { Contact } from "../types";
 import { Avatar } from "./Avatar";
 import { ContactAside } from "./ContactAside";
@@ -201,6 +202,7 @@ const ContactShowContentMobile = () => {
           </TabsContent>
           <TabsContent value="activity" className="mt-2">
             <VisitasPanel />
+            <PropertyMatchList leadId={record.id} />
             <AdvisorConversacionLog />
             <ConversacionLog />
           </TabsContent>
@@ -246,6 +248,7 @@ const ContactShowContent = () => {
           </CardContent>
         </Card>
         <VisitasPanel />
+        <PropertyMatchList leadId={record.id} />
         <AdvisorConversacionLog />
         <ConversacionLog />
       </div>
