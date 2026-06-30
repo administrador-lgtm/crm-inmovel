@@ -179,6 +179,26 @@ create table public.conversaciones (
 create index conversaciones_lead_id_timestamp_idx
     on public.conversaciones using btree (lead_id, timestamp);
 
+-- Lead search profile extracted from the WhatsApp transcript by the
+-- lead-profile-extract job (Haiku). One row per lead; feeds the Property Matcher
+-- (lead_property_matches view). Private per-lead intent — RLS-scoped to the lead
+-- owner in 05_policies.sql, exactly like conversaciones.
+create table public.lead_match_profile (
+    lead_id bigint primary key references public.contacts(id) on delete cascade,
+    operacion text,
+    zonas text[],
+    presupuesto_min numeric,
+    presupuesto_max numeric,
+    recamaras int,
+    tipo text,
+    confianza numeric,
+    evidencia text,
+    fuente text,
+    model text,
+    raw jsonb,
+    extracted_at timestamp with time zone default now()
+);
+
 -- Meta ad -> property mapping (synced reference, read-only).
 create table public.anuncios (
     ad_id text primary key,
