@@ -23,6 +23,158 @@ select
 from public.contact_notes cn
     left join public.contacts co on co.id = cn.contact_id;
 
+-- Lead ↔ property matcher (Property Matcher v1). For every "matchable" lead
+-- profile (operacion ∈ {renta, venta} AND a budget ceiling AND ≥1 zona), surface
+-- the candidate properties whose price falls inside the lead's ±15% band and
+-- whose colonia/alcaldia contains one of the lead's zonas (accent/case-
+-- insensitive containment). recamaras and tipo are SOFT signals folded into
+-- rank_score, never hard filters — a 2-bedroom lead still sees 3-bedroom options,
+-- ranked lower.
+--
+-- Three ranked tiers, best first:
+--   1. own        -> public.propiedades        (top priority)
+--   2. nocnok      -> public.nocnok_raw          (qualified pool; is_exclusive ranks first within tier)
+--   3. lamudi      -> public.lamudi_raw          (scraped marketplace)
+-- The external feeds are filtered to their latest fecha_carga batch (the syncs
+-- upsert but never delete), mirroring public.inventario_externo. This view reads
+-- the raw tables directly rather than that view so it can be declared ahead of
+-- contacts_summary (which reads match_count from it).
+--
+-- security_invoker = on: this view carries no RLS of its own, but it is only ever
+-- read joined to a lead the caller can already see (via contacts_summary /
+-- contacts RLS, can_access_lead). Running as the invoker keeps the matcher inside
+-- the caller's lead scope — advisors never read matches for leads they don't own.
+-- See adr/ADR-TASK-001-lead-property-matches-security.md.
+--
+-- Suggested indexes (matcher is read per-lead from the ficha):
+--   lead_match_profile(lead_id), propiedades(operacion, precio),
+--   nocnok_raw(fecha_carga, operacion, precio), lamudi_raw(fecha_carga, operacion, precio).
+create or replace view public.lead_property_matches with (security_invoker = on) as
+with matchable as (
+    select
+        lmp.lead_id,
+        public.normalize_text(lmp.operacion) as operacion,
+        lmp.zonas,
+        lmp.recamaras as lead_recamaras,
+        public.normalize_text(lmp.tipo) as lead_tipo,
+        -- ±15% band: floor protects a higher-budget lead from wrong-tier cheap
+        -- product; ceiling caps at the stated maximum + 15%.
+        coalesce(lmp.presupuesto_min, lmp.presupuesto_max) * 0.85 as price_floor,
+        lmp.presupuesto_max * 1.15 as price_ceiling
+    from public.lead_match_profile lmp
+    where lmp.operacion in ('renta', 'venta')
+      and lmp.presupuesto_max is not null
+      and array_length(lmp.zonas, 1) >= 1
+),
+candidates as (
+    -- Tier 1: own inventory
+    select
+        1 as tier,
+        'own'::text as property_source,
+        'own'::text as fuente,
+        p.id as property_id,
+        p.nombre as title,
+        public.normalize_text(p.operacion) as operacion,
+        p.precio,
+        p.recamaras::int as recamaras,
+        public.normalize_text(p.tipo) as tipo,
+        p.colonia,
+        p.alcaldia,
+        p.url_ficha,
+        p.url_anuncio,
+        coalesce(p.is_exclusive, false) as is_exclusive
+    from public.propiedades p
+    where p.activa is not false
+    union all
+    -- Tier 2: qualified pool (NocNok), latest batch only
+    select
+        2,
+        'nocnok'::text,
+        'nocnok'::text,
+        n.codigo,
+        coalesce(nullif(n.title, ''), concat_ws(' · ', nullif(n.type_text, ''), nullif(n.colonia, ''))),
+        public.normalize_text(n.operacion),
+        n.precio,
+        n.recamaras::int,
+        public.normalize_text(n.type_text),
+        n.colonia,
+        n.alcaldia,
+        n.url_ficha,
+        null::text,
+        coalesce(n.is_exclusive, false)
+    from public.nocnok_raw n
+    where n.fecha_carga = (select max(fecha_carga) from public.nocnok_raw)
+    union all
+    -- Tier 3: rest (Lamudi), latest batch only
+    select
+        3,
+        'lamudi'::text,
+        'lamudi'::text,
+        l.codigo,
+        coalesce(nullif(l.title, ''), concat_ws(' · ', nullif(l.type_text, ''), nullif(l.colonia, ''))),
+        public.normalize_text(l.operacion),
+        l.precio,
+        l.recamaras::int,
+        public.normalize_text(l.type_text),
+        l.colonia,
+        l.alcaldia,
+        l.url_ficha,
+        null::text,
+        coalesce(l.is_exclusive, false)
+    from public.lamudi_raw l
+    where l.fecha_carga = (select max(fecha_carga) from public.lamudi_raw)
+)
+select
+    -- Stable composite id for react-admin (lead_id + source + property_id; the
+    -- source disambiguates own vs external codes).
+    (m.lead_id || '-' || c.property_source || '-' || c.property_id) as id,
+    m.lead_id,
+    c.property_id,
+    c.property_source,
+    c.tier,
+    -- Soft rank: lower tier wins, then recamaras fit, tipo match, exclusivity.
+    -- No row is excluded on these signals — they only reorder.
+    (
+        (100 - c.tier * 10)
+        + case
+            when m.lead_recamaras is null or c.recamaras is null then 0
+            when c.recamaras = m.lead_recamaras then 20
+            when abs(c.recamaras - m.lead_recamaras) = 1 then 5
+            else -10
+          end
+        + case
+            when m.lead_tipo <> '' and c.tipo <> '' and c.tipo = m.lead_tipo then 15
+            else 0
+          end
+        + case when c.is_exclusive then 5 else 0 end
+    )::numeric as rank_score,
+    c.title,
+    c.precio,
+    c.recamaras,
+    c.colonia,
+    c.alcaldia,
+    c.url_ficha,
+    c.url_anuncio,
+    c.is_exclusive,
+    c.fuente
+from matchable m
+join candidates c
+    on c.operacion = m.operacion
+   and c.precio is not null
+   and c.precio >= m.price_floor
+   and c.precio <= m.price_ceiling
+   -- Zona containment: at least one lead zona normalized-contained in the
+   -- property's colonia OR alcaldia. EXISTS avoids fanning the join out per zona.
+   and exists (
+        select 1
+        from unnest(m.zonas) as z
+        where nullif(trim(z), '') is not null
+          and (
+            strpos(public.normalize_text(c.colonia), public.normalize_text(z)) > 0
+            or strpos(public.normalize_text(c.alcaldia), public.normalize_text(z)) > 0
+          )
+   );
+
 create or replace view public.contacts_summary with (security_invoker = on) as
 select
     co.id,
@@ -92,7 +244,12 @@ select
     -- Readable name of the lead's active property of interest (the kanban card
     -- shows it instead of the redundant stage badge). desarrollo_activo holds the
     -- property id (own slug or nocnok code), both present in propiedades.
-    max(prop.nombre) as desarrollo_activo_nombre
+    max(prop.nombre) as desarrollo_activo_nombre,
+    -- Count of suggested properties for the lead (Property Matcher). Lets the
+    -- kanban card render its "tiene matches" badge cheaply without re-running the
+    -- matcher join. Correlated scalar subquery — acceptable at this scale (~600
+    -- matchable leads, <4000 properties).
+    (select count(*) from public.lead_property_matches lpm where lpm.lead_id = co.id) as match_count
 from public.contacts co
 left join public.propiedades prop on prop.id = co.desarrollo_activo
 group by co.id;

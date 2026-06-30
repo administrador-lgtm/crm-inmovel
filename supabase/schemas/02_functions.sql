@@ -635,3 +635,19 @@ begin
   return new;
 end;
 $$;
+
+-- Inmovel: accent/case-insensitive text normalizer used by the property matcher
+-- (lead_property_matches) for zona ↔ colonia/alcaldia containment. Deliberately
+-- built on translate() instead of the unaccent extension: unaccent is not
+-- enabled here, and its single-argument form depends on the 'unaccent' text
+-- search dictionary being on search_path, which does not hold under
+-- security_invoker views. translate() covers Spanish diacritics deterministically
+-- with no extension dependency. IMMUTABLE so it can be used in indexed/joined
+-- predicates. NULL input collapses to '' so callers can compare safely.
+CREATE OR REPLACE FUNCTION "public"."normalize_text"("input" text) RETURNS text
+    LANGUAGE "sql" IMMUTABLE
+    SET "search_path" TO ''
+    AS $$
+  select lower(trim(translate(coalesce(input, ''),
+    'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunAEIOUUN')));
+$$;
