@@ -192,6 +192,20 @@ join candidates c
           )
    );
 
+-- Precomputed per-lead match counts. lead_property_matches is heavy (~20s full
+-- scan), so contacts_summary reads the count from here instead of running the
+-- matcher once per contact row — that correlated subquery timed out the kanban
+-- and contact list. Refresh periodically (REFRESH MATERIALIZED VIEW
+-- CONCURRENTLY public.lead_match_counts); counts are an advisory signal, so
+-- slight staleness between refreshes is acceptable.
+create materialized view if not exists public.lead_match_counts as
+    select lead_id, count(*)::int as match_count
+    from public.lead_property_matches
+    group by lead_id;
+
+create unique index if not exists lead_match_counts_lead_id_idx
+    on public.lead_match_counts (lead_id);
+
 create or replace view public.contacts_summary with (security_invoker = on) as
 select
     co.id,
@@ -266,7 +280,7 @@ select
     -- kanban card render its "tiene matches" badge cheaply without re-running the
     -- matcher join. Correlated scalar subquery — acceptable at this scale (~600
     -- matchable leads, <4000 properties).
-    (select count(*) from public.lead_property_matches lpm where lpm.lead_id = co.id) as match_count
+    (select lmc.match_count::bigint from public.lead_match_counts lmc where lmc.lead_id = co.id) as match_count
 from public.contacts co
 left join public.propiedades prop on prop.id = co.desarrollo_activo
 group by co.id;
