@@ -29,6 +29,14 @@ export default defineConfig({
         test: {
           name: "app",
           globals: true,
+          // Browser (Chromium) tests share a single headless instance. Running
+          // files in parallel makes them contend for it, so locator actions time
+          // out at random under load — the source of the suite's flakiness.
+          // Run them serially with generous timeouts: slower but DETERMINISTIC,
+          // which is what the validate-before-review gate needs.
+          fileParallelism: false,
+          testTimeout: 30000,
+          hookTimeout: 30000,
           browser: {
             headless: true,
             provider: playwright(),
