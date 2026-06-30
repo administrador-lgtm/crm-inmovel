@@ -1,4 +1,4 @@
-# ADR-TASK-001 — lead_property_matches uses security_invoker (not definer)
+# ADR-TASK-001 — lead_property_matches scoped via lead_match_profile RLS (invoker)
 
 - **Date**: 2026-06-30
 - **Ticket**: TASK-001
@@ -6,36 +6,40 @@
 
 ## Context
 
-The Property Matcher view joins each lead's `lead_match_profile` against the
-property inventory. Matches expose a lead's budget/zona intent, so a non-admin
-advisor must only ever read matches for leads they own. Two precedents exist in
-this codebase: `contacts_summary` (invoker) and `visitas_agenda` (definer, for a
-deliberately team-wide read).
+The Property Matcher view crosses each lead's `lead_match_profile` (budget/zona
+intent) against the property inventory. That intent is private per lead — a
+non-admin advisor must only read matches for leads they own. The profile table
+existed only in the live DB (bot-extracted), undeclared and ungranted, with no
+RLS.
 
 ## Decision
 
-Declare `lead_property_matches` with `security_invoker = on`. The view holds no
-RLS itself; it is only read joined to a lead the caller can already see (through
-`contacts_summary` / `contacts` RLS via `can_access_lead`), so running as the
-invoker keeps every row inside the caller's lead scope. The companion
-`normalize_text()` helper uses `translate()` rather than the `unaccent`
-extension (not enabled; its single-arg form needs the `unaccent` dictionary on
-`search_path`, which fails under invoker views).
+Declare `lead_match_profile` in the schema and give it its own per-lead SELECT
+policy (`can_access_lead` through `contacts`, the exact shape used by
+`conversaciones`). Keep `lead_property_matches` as `security_invoker = on`: the
+invoker view re-applies that table policy, so reads are automatically scoped to
+the caller's leads. The inventory tables (`propiedades`, `nocnok_raw`,
+`lamudi_raw`) are team-wide reference data, so the profile is the only sensitive
+input and it is gated at its source. `normalize_text()` uses `translate()` rather
+than the `unaccent` extension (not enabled; single-arg `unaccent` needs the
+dictionary on `search_path`, which fails under invoker views).
 
 ## Consequences
 
-- Advisors never read matches for leads outside their RLS scope — no client-side
-  filtering needed, no definer escape hatch to audit.
-- `lead_match_profile` carries no row-level policy; the security boundary is the
-  JOIN to `contacts`, exactly as with `contacts_summary`. If that table later
-  gains RLS, the invoker view inherits it for free.
-- Deliberately the opposite choice from `visitas_agenda` (definer): the matcher
-  is per-lead-private, not a shared team agenda.
-- No new runtime dependency — accent folding ships as a plain SQL function.
+- No IDOR: an advisor querying the view (or the base table directly) only ever
+  sees their own leads' matches — the RLS policy holds on every access path.
+- The boundary lives on `lead_match_profile`, not in the view body; the view
+  carries no `WHERE`/JOIN scope of its own, mirroring how `conversaciones` is
+  consumed.
+- Deliberately the opposite of `visitas_agenda` (definer, team-wide) — the
+  matcher is per-lead-private.
+- Bot writes are unaffected (the extractor runs as postgres/service_role, which
+  bypasses RLS). No new runtime dependency — accent folding ships as plain SQL.
 
 ## Alternatives considered
 
-- `security_invoker = off` (definer, like `visitas_agenda`): rejected — it would
-  bypass `contacts` RLS and leak other advisors' lead intent.
-- `unaccent` extension for zona normalization: rejected — not enabled, and
-  unreliable on `search_path` inside an invoker view.
+- `security_invoker = off` (definer) gating inside with `can_access_lead`, like
+  `advisor_conversation`: rejected — it hides the scope in the view body, whereas
+  table-level RLS is reusable and also protects direct base-table access.
+- `unaccent` extension for zona normalization: rejected — not enabled, unreliable
+  on `search_path` inside an invoker view.

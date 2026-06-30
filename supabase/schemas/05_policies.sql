@@ -13,6 +13,7 @@ alter table public.lead_propiedad enable row level security;
 alter table public.conversaciones enable row level security;
 alter table public.anuncios enable row level security;
 alter table public.nocnok_raw enable row level security;
+alter table public.lead_match_profile enable row level security;
 alter table public.configuration enable row level security;
 alter table public.favicons_excluded_domains enable row level security;
 
@@ -80,6 +81,19 @@ create policy "Conversaciones selectable for accessible leads" on public.convers
     exists (
       select 1 from public.contacts c
       where c.id = conversaciones.lead_id and public.can_access_lead(c.asesor_asignado)
+    )
+  );
+
+-- Lead match profile — bot-extracted per-lead search intent (budget/zona),
+-- read-only, scoped to accessible leads. This policy IS the security boundary
+-- for the lead_property_matches view: that view is security_invoker = on, so a
+-- caller's read of it re-applies this policy and only ever returns matches for
+-- leads the caller owns. Same shape as conversaciones above.
+create policy "Lead match profile selectable for accessible leads" on public.lead_match_profile
+  for select to authenticated using (
+    exists (
+      select 1 from public.contacts c
+      where c.id = lead_match_profile.lead_id and public.can_access_lead(c.asesor_asignado)
     )
   );
 

@@ -40,10 +40,13 @@ from public.contact_notes cn
 -- the raw tables directly rather than that view so it can be declared ahead of
 -- contacts_summary (which reads match_count from it).
 --
--- security_invoker = on: this view carries no RLS of its own, but it is only ever
--- read joined to a lead the caller can already see (via contacts_summary /
--- contacts RLS, can_access_lead). Running as the invoker keeps the matcher inside
--- the caller's lead scope — advisors never read matches for leads they don't own.
+-- security_invoker = on: the security boundary is lead_match_profile's own RLS
+-- policy ("Lead match profile selectable for accessible leads" in 05_policies.sql,
+-- scoped through contacts.can_access_lead — same shape as conversaciones). Because
+-- the view runs as the invoker, reading it re-applies that policy, so the matcher
+-- only ever yields rows for leads the caller owns. propiedades/nocnok_raw/
+-- lamudi_raw are team-wide-readable reference inventory, so the lead profile is
+-- the only sensitive input and it is gated at its source table.
 -- See adr/ADR-TASK-001-lead-property-matches-security.md.
 --
 -- Suggested indexes (matcher is read per-lead from the ficha):
