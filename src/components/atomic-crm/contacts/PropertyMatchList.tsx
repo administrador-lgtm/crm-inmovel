@@ -18,6 +18,11 @@ const TIER_LABELS: Record<number, string> = {
 
 const TIER_ORDER = [1, 2, 3];
 
+// Popular zones match hundreds of listings; cap the ficha at the best-ranked
+// few so the advisor sees signal, not a wall. rank_score already favours lower
+// tiers, so the top slice is naturally own/qualified-pool heavy.
+const TOP_N = 24;
+
 interface PropertyMatchListProps {
   leadId: Identifier;
 }
@@ -35,8 +40,8 @@ export const PropertyMatchList = ({ leadId }: PropertyMatchListProps) => {
     "lead_property_matches",
     {
       filter: { lead_id: leadId },
-      sort: { field: "tier", order: "ASC" },
-      pagination: { page: 1, perPage: 50 },
+      sort: { field: "rank_score", order: "DESC" },
+      pagination: { page: 1, perPage: TOP_N },
     },
   );
 
@@ -56,6 +61,14 @@ export const PropertyMatchList = ({ leadId }: PropertyMatchListProps) => {
             _: "Propiedades sugeridas",
           })}
         </h3>
+        {matches.length >= TOP_N ? (
+          <p className="text-xs text-muted-foreground mb-3">
+            {translate("crm.propertyMatch.capped", {
+              n: TOP_N,
+              _: `Mostrando las ${TOP_N} más relevantes.`,
+            })}
+          </p>
+        ) : null}
         {matches.length > 0 ? (
           <PropertyMatchGroups matches={matches} />
         ) : (

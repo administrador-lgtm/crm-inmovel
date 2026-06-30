@@ -72,7 +72,10 @@ export const LeadKanbanCardContent = ({
   const stageAge = getStageAge(lead.stage_changed_at);
   // Property Matcher: contacts_summary already carries match_count, so the
   // badge is purely presentational — no extra fetch (see TASK-001 / TASK-003).
+  // Counts run into the hundreds for popular zones, so the badge caps at "9+"
+  // — it signals "has suggestions", not an exact count.
   const matchCount = lead.match_count ?? 0;
+  const matchLabel = matchCount > 9 ? "9+" : String(matchCount);
 
   const handleClick = () => {
     redirect(`/contacts/${lead.id}/show`, undefined, undefined, undefined, {
@@ -125,7 +128,7 @@ export const LeadKanbanCardContent = ({
                     title="Propiedades sugeridas para este lead"
                   >
                     <Home className="size-3" aria-hidden="true" />
-                    {matchCount}
+                    {matchLabel}
                   </Badge>
                 ) : null}
               </div>
