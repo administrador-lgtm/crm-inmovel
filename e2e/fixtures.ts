@@ -10,7 +10,9 @@ const adminSupabase = createClient(
 // Tables in FK-safe deletion order (children before parents)
 const TABLES = [
   "contact_notes",
+  "lead_match_profile",
   "contacts",
+  "propiedades",
   "companies",
   "tags",
   "favicons_excluded_domains",
@@ -195,6 +197,83 @@ async function createContact({
   return data;
 }
 
+async function createPropiedad({
+  id,
+  nombre,
+  tipo = "departamento",
+  operacion = "venta",
+  precio,
+  colonia,
+  alcaldia,
+  recamaras,
+  url_ficha,
+}: {
+  id: string;
+  nombre: string;
+  tipo?: string;
+  operacion?: string;
+  precio: number;
+  colonia: string;
+  alcaldia: string;
+  recamaras?: number;
+  url_ficha?: string;
+}) {
+  const { data, error } = await adminSupabase
+    .from("propiedades")
+    .insert({
+      id,
+      nombre,
+      tipo,
+      operacion,
+      precio,
+      colonia,
+      alcaldia,
+      recamaras,
+      url_ficha,
+      activa: true,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create propiedad: ${error.message}`);
+  }
+
+  return data;
+}
+
+async function createLeadMatchProfile({
+  leadId,
+  operacion = "venta",
+  zonas,
+  presupuestoMin = null,
+  presupuestoMax,
+  recamaras = null,
+  tipo = null,
+}: {
+  leadId: string | number;
+  operacion?: string;
+  zonas: string[];
+  presupuestoMin?: number | null;
+  presupuestoMax: number;
+  recamaras?: number | null;
+  tipo?: string | null;
+}) {
+  const { error } = await adminSupabase.from("lead_match_profile").insert({
+    lead_id: leadId,
+    operacion,
+    zonas,
+    presupuesto_min: presupuestoMin,
+    presupuesto_max: presupuestoMax,
+    recamaras,
+    tipo,
+  });
+
+  if (error) {
+    throw new Error(`Failed to create lead match profile: ${error.message}`);
+  }
+}
+
 const getMenuMethod = ({ page }: { page: Page; isMobile: boolean }) => ({
   goToDashboard: async () => {
     await page.getByRole("link", { name: "Dashboard" }).click();
@@ -220,6 +299,8 @@ export const test = base.extend<{
   createCompany: typeof createCompany;
   createContact: typeof createContact;
   createNotes: typeof createNotes;
+  createPropiedad: typeof createPropiedad;
+  createLeadMatchProfile: typeof createLeadMatchProfile;
   menu: ReturnType<typeof getMenuMethod>;
   dismissToast: (content: string) => Promise<void>;
 }>({
@@ -252,6 +333,14 @@ export const test = base.extend<{
   // eslint-disable-next-line no-empty-pattern
   createNotes: async ({}, cb) => {
     await cb(createNotes);
+  },
+  // eslint-disable-next-line no-empty-pattern
+  createPropiedad: async ({}, cb) => {
+    await cb(createPropiedad);
+  },
+  // eslint-disable-next-line no-empty-pattern
+  createLeadMatchProfile: async ({}, cb) => {
+    await cb(createLeadMatchProfile);
   },
   menu: async ({ page, isMobile }, cb) => {
     await cb(getMenuMethod({ page, isMobile }));
