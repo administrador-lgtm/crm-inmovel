@@ -2,6 +2,16 @@
 
 Durable Atomic CRM knowledge. One sentence per bullet, freshest first. Maintained by the `documentator` agent — see [.claude/agents/documentator.md](.claude/agents/documentator.md).
 
+## Property Matcher v1 (2026-06-30)
+
+- Property Matcher v1 is BUILT and live: `lead_property_matches` SQL view (security_invoker=on) cross-joins `lead_match_profile` against `propiedades` + `inventario_externo` with a ±15% price band and zona containment match; surfaced as "Propiedades sugeridas" on the lead ficha and a 🏠 badge on the Kanban card when match_count ≥ 1.
+- Only 589 leads (30.4% of 1,935 profiled) are matchable under the strict gate: operacion ∈ {renta, venta} AND presupuesto_max NOT NULL AND ≥1 zona; ~1,346 others are silently excluded with no follow-up queue in v1.
+- Price is the coverage bottleneck (31% of leads have presupuesto_max); zona is nearly free (89%); the lever to raise coverage is better budget extraction, not loosening zona.
+- The extractor's "never treat enganche as budget" rule may be suppressing valid budgets and is a candidate to revisit if coverage stalls.
+- Properties rank in 3 tiers: own `propiedades` (34, top priority) → Nocnok "bolsa calificada" (714, co-broke + fotos, `is_exclusive` ranked first within tier) → Lamudi (3,067, scraped marketplace, no co-broke); recamaras and tipo are soft rank signals, not hard filters.
+- `lead_match_profile` RLS was open (IDOR — lead budget/zona intent was world-readable); it is now closed via `can_access_lead`; `lead_property_matches` inherits the same guard via security_invoker=on.
+- Zona alias map (e.g. "Del Valle" ↔ "Benito Juárez") and a global `/matcher` screen are explicitly deferred to v2.
+
 ## Business Knowledge
 
 - Core resources: contacts, companies, deals (Kanban pipeline), tasks, notes, tags, and sales (team members).
