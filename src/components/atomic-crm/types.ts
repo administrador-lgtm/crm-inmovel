@@ -134,6 +134,11 @@ export type Contact = {
   sheet_id?: string | null;
   /** Advisor name from the Sheet (display-only; RLS uses asesor_asignado). */
   asesor_nombre?: string | null;
+  /**
+   * Number of suggested properties for this lead (Property Matcher). Comes from
+   * `contacts_summary`; the kanban card uses it to show a "has matches" badge.
+   */
+  match_count?: number;
 } & Pick<RaRecord, "id">;
 
 export type Propiedad = {
@@ -232,6 +237,30 @@ export type VisitaAgenda = {
   url_maps?: string | null;
   estado?: string | null;
   stage?: string | null;
+} & Pick<RaRecord, "id">;
+
+/**
+ * One ranked row from the `lead_property_matches` view: a property suggested for
+ * a lead by the Property Matcher. Read-only. `tier` (1 own, 2 nocnok, 3 lamudi)
+ * and `rank_score` (higher is better) drive ordering; `recamaras`/`tipo` are soft
+ * signals already folded into `rank_score`, never hard filters. `url_anuncio` is
+ * only populated for own properties (tier 1).
+ */
+export type LeadPropertyMatch = {
+  lead_id: Identifier;
+  property_id: string;
+  property_source: "own" | "nocnok" | "lamudi";
+  tier: number;
+  rank_score: number;
+  title?: string | null;
+  precio?: number | null;
+  recamaras?: number | null;
+  colonia?: string | null;
+  alcaldia?: string | null;
+  url_ficha?: string | null;
+  url_anuncio?: string | null;
+  is_exclusive: boolean;
+  fuente: string;
 } & Pick<RaRecord, "id">;
 
 export type LeadPropiedad = {

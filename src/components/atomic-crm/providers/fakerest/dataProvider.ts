@@ -100,6 +100,13 @@ export const createDataProvider = ({
         const start = (page - 1) * perPage;
         return { data: all.slice(start, start + perPage), total: all.length };
       }
+      // lead_property_matches is a Supabase-only view (the Property Matcher).
+      // FakeRest generates no rows for it, so return an empty list — the demo
+      // shows the "no suggestions" state instead of erroring on an unknown
+      // collection. The kanban badge still works via the contacts match_count.
+      if (resource === "lead_property_matches") {
+        return { data: [], total: 0 };
+      }
       return baseDataProvider.getList(resource, params);
     },
     signUp: async ({
