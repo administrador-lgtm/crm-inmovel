@@ -96,7 +96,14 @@ candidates as (
         'nocnok'::text,
         n.codigo,
         coalesce(nullif(n.title, ''), concat_ws(' · ', nullif(n.type_text, ''), nullif(n.colonia, ''))),
-        public.normalize_text(n.operacion),
+        -- External inventory encodes operation in English (Sale/Rent/Sale+Rent);
+        -- map to the Spanish vocabulary the lead profile uses (renta/venta/ambos).
+        case lower(n.operacion)
+            when 'sale' then 'venta'
+            when 'rent' then 'renta'
+            when 'sale+rent' then 'ambos'
+            else public.normalize_text(n.operacion)
+        end,
         n.precio,
         n.recamaras::int,
         public.normalize_text(n.type_text),
@@ -115,7 +122,13 @@ candidates as (
         'lamudi'::text,
         l.codigo,
         coalesce(nullif(l.title, ''), concat_ws(' · ', nullif(l.type_text, ''), nullif(l.colonia, ''))),
-        public.normalize_text(l.operacion),
+        -- Same English→Spanish operation mapping as the NocNok branch above.
+        case lower(l.operacion)
+            when 'sale' then 'venta'
+            when 'rent' then 'renta'
+            when 'sale+rent' then 'ambos'
+            else public.normalize_text(l.operacion)
+        end,
         l.precio,
         l.recamaras::int,
         public.normalize_text(l.type_text),
@@ -162,7 +175,8 @@ select
     c.fuente
 from matchable m
 join candidates c
-    on c.operacion = m.operacion
+    -- 'ambos' (Sale+Rent listings) matches both renta and venta leads.
+    on (c.operacion = m.operacion or c.operacion = 'ambos')
    and c.precio is not null
    and c.precio >= m.price_floor
    and c.precio <= m.price_ceiling
