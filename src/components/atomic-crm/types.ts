@@ -261,6 +261,8 @@ export type LeadPropertyMatch = {
   url_anuncio?: string | null;
   is_exclusive: boolean;
   fuente: string;
+  broker_wa?: string | null;
+  broker_nombre?: string | null;
 } & Pick<RaRecord, "id">;
 
 export type LeadPropiedad = {

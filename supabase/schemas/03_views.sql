@@ -85,7 +85,9 @@ candidates as (
         p.alcaldia,
         p.url_ficha,
         p.url_anuncio,
-        coalesce(p.is_exclusive, false) as is_exclusive
+        coalesce(p.is_exclusive, false) as is_exclusive,
+        p.broker_wa,
+        p.broker_nombre as broker_nombre
     from public.propiedades p
     where p.activa is not false
     union all
@@ -111,7 +113,9 @@ candidates as (
         n.alcaldia,
         n.url_ficha,
         null::text,
-        coalesce(n.is_exclusive, false)
+        coalesce(n.is_exclusive, false),
+        n.broker_wa,
+        n.account_name
     from public.nocnok_raw n
     where n.fecha_carga = (select max(fecha_carga) from public.nocnok_raw)
     union all
@@ -136,7 +140,9 @@ candidates as (
         l.alcaldia,
         l.url_ficha,
         null::text,
-        coalesce(l.is_exclusive, false)
+        coalesce(l.is_exclusive, false),
+        l.broker_wa,
+        l.account_name
     from public.lamudi_raw l
     where l.fecha_carga = (select max(fecha_carga) from public.lamudi_raw)
 )
@@ -172,7 +178,9 @@ select
     c.url_ficha,
     c.url_anuncio,
     c.is_exclusive,
-    c.fuente
+    c.fuente,
+    c.broker_wa,
+    c.broker_nombre
 from matchable m
 join candidates c
     -- 'ambos' (Sale+Rent listings) matches both renta and venta leads.

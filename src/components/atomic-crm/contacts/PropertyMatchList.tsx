@@ -1,5 +1,6 @@
 import { useGetList, useTranslate } from "ra-core";
 import type { Identifier } from "ra-core";
+import { MessageCircle } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -119,6 +120,10 @@ const PropertyMatchRow = ({ match }: { match: LeadPropertyMatch }) => {
   const href = match.url_ficha ?? match.url_anuncio ?? null;
   const precio = formatPrecio(match.precio ?? undefined);
   const location = [match.colonia, match.alcaldia].filter(Boolean).join(" · ");
+  // Qualified-pool (NocNok) fichas open under our own account, so the advisor
+  // can't reach the listing broker from there. Surface the broker's WhatsApp
+  // (and name) directly on the row for co-brokering.
+  const showBroker = match.property_source === "nocnok" && !!match.broker_wa;
 
   const content = (
     <>
@@ -134,26 +139,46 @@ const PropertyMatchRow = ({ match }: { match: LeadPropertyMatch }) => {
           {location}
         </span>
       )}
+      {showBroker && match.broker_nombre && (
+        <span className="text-xs text-muted-foreground break-words">
+          Broker: {match.broker_nombre}
+        </span>
+      )}
     </>
   );
 
-  const rowClasses =
-    "flex min-h-[44px] flex-col justify-center rounded-md border p-3";
+  const main = href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex min-w-0 flex-1 flex-col justify-center hover:underline"
+    >
+      {content}
+    </a>
+  ) : (
+    <div className="flex min-w-0 flex-1 flex-col justify-center">{content}</div>
+  );
 
-  if (href) {
-    return (
-      <li>
+  return (
+    <li className="flex min-h-[44px] items-center gap-2 rounded-md border p-3">
+      {main}
+      {showBroker && (
         <a
-          href={href}
+          href={match.broker_wa ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${rowClasses} hover:bg-accent`}
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-md border border-green-600 px-2 text-xs font-medium text-green-700 hover:bg-green-50"
+          title={
+            match.broker_nombre
+              ? `WhatsApp del broker (${match.broker_nombre})`
+              : "WhatsApp del broker"
+          }
         >
-          {content}
+          <MessageCircle className="size-4" aria-hidden="true" />
+          <span className="hidden sm:inline">WhatsApp broker</span>
         </a>
-      </li>
-    );
-  }
-
-  return <li className={rowClasses}>{content}</li>;
+      )}
+    </li>
+  );
 };
