@@ -651,3 +651,64 @@ CREATE OR REPLACE FUNCTION "public"."normalize_text"("input" text) RETURNS text
   select lower(trim(translate(coalesce(input, ''),
     'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunAEIOUUN')));
 $$;
+
+
+CREATE OR REPLACE FUNCTION public.sync_human_last_seen()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_lead_id bigint;
+  v_ts timestamptz;
+begin
+  -- Only advisor->lead messages with content ("we contacted them").
+  if new.from_advisor is not true or coalesce(new.text, '') = '' then
+    return new;
+  end if;
+
+  v_ts := to_timestamp(new.ts::double precision);
+
+  -- Resolve the lead via the same number/chat mapping advisor_conversation uses.
+  select co.id
+    into v_lead_id
+  from wa_listener.chats c
+  join public.contacts co on co.id = c.contact_id
+  where right(regexp_replace(c.number, '\D', '', 'g'), 10)
+        = right(regexp_replace(new.number, '\D', '', 'g'), 10)
+    and (c.lid = new.chat_id or c.phone = new.chat_id)
+  limit 1;
+
+  -- Human-owned stages only (S1..S5 belong to the bot). Only move forward in time.
+  if v_lead_id is not null then
+    update public.contacts
+       set last_seen = v_ts
+     where id = v_lead_id
+       and stage is not null
+       and stage not in ('S1', 'S2', 'S3', 'S4', 'S5', 'descartado')
+       and (last_seen is null or v_ts > last_seen);
+  end if;
+
+  return new;
+exception when others then
+  return new;  -- never block the Baileys listener's insert on a bookkeeping error
+end;
+$function$
+
+
+CREATE OR REPLACE FUNCTION public.protect_human_last_seen()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  if old.stage is not null
+     and old.stage not in ('S1', 'S2', 'S3', 'S4', 'S5', 'descartado')
+     and new.last_seen is not null
+     and old.last_seen is not null
+     and new.last_seen < old.last_seen then
+    new.last_seen := old.last_seen;
+  end if;
+  return new;
+end;
+$function$

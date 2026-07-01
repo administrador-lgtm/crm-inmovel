@@ -93,3 +93,17 @@ create or replace trigger notify_mention_wa_trigger
 create or replace trigger create_reactivation_note_trigger
     after insert on public.conversaciones
     for each row execute function public.create_reactivation_note();
+
+
+-- Inmovel: advisor->lead Baileys outbound stamps last_seen for human stages (S6+).
+drop trigger if exists sync_human_last_seen_trigger on wa_listener.raw_messages;
+create trigger sync_human_last_seen_trigger
+  after insert on wa_listener.raw_messages
+  for each row execute function public.sync_human_last_seen();
+
+-- Inmovel: keep human-stage last_seen monotonic so the Sheet sync can't pull it
+-- back to the frozen bot-handoff value once Baileys has advanced it.
+drop trigger if exists protect_human_last_seen_trigger on public.contacts;
+create trigger protect_human_last_seen_trigger
+  before update on public.contacts
+  for each row execute function public.protect_human_last_seen();
