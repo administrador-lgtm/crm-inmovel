@@ -5,11 +5,21 @@ import type {
   DraggableStateSnapshot,
 } from "@hello-pangea/dnd";
 import { useRedirect, RecordContextProvider } from "ra-core";
-import { Home } from "lucide-react";
+import { Home, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import type { Contact } from "../types";
+import { READ_ONLY_STAGES } from "./stages";
+
+/**
+ * Human-owned stage = an advisor-managed stage (not a bot funnel stage S1..S5,
+ * not "descartado"). In these stages the advisor is expected to reach out.
+ */
+const isHumanStage = (stage?: string): boolean =>
+  !!stage &&
+  !READ_ONLY_STAGES.includes(stage as (typeof READ_ONLY_STAGES)[number]) &&
+  stage !== "descartado";
 
 /** Display name for a lead (contact). */
 const getLeadName = (lead: Contact): string =>
@@ -76,6 +86,10 @@ export const LeadKanbanCardContent = ({
   // — it signals "has suggestions", not an exact count.
   const matchCount = lead.match_count ?? 0;
   const matchLabel = matchCount > 9 ? "9+" : String(matchCount);
+  // Advisor-owned stage but the advisor has never contacted the lead (no Baileys
+  // outbound): flag it red so it's obvious the lead is being neglected.
+  const advisorNeverContacted =
+    isHumanStage(lead.stage) && !lead.advisor_last_contact_at;
 
   const handleClick = () => {
     redirect(`/contacts/${lead.id}/show`, undefined, undefined, undefined, {
@@ -101,6 +115,16 @@ export const LeadKanbanCardContent = ({
         >
           <CardContent className="px-3 flex flex-col gap-1">
             <p className="text-sm font-medium">{getLeadName(lead)}</p>
+            {advisorNeverContacted ? (
+              <Badge
+                variant="outline"
+                className="w-fit gap-1 border-red-500 bg-red-50 text-xs font-medium text-red-600"
+                title="El asesor no ha contactado a este lead"
+              >
+                <AlertTriangle className="size-3" aria-hidden="true" />
+                Sin contacto del asesor
+              </Badge>
+            ) : null}
             {lead.asesor_nombre ? (
               <Badge
                 variant="outline"

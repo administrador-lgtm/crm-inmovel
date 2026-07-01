@@ -288,7 +288,8 @@ select
     -- kanban card render its "tiene matches" badge cheaply without re-running the
     -- matcher join. Correlated scalar subquery — acceptable at this scale (~600
     -- matchable leads, <4000 properties).
-    (select lmc.match_count::bigint from public.lead_match_counts lmc where lmc.lead_id = co.id) as match_count
+    (select lmc.match_count::bigint from public.lead_match_counts lmc where lmc.lead_id = co.id) as match_count,
+    co.advisor_last_contact_at
 from public.contacts co
 left join public.propiedades prop on prop.id = co.desarrollo_activo
 group by co.id;

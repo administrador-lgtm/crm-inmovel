@@ -74,6 +74,8 @@ export type Contact = {
   linkedin_url?: string | null;
   first_seen: string;
   last_seen: string;
+  /** Last time an advisor contacted the lead via Baileys; null = never. */
+  advisor_last_contact_at?: string | null;
   has_newsletter: boolean;
   gender: string;
   sales_id?: Identifier;

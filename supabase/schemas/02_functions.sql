@@ -680,8 +680,14 @@ begin
     and (c.lid = new.chat_id or c.phone = new.chat_id)
   limit 1;
 
-  -- Human-owned stages only (S1..S5 belong to the bot). Only move forward in time.
   if v_lead_id is not null then
+    -- Record advisor contact regardless of stage (monotonic forward).
+    update public.contacts
+       set advisor_last_contact_at = v_ts
+     where id = v_lead_id
+       and (advisor_last_contact_at is null or v_ts > advisor_last_contact_at);
+
+    -- Human-owned stages only (S1..S5 belong to the bot). Only move forward in time.
     update public.contacts
        set last_seen = v_ts
      where id = v_lead_id

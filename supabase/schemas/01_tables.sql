@@ -20,6 +20,7 @@ create table public.contacts (
     avatar jsonb,
     first_seen timestamp with time zone,
     last_seen timestamp with time zone,
+    advisor_last_contact_at timestamp with time zone,
     has_newsletter boolean,
     status text,
     sales_id bigint,
