@@ -30,13 +30,29 @@ const leadPhone = (lead: Contact): string | undefined =>
   (lead as unknown as { telefono?: string }).telefono ||
   undefined;
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const toLocalString = (d: Date): string =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
 /** "2026-06-28T17:00" for a datetime-local input, from an ISO/date string. */
 const toLocalInput = (iso?: string | null): string => {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return toLocalString(d);
+};
+
+/**
+ * A sensible default slot when the lead has no proposed date: today, next full
+ * hour. Seeding a valid value avoids the empty datetime-local trap where the
+ * input looks filled but reports "" until every segment is set — which left the
+ * "Confirmar" button disabled.
+ */
+const defaultVisitLocal = (): string => {
+  const d = new Date();
+  d.setMinutes(0, 0, 0);
+  d.setHours(d.getHours() + 1);
+  return toLocalString(d);
 };
 
 const formatHuman = (local: string): string => {
@@ -74,7 +90,7 @@ export const AgendarVisitaDialog = ({
     lead?.desarrollo_activo ?? "",
   );
   const [fecha, setFecha] = useState<string>(
-    toLocalInput(lead?.fecha_visita_propuesta),
+    toLocalInput(lead?.fecha_visita_propuesta) || defaultVisitLocal(),
   );
   const [duracion, setDuracion] = useState<string>("60");
   const [enviarConfirmacion, setEnviarConfirmacion] = useState<boolean>(true);
