@@ -535,9 +535,30 @@ CREATE OR REPLACE FUNCTION "public"."derive_lead_stage"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
 begin
+  -- CRM user writes (with a JWT) are authoritative — advisors move stages freely.
   if auth.uid() is not null then
     return new;
   end if;
+
+  -- Sync/service writes must never move a CRM-owned stage BACKWARDS: once a lead
+  -- is S6+ (advisor territory) or descartado, the sheet mirror can send a stale
+  -- funnel stage, but the DB is the final frontier. Promotions (e.g. S6 -> S7 on
+  -- a visit, or handoff) are still allowed. This closes the S6 -> S3 demotion.
+  if tg_op = 'UPDATE' and old.stage is not null then
+    if old.stage = 'descartado' and new.stage is distinct from 'descartado' then
+      new.stage := 'descartado';
+      return new;
+    end if;
+    if old.stage ~ '^S[0-9]+$'
+       and (regexp_replace(old.stage, '\D', '', 'g'))::int >= 6
+       and new.stage ~ '^S[0-9]+$'
+       and (regexp_replace(new.stage, '\D', '', 'g'))::int
+           < (regexp_replace(old.stage, '\D', '', 'g'))::int then
+      new.stage := old.stage;
+      return new;
+    end if;
+  end if;
+
   if new.stage is not null and new.stage not in ('S1', 'S2', 'S3', 'S4') then
     return new;
   end if;
