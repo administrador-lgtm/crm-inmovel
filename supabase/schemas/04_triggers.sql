@@ -23,10 +23,11 @@ create or replace trigger "20_contact_saved"
     before insert or update on public.contacts
     for each row execute function public.handle_contact_saved();
 
--- Update contact.last_seen when a contact note is created
-create or replace trigger on_public_contact_notes_created_or_updated
-    after insert on public.contact_notes
-    for each row execute function public.handle_contact_note_created_or_updated();
+-- Inmovel: notes must NOT move "último contacto" (last_seen) — that field
+-- reflects real contact WITH the lead (bot for S1..S5, advisor Baileys for S6+),
+-- not internal advisor comments. The base atomic-crm note->last_seen trigger is
+-- intentionally omitted. (Function handle_contact_note_created_or_updated is left
+-- defined but unused.)
 
 -- Cleanup storage attachments when contact notes are updated or deleted
 create or replace trigger on_contact_notes_attachments_updated_delete_note_attachments
