@@ -1,31 +1,40 @@
-import { useGetList } from "ra-core";
+import { Card, CardContent } from "@/components/ui/card";
 
-import type { Contact } from "../types";
-import { DashboardActivityLog } from "./DashboardActivityLog";
-import { HotContacts } from "./HotContacts";
-import { Welcome } from "./Welcome";
+import { PipelineWidget } from "./PipelineWidget";
+import { VisitasProximasWidget } from "./VisitasProximasWidget";
+import { LeadsFollowupWidget } from "./LeadsFollowupWidget";
+import { HandoffUnassignedWidget } from "./HandoffUnassignedWidget";
 
+/** Placeholder for ④ "Vista Marketing" (live Meta ad insights) — wired next. */
+const MarketingPlaceholder = () => (
+  <Card>
+    <CardContent className="flex h-full min-h-[8rem] flex-col items-center justify-center pt-5 text-center">
+      <p className="text-sm font-semibold text-muted-foreground">
+        Vista Marketing
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Cómo vamos (Meta, live) — próximamente
+      </p>
+    </CardContent>
+  </Card>
+);
+
+/**
+ * Inmovel operations dashboard: pipeline funnel, this week's visits, per-advisor
+ * follow-up gaps, and the unassigned handoff-ready queue. The Marketing panel
+ * (live Meta insights) is stubbed until its integration lands.
+ */
 export const Dashboard = () => {
-  const { isPending } = useGetList<Contact>("contacts", {
-    pagination: { page: 1, perPage: 1 },
-  });
-
-  if (isPending) {
-    return null;
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-1">
-      <div className="md:col-span-3">
-        <div className="flex flex-col gap-4">
-          {import.meta.env.VITE_IS_DEMO === "true" ? <Welcome /> : null}
-          <HotContacts />
-        </div>
+    <div className="mt-1 flex flex-col gap-6">
+      <PipelineWidget />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <VisitasProximasWidget />
+        <LeadsFollowupWidget />
       </div>
-      <div className="md:col-span-6">
-        <div className="flex flex-col gap-6">
-          <DashboardActivityLog />
-        </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <MarketingPlaceholder />
+        <HandoffUnassignedWidget />
       </div>
     </div>
   );

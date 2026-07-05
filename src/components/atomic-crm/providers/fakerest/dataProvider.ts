@@ -107,6 +107,15 @@ export const createDataProvider = ({
       if (resource === "lead_property_matches") {
         return { data: [], total: 0 };
       }
+      // Supabase-only dashboard aggregation views — no FakeRest fixtures, so the
+      // demo dashboard renders its empty states instead of erroring.
+      if (
+        resource === "dashboard_pipeline" ||
+        resource === "dashboard_followup" ||
+        resource === "dashboard_handoff_unassigned"
+      ) {
+        return { data: [], total: 0 };
+      }
       return baseDataProvider.getList(resource, params);
     },
     signUp: async ({

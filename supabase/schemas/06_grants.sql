@@ -182,3 +182,7 @@ grant all on sequence public.visitas_id_seq to service_role;
 grant all on sequence public.lead_propiedad_id_seq to anon;
 grant all on sequence public.lead_propiedad_id_seq to authenticated;
 grant all on sequence public.lead_propiedad_id_seq to service_role;
+
+grant select on public.dashboard_pipeline to anon, authenticated, service_role;
+grant select on public.dashboard_followup to anon, authenticated, service_role;
+grant select on public.dashboard_handoff_unassigned to anon, authenticated, service_role;
