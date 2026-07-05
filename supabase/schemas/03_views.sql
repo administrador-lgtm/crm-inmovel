@@ -541,9 +541,12 @@ select
     c.id,
     coalesce(c.nombre, c.first_name) as lead_name,
     c.stage,
+    c.tipo_busqueda as operacion,
+    c.desarrollo_activo,
     c.zona_interes,
     c.presupuesto,
     c.telefono,
+    c.first_seen,
     c.stage_changed_at
 from public.contacts c
 where c.stage in ('S4','S5') and c.asesor_asignado is null;
