@@ -3,6 +3,7 @@ import { VisitasProximasWidget } from "./VisitasProximasWidget";
 import { LeadsFollowupWidget } from "./LeadsFollowupWidget";
 import { HandoffUnassignedWidget } from "./HandoffUnassignedWidget";
 import { MarketingWidget } from "./MarketingWidget";
+import { ConversacionesActivasWidget } from "./ConversacionesActivasWidget";
 
 /**
  * Inmovel operations dashboard: pipeline funnel, this week's visits, per-advisor
@@ -17,9 +18,10 @@ export const Dashboard = () => {
         <LeadsFollowupWidget />
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <MarketingWidget />
+        <ConversacionesActivasWidget />
         <HandoffUnassignedWidget />
       </div>
+      <MarketingWidget />
     </div>
   );
 };

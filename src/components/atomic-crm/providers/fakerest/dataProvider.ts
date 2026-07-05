@@ -112,7 +112,8 @@ export const createDataProvider = ({
       if (
         resource === "dashboard_pipeline" ||
         resource === "dashboard_followup" ||
-        resource === "dashboard_handoff_unassigned"
+        resource === "dashboard_handoff_unassigned" ||
+        resource === "dashboard_conversaciones_activas"
       ) {
         return { data: [], total: 0 };
       }
