@@ -739,3 +739,19 @@ begin
   return new;
 end;
 $function$
+
+
+CREATE OR REPLACE FUNCTION public.promote_stage_on_visit()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+begin
+  update public.contacts
+     set stage = 'S7'
+   where id = new.lead_id
+     and stage in ('S1', 'S2', 'S3', 'S4', 'S5', 'S6');
+  return new;
+end;
+$function$

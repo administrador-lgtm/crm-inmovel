@@ -107,3 +107,11 @@ drop trigger if exists protect_human_last_seen_trigger on public.contacts;
 create trigger protect_human_last_seen_trigger
   before update on public.contacts
   for each row execute function public.protect_human_last_seen();
+
+
+-- Inmovel: scheduling a visit advances the lead to S7 "Visita solicitada"
+-- (forward-only; S7+ and descartado untouched).
+drop trigger if exists promote_stage_on_visit_trigger on public.visitas;
+create trigger promote_stage_on_visit_trigger
+  after insert on public.visitas
+  for each row execute function public.promote_stage_on_visit();
