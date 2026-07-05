@@ -52,11 +52,14 @@ export const LeadsFollowupWidget = () => {
     return { sinContacto: sc, sinVisita: sv };
   }, [rows, asesor]);
 
-  const href = (extra: Record<string, unknown>) => {
-    const filter: Record<string, unknown> = { ...extra };
-    if (asesor === "unassigned") filter["asesor_asignado@is"] = null;
-    else if (asesor === "assigned") filter["asesor_asignado@not.is"] = null;
-    else if (asesor !== "all") filter["asesor_asignado@eq"] = asesor;
+  // Only use filter sources the contacts list registers (sales_id), so the
+  // applied filter is a visible, removable chip — never a hidden sticky one.
+  // "Sin contacto"/"sin visita" aren't registered filters, so the drill lands on
+  // the advisor's leads; the exact number lives in the card.
+  const href = () => {
+    const filter: Record<string, unknown> = {};
+    if (asesor !== "all" && asesor !== "unassigned" && asesor !== "assigned")
+      filter.sales_id = asesor;
     return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
   };
 
@@ -85,7 +88,7 @@ export const LeadsFollowupWidget = () => {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Link
-            to={href({ "advisor_last_contact_at@is": null })}
+            to={href()}
             className="flex flex-col rounded-md border border-red-300 bg-red-50 p-3 hover:bg-red-100"
           >
             <span className="text-2xl font-semibold tabular-nums text-red-700">
@@ -94,7 +97,7 @@ export const LeadsFollowupWidget = () => {
             <span className="text-xs text-red-700">Sin contacto del asesor</span>
           </Link>
           <Link
-            to={href({})}
+            to={href()}
             className="flex flex-col rounded-md border border-amber-300 bg-amber-50 p-3 hover:bg-amber-100"
           >
             <span className="text-2xl font-semibold tabular-nums text-amber-700">

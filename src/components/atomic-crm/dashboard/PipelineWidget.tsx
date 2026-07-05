@@ -24,11 +24,14 @@ type PipelineRow = {
 /** Ordered funnel stages, excluding descartado (which the view already omits). */
 const STAGES = defaultLeadStages.filter((s) => s.value !== "descartado");
 
+// Use the SAME filter sources the contacts list registers (getLeadFilters):
+// `stage` and `sales_id`. This makes the applied filter show as a removable chip
+// instead of a hidden, sticky one. (unassigned/assigned have no registered filter,
+// so we drill by stage only — the widget's own count stays exact.)
 const contactsFilterHref = (stage: string, asesorId: string): string => {
-  const filter: Record<string, unknown> = { "stage@eq": stage };
-  if (asesorId === "unassigned") filter["asesor_asignado@is"] = null;
-  else if (asesorId === "assigned") filter["asesor_asignado@not.is"] = null;
-  else if (asesorId !== "all") filter["asesor_asignado@eq"] = asesorId;
+  const filter: Record<string, unknown> = { stage };
+  if (asesorId !== "all" && asesorId !== "unassigned" && asesorId !== "assigned")
+    filter.sales_id = asesorId;
   return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
 };
 

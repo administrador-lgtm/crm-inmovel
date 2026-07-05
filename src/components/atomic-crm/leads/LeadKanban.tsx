@@ -25,6 +25,10 @@ const LeadKanban = () => {
   return (
     <List
       resource="contacts"
+      // Distinct storeKey so the kanban's filters are independent from the
+      // Contacts list (both read `contacts`). Without it they share
+      // `contacts.listParams` and a filter set on one leaks into the other.
+      storeKey="leadKanban"
       perPage={200}
       title="resources.contacts.name"
       sort={{ field: "last_seen", order: "DESC" }}
