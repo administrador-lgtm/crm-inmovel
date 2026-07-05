@@ -3,6 +3,7 @@ import { BarChart3 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { getSupabaseClient } from "../providers/supabase/supabase";
 
@@ -21,6 +22,7 @@ type Insights = {
   fetched_at?: string;
 };
 
+// "Mes" = this calendar month to date (Meta this_month), NOT a rolling 30 days.
 const PRESETS: { key: string; label: string }[] = [
   { key: "today", label: "Hoy" },
   { key: "week", label: "Semana" },
@@ -29,17 +31,25 @@ const PRESETS: { key: string; label: string }[] = [
 
 const money = (n: number) => `$${n.toLocaleString("es-MX")}`;
 
-/** ④ Vista Marketing — live Meta ad insights (per ad set) with a Hoy/Semana/Mes toggle. */
+/**
+ * ④ Vista Marketing — live Meta ad insights per ad set. Hoy/Semana/Mes presets
+ * plus a custom Desde/Hasta range (which takes over when both dates are set).
+ */
 export const MarketingWidget = () => {
   const [preset, setPreset] = useState<string>("today");
+  const [since, setSince] = useState<string>("");
+  const [until, setUntil] = useState<string>("");
   const [data, setData] = useState<Insights | null>(null);
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
+
+  const customActive = Boolean(since && until);
 
   useEffect(() => {
     let alive = true;
     setState("loading");
+    const body = customActive ? { since, until } : { preset };
     getSupabaseClient()
-      .functions.invoke("meta_insights", { body: { preset } })
+      .functions.invoke("meta_insights", { body })
       .then(({ data, error }) => {
         if (!alive) return;
         if (error || !data || (data as { error?: string }).error) {
@@ -53,7 +63,13 @@ export const MarketingWidget = () => {
     return () => {
       alive = false;
     };
-  }, [preset]);
+  }, [preset, since, until, customActive]);
+
+  const pickPreset = (key: string) => {
+    setSince("");
+    setUntil("");
+    setPreset(key);
+  };
 
   return (
     <Card>
@@ -68,18 +84,35 @@ export const MarketingWidget = () => {
           </span>
         </div>
 
-        <div className="mb-3 flex gap-1">
+        <div className="mb-2 flex flex-wrap items-center gap-1">
           {PRESETS.map((p) => (
             <Button
               key={p.key}
               type="button"
               size="sm"
-              variant={preset === p.key ? "default" : "outline"}
-              onClick={() => setPreset(p.key)}
+              variant={!customActive && preset === p.key ? "default" : "outline"}
+              onClick={() => pickPreset(p.key)}
             >
               {p.label}
             </Button>
           ))}
+          <div className="ml-auto flex items-center gap-1">
+            <Input
+              type="date"
+              aria-label="Desde"
+              className="h-8 w-[8.5rem] text-xs"
+              value={since}
+              onChange={(e) => setSince(e.target.value)}
+            />
+            <span className="text-xs text-muted-foreground">–</span>
+            <Input
+              type="date"
+              aria-label="Hasta"
+              className="h-8 w-[8.5rem] text-xs"
+              value={until}
+              onChange={(e) => setUntil(e.target.value)}
+            />
+          </div>
         </div>
 
         {state === "loading" ? (
@@ -108,9 +141,7 @@ export const MarketingWidget = () => {
                     <td className="py-1 text-right tabular-nums">
                       {money(a.spend)}
                     </td>
-                    <td className="py-1 text-right tabular-nums">
-                      ${a.cpm}
-                    </td>
+                    <td className="py-1 text-right tabular-nums">${a.cpm}</td>
                     <td className="py-1 text-right tabular-nums">{a.ctr}%</td>
                     <td className="py-1 text-right tabular-nums">{a.fr}</td>
                     <td className="py-1 text-right font-medium tabular-nums">

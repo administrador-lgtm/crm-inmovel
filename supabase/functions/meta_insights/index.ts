@@ -51,11 +51,18 @@ Deno.serve(async (req) => {
     if (!TOKEN) return json({ error: "META_ACCESS_TOKEN not set" }, 500);
 
     const body = await req.json().catch(() => ({}));
-    const preset = PRESETS[body?.preset as string] ?? "today";
+    // A custom { since, until } (YYYY-MM-DD) range wins; otherwise a named preset
+    // (today / this-week-to-date / this calendar month to date).
+    const since = typeof body?.since === "string" ? body.since : null;
+    const until = typeof body?.until === "string" ? body.until : null;
+    const rangeField: Record<string, string> =
+      since && until
+        ? { time_range: JSON.stringify({ since, until }) }
+        : { date_preset: PRESETS[body?.preset as string] ?? "today" };
 
     const params = new URLSearchParams({
       level: "adset",
-      date_preset: preset,
+      ...rangeField,
       fields: "adset_id,adset_name,spend,impressions,cpm,ctr,actions",
       limit: "200",
       access_token: TOKEN,
@@ -95,7 +102,7 @@ Deno.serve(async (req) => {
       cpl: totalFr ? +(totalSpend / totalFr).toFixed(2) : 0,
     };
 
-    return json({ preset, adsets, totals, fetched_at: new Date().toISOString() });
+    return json({ adsets, totals, fetched_at: new Date().toISOString() });
   } catch (e) {
     return json({ error: String((e as Error).message) }, 500);
   }
