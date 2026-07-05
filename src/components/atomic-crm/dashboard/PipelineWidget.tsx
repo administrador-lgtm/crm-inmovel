@@ -26,8 +26,18 @@ const STAGES = defaultLeadStages.filter((s) => s.value !== "descartado");
 
 const contactsFilterHref = (stage: string, asesorId: string): string => {
   const filter: Record<string, unknown> = { "stage@eq": stage };
-  if (asesorId !== "all") filter["asesor_asignado@eq"] = asesorId;
+  if (asesorId === "unassigned") filter["asesor_asignado@is"] = null;
+  else if (asesorId === "assigned") filter["asesor_asignado@not.is"] = null;
+  else if (asesorId !== "all") filter["asesor_asignado@eq"] = asesorId;
   return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
+};
+
+/** Whether a pipeline row passes the advisor filter (all / unassigned / assigned / specific id). */
+const matchesAsesor = (rowAsesorId: number | null, filter: string): boolean => {
+  if (filter === "all") return true;
+  if (filter === "unassigned") return rowAsesorId == null;
+  if (filter === "assigned") return rowAsesorId != null;
+  return String(rowAsesorId ?? "") === filter;
 };
 
 /** ① Pipeline — lead count per stage (S1..S10). Clickable, filterable by advisor. */
@@ -44,7 +54,7 @@ export const PipelineWidget = () => {
   const byStage = useMemo(() => {
     const m = new Map<string, number>();
     (rows ?? []).forEach((r) => {
-      if (asesor !== "all" && String(r.asesor_id ?? "") !== asesor) return;
+      if (!matchesAsesor(r.asesor_id, asesor)) return;
       m.set(r.stage, (m.get(r.stage) ?? 0) + r.leads);
     });
     return m;
@@ -62,7 +72,9 @@ export const PipelineWidget = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los asesores</SelectItem>
+              <SelectItem value="all">Todos (asignados + sin asignar)</SelectItem>
+              <SelectItem value="unassigned">Sin asignar</SelectItem>
+              <SelectItem value="assigned">Asignados (todos)</SelectItem>
               {sales?.map((s) => (
                 <SelectItem key={s.id} value={String(s.id)}>
                   {s.first_name} {s.last_name}

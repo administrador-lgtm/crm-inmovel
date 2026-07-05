@@ -37,7 +37,15 @@ export const LeadsFollowupWidget = () => {
     let sc = 0;
     let sv = 0;
     (rows ?? []).forEach((r) => {
-      if (asesor !== "all" && String(r.asesor_id ?? "") !== asesor) return;
+      const ok =
+        asesor === "all"
+          ? true
+          : asesor === "unassigned"
+            ? r.asesor_id == null
+            : asesor === "assigned"
+              ? r.asesor_id != null
+              : String(r.asesor_id ?? "") === asesor;
+      if (!ok) return;
       if (r.sin_contacto) sc += 1;
       if (r.sin_visita) sv += 1;
     });
@@ -46,7 +54,9 @@ export const LeadsFollowupWidget = () => {
 
   const href = (extra: Record<string, unknown>) => {
     const filter: Record<string, unknown> = { ...extra };
-    if (asesor !== "all") filter["asesor_asignado@eq"] = asesor;
+    if (asesor === "unassigned") filter["asesor_asignado@is"] = null;
+    else if (asesor === "assigned") filter["asesor_asignado@not.is"] = null;
+    else if (asesor !== "all") filter["asesor_asignado@eq"] = asesor;
     return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
   };
 
@@ -62,7 +72,9 @@ export const LeadsFollowupWidget = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los asesores</SelectItem>
+              <SelectItem value="all">Todos (asignados + sin asignar)</SelectItem>
+              <SelectItem value="unassigned">Sin asignar</SelectItem>
+              <SelectItem value="assigned">Asignados (todos)</SelectItem>
               {sales?.map((s) => (
                 <SelectItem key={s.id} value={String(s.id)}>
                   {s.first_name} {s.last_name}
