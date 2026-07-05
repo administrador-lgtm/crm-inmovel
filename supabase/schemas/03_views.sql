@@ -488,10 +488,14 @@ select
     c.asesor_asignado as asesor_id,
     trim(s.first_name || ' ' || coalesce(s.last_name, '')) as asesor_name,
     v.propiedad_id,
-    p.nombre as propiedad_name,
-    p.url_maps,
+    -- Own properties resolve via propiedades; external "URL libre" visits fall
+    -- back to the snapshot stored on the visit.
+    coalesce(p.nombre, v.propiedad_nombre) as propiedad_name,
+    coalesce(p.url_maps, v.propiedad_url_maps) as url_maps,
     v.estado,
-    c.stage
+    c.stage,
+    v.propiedad_url,
+    v.propiedad_fuente
 from public.visitas v
 join public.contacts c on c.id = v.lead_id
 left join public.sales s on s.id = c.asesor_asignado

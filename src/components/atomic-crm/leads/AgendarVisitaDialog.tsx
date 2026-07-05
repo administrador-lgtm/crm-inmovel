@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { useGetList, useNotify, useRecordContext, useRefresh } from "ra-core";
+import {
+  useDataProvider,
+  useGetList,
+  useNotify,
+  useRecordContext,
+  useRefresh,
+} from "ra-core";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,12 +48,7 @@ const toLocalInput = (iso?: string | null): string => {
   return toLocalString(d);
 };
 
-/**
- * A sensible default slot when the lead has no proposed date: today, next full
- * hour. Seeding a valid value avoids the empty datetime-local trap where the
- * input looks filled but reports "" until every segment is set — which left the
- * "Confirmar" button disabled.
- */
+/** Default slot when the lead has no proposed date: today, next full hour. */
 const defaultVisitLocal = (): string => {
   const d = new Date();
   d.setMinutes(0, 0, 0);
@@ -63,11 +64,38 @@ const formatHuman = (local: string): string => {
 };
 
 /**
+ * Pull an external listing code out of a pasted URL or a bare code.
+ * NocNok/Lamudi fichas end in "...-id-nn-gwa527"; a bare "NN-GWA527" is also fine.
+ */
+const extractCodigo = (raw: string): string => {
+  const t = raw.trim();
+  const m = t.match(/id-([a-z0-9-]+)\/?(?:[?#].*)?$/i);
+  if (m) return m[1].toUpperCase();
+  return t.toUpperCase();
+};
+
+/** External inventory row shape (from the `inventario_externo` view). */
+type InventarioExterno = {
+  id: string | number;
+  codigo?: string | null;
+  title?: string | null;
+  colonia?: string | null;
+  alcaldia?: string | null;
+  url_ficha?: string | null;
+  lat_num?: number | null;
+  lng_num?: number | null;
+};
+
+type Mode = "propia" | "url";
+type MatchState = "idle" | "searching" | "found" | "notfound";
+
+/**
  * "Agendar visita" journey: the advisor confirms property / date / time and sees
  * a live preview of the calendar invite AND the WhatsApp confirmation the lead
- * will get — both composed from the confirmed fields. On confirm it creates the
- * `visitas` row (CRM mirror). Creating the actual Calendar event + the WA send is
- * wired in the next step. See docs/VISITAS-CALENDAR.md.
+ * will get. The property can be an OWN one (dropdown) or ANY external listing via
+ * "URL libre" — paste the URL/code and it auto-fills from inventario_externo (or
+ * type the title by hand). On confirm the `agendar_visita` edge function creates
+ * the Calendar event + optional WA and mirrors it into `visitas`.
  */
 export const AgendarVisitaDialog = ({
   open,
@@ -77,6 +105,7 @@ export const AgendarVisitaDialog = ({
   onOpenChange: (v: boolean) => void;
 }) => {
   const lead = useRecordContext<Contact>();
+  const dataProvider = useDataProvider();
   const notify = useNotify();
   const refresh = useRefresh();
   const [submitting, setSubmitting] = useState(false);
@@ -86,9 +115,20 @@ export const AgendarVisitaDialog = ({
     pagination: { page: 1, perPage: 300 },
   });
 
+  const [mode, setMode] = useState<Mode>("propia");
   const [propiedadId, setPropiedadId] = useState<string>(
     lead?.desarrollo_activo ?? "",
   );
+
+  // "URL libre" state — the pasted input, the lookup status, and the resolved
+  // (auto-filled or manually entered) snapshot fields.
+  const [urlInput, setUrlInput] = useState<string>("");
+  const [matchState, setMatchState] = useState<MatchState>("idle");
+  const [extNombre, setExtNombre] = useState<string>("");
+  const [extDireccion, setExtDireccion] = useState<string>("");
+  const [extUrlMaps, setExtUrlMaps] = useState<string>("");
+  const [extCodigo, setExtCodigo] = useState<string>("");
+
   const [fecha, setFecha] = useState<string>(
     toLocalInput(lead?.fecha_visita_propuesta) || defaultVisitLocal(),
   );
@@ -100,32 +140,86 @@ export const AgendarVisitaDialog = ({
     [propiedades, propiedadId],
   );
 
+  const lookupExterna = async () => {
+    const raw = urlInput.trim();
+    if (!raw) return;
+    setMatchState("searching");
+    const codigo = extractCodigo(raw);
+    try {
+      const { data } = await dataProvider.getList<InventarioExterno>(
+        "inventario_externo",
+        {
+          filter: { "codigo@eq": codigo },
+          sort: { field: "title", order: "ASC" },
+          pagination: { page: 1, perPage: 1 },
+        },
+      );
+      const row = data?.[0];
+      if (row) {
+        const zona = [row.colonia, row.alcaldia].filter(Boolean).join(", ");
+        setExtNombre(row.title || `Anuncio ${codigo}`);
+        setExtDireccion(zona);
+        setExtCodigo(String(row.codigo || codigo));
+        setExtUrlMaps(
+          row.lat_num != null && row.lng_num != null
+            ? `https://maps.google.com/?q=${row.lat_num},${row.lng_num}`
+            : zona
+              ? `https://maps.google.com/?q=${encodeURIComponent(zona)}`
+              : "",
+        );
+        setMatchState("found");
+      } else {
+        // Not in our inventory — still schedulable; advisor types the title.
+        setExtCodigo(codigo);
+        setMatchState("notfound");
+      }
+    } catch {
+      setExtCodigo(codigo);
+      setMatchState("notfound");
+    }
+  };
+
   if (!lead) return null;
 
   const leadName = lead.nombre || lead.first_name || "el lead";
   const asesor = lead.asesor_nombre || "tu asesor";
-  const direccion = propiedad?.direccion;
   const hasPhone = Boolean(leadPhone(lead));
-  const ready = Boolean(propiedadId && fecha);
-  // Whether to fire the WhatsApp confirmation (only possible with a phone). The
-  // actual WABA send is wired with the `visita_confirmada` template; this captures
-  // the advisor's choice at confirm time.
+
+  // Unified selected-property view for preview + submit.
+  const selNombre = mode === "propia" ? propiedad?.nombre : extNombre;
+  const selDireccion = mode === "propia" ? propiedad?.direccion : extDireccion;
+  const selReady =
+    mode === "propia" ? Boolean(propiedadId) : Boolean(urlInput && extNombre);
+  const ready = Boolean(selReady && fecha);
   const willNotify = enviarConfirmacion && hasPhone;
 
   const submit = async () => {
     if (!ready) return;
     setSubmitting(true);
+    const body =
+      mode === "propia"
+        ? {
+            lead_id: lead.id,
+            propiedad_id: propiedadId,
+            fecha: new Date(fecha).toISOString(),
+            duracion: Number(duracion),
+            enviar_confirmacion: willNotify,
+          }
+        : {
+            lead_id: lead.id,
+            propiedad_id: extCodigo || urlInput,
+            fuente: "externa",
+            propiedad_nombre: extNombre,
+            propiedad_direccion: extDireccion || undefined,
+            propiedad_url_maps: extUrlMaps || undefined,
+            propiedad_url: urlInput,
+            fecha: new Date(fecha).toISOString(),
+            duracion: Number(duracion),
+            enviar_confirmacion: willNotify,
+          };
     const { data, error } = await getSupabaseClient().functions.invoke(
       "agendar_visita",
-      {
-        body: {
-          lead_id: lead.id,
-          propiedad_id: propiedadId,
-          fecha: new Date(fecha).toISOString(),
-          duracion: Number(duracion),
-          enviar_confirmacion: willNotify,
-        },
-      },
+      { body },
     );
     setSubmitting(false);
     if (error || (data && (data as { error?: string }).error)) {
@@ -145,22 +239,89 @@ export const AgendarVisitaDialog = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
-          {/* Property */}
-          <div className="flex flex-col gap-1">
-            <Label>Propiedad</Label>
-            <Select value={propiedadId} onValueChange={setPropiedadId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Elige la propiedad" />
-              </SelectTrigger>
-              <SelectContent>
-                {propiedades?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Property source toggle */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={mode === "propia" ? "default" : "outline"}
+              onClick={() => setMode("propia")}
+            >
+              Propia
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={mode === "url" ? "default" : "outline"}
+              onClick={() => setMode("url")}
+            >
+              Otra (URL)
+            </Button>
           </div>
+
+          {/* Property — own dropdown */}
+          {mode === "propia" ? (
+            <div className="flex flex-col gap-1">
+              <Label>Propiedad</Label>
+              <Select value={propiedadId} onValueChange={setPropiedadId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Elige la propiedad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propiedades?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            /* Property — external "URL libre" */
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ext_url">URL o código del anuncio</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="ext_url"
+                    placeholder="https://app.nocnok.com/… o NN-GWA527"
+                    value={urlInput}
+                    onChange={(e) => {
+                      setUrlInput(e.target.value);
+                      setMatchState("idle");
+                    }}
+                    onBlur={lookupExterna}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={lookupExterna}
+                    disabled={!urlInput || matchState === "searching"}
+                  >
+                    Buscar
+                  </Button>
+                </div>
+                {matchState === "found" ? (
+                  <p className="text-xs text-green-600">
+                    ✓ Encontrada{extDireccion ? ` · ${extDireccion}` : ""}
+                  </p>
+                ) : matchState === "notfound" ? (
+                  <p className="text-xs text-amber-600">
+                    No está en nuestro inventario — escribe el título abajo.
+                  </p>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ext_nombre">Título de la propiedad</Label>
+                <Input
+                  id="ext_nombre"
+                  placeholder="Ej. Depto en venta, Narvarte"
+                  value={extNombre}
+                  onChange={(e) => setExtNombre(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Date + time */}
           <div className="flex flex-col gap-1">
@@ -197,11 +358,11 @@ export const AgendarVisitaDialog = ({
             <div className="space-y-1">
               <p>
                 🗓️ <span className="font-medium">Invite (calendario):</span>{" "}
-                Visita — {leadName} — {propiedad?.nombre ?? "(elige propiedad)"}
+                Visita — {leadName} — {selNombre || "(elige propiedad)"}
               </p>
               <p>📅 {formatHuman(fecha)}</p>
-              <p className={cn(!direccion && "text-muted-foreground")}>
-                📍 {direccion ?? "(la propiedad no tiene dirección)"}
+              <p className={cn(!selDireccion && "text-muted-foreground")}>
+                📍 {selDireccion || "(sin dirección)"}
               </p>
               <p>👤 Te atiende: {asesor}</p>
             </div>
@@ -211,7 +372,7 @@ export const AgendarVisitaDialog = ({
               </p>
               <p className="text-muted-foreground">
                 ¡Hola {leadName}! 👋 Confirmamos tu visita: 🏠 {""}
-                {propiedad?.nombre ?? "…"} · {formatHuman(fecha)} · 👤 {asesor}.
+                {selNombre || "…"} · {formatHuman(fecha)} · 👤 {asesor}.
                 {leadPhone(lead)
                   ? ""
                   : " (el lead no tiene teléfono — no se enviará WhatsApp)"}

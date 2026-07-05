@@ -37,8 +37,13 @@ export const VisitasPanel = () => {
 
   if (!lead) return null;
 
-  const propiedadName = (id?: string | null) =>
-    propiedades?.find((p) => p.id === id)?.nombre ?? id ?? "";
+  const propiedadName = (visita: Visita) =>
+    // Own properties resolve via propiedades; external "URL libre" visits carry
+    // their title as a snapshot on the visit itself.
+    visita.propiedad_nombre ||
+    propiedades?.find((p) => p.id === visita.propiedad_id)?.nombre ||
+    visita.propiedad_id ||
+    "";
 
   return (
     <Card className="mt-4">
@@ -61,9 +66,7 @@ export const VisitasPanel = () => {
                 key={visita.id}
                 className="border rounded-md p-2 text-sm flex flex-col"
               >
-                <span className="font-medium">
-                  {propiedadName(visita.propiedad_id)}
-                </span>
+                <span className="font-medium">{propiedadName(visita)}</span>
                 <span className="text-xs text-muted-foreground">
                   {formatDate(visita.fecha, "es-MX")}
                   {visita.estado && visita.estado !== "confirmada"

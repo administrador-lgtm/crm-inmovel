@@ -39,6 +39,13 @@ Deno.serve(async (req) => {
       fecha,
       duracion = 60,
       enviar_confirmacion = false,
+      // Optional snapshot for external / "URL libre" properties (not in the
+      // propiedades table). When present, these override the propiedades lookup.
+      fuente,
+      propiedad_nombre,
+      propiedad_direccion,
+      propiedad_url_maps,
+      propiedad_url,
     } = body;
     if (!lead_id || !propiedad_id || !fecha) {
       return json({ error: "lead_id, propiedad_id, fecha required" }, 400);
@@ -72,6 +79,14 @@ Deno.serve(async (req) => {
       .eq("id", propiedad_id)
       .single();
 
+    // Resolve display fields: own property (propiedades) wins; otherwise fall
+    // back to the client-provided snapshot (external "URL libre").
+    const propNombreResolved =
+      prop?.nombre || propiedad_nombre || String(propiedad_id);
+    const direccionResolved = prop?.direccion || propiedad_direccion || null;
+    const urlMapsResolved = prop?.url_maps || propiedad_url_maps || null;
+    const propFuenteResolved = prop ? "propia" : fuente || "externa";
+
     let advisorCal: string | null = null;
     let advisorWa: string | null = null;
     if (lead.asesor_asignado) {
@@ -85,7 +100,7 @@ Deno.serve(async (req) => {
     }
 
     const leadName = lead.nombre || lead.first_name || "Lead";
-    const propNombre = prop?.nombre || propiedad_id;
+    const propNombre = propNombreResolved;
     const start = new Date(fecha);
     const end = new Date(start.getTime() + Number(duracion) * 60_000);
 
@@ -93,7 +108,8 @@ Deno.serve(async (req) => {
     const lines: string[] = [`Lead: ${leadName}`];
     if (lead.telefono) lines.push(`Tel: ${lead.telefono}`);
     lines.push(`Propiedad: ${propNombre}`);
-    if (prop?.direccion) lines.push(`Dirección: ${prop.direccion}`);
+    if (direccionResolved) lines.push(`Dirección: ${direccionResolved}`);
+    if (propiedad_url) lines.push(`Anuncio: ${propiedad_url}`);
     if (lead.presupuesto) lines.push(`Presupuesto: ${lead.presupuesto}`);
     if (lead.zona_interes) lines.push(`Zona: ${lead.zona_interes}`);
     if (lead.ventana_compra) lines.push(`Ventana de compra: ${lead.ventana_compra}`);
@@ -103,7 +119,7 @@ Deno.serve(async (req) => {
 
     const event: Record<string, unknown> = {
       summary: `Visita — ${leadName} — ${propNombre}`,
-      location: prop?.direccion || undefined,
+      location: direccionResolved || undefined,
       description: lines.join("\n"),
       start: { dateTime: start.toISOString(), timeZone: TZ },
       end: { dateTime: end.toISOString(), timeZone: TZ },
@@ -139,6 +155,10 @@ Deno.serve(async (req) => {
         fecha: start.toISOString(),
         asesor_id: lead.asesor_asignado ?? null,
         gcal_event_id: ev.id,
+        propiedad_fuente: propFuenteResolved,
+        propiedad_nombre: propNombreResolved,
+        propiedad_url: propiedad_url ?? null,
+        propiedad_url_maps: urlMapsResolved,
       },
       { onConflict: "gcal_event_id" },
     );
@@ -159,13 +179,13 @@ Deno.serve(async (req) => {
         hour: "numeric",
         minute: "2-digit",
       });
-      const address = prop?.direccion || propNombre;
+      const address = direccionResolved || propNombre;
       // Maps button base in the template is `https://maps.google.com/?q=` (the
       // format that opens reliably). Pass the suffix from the property's url_maps
       // when present, else the encoded address.
       const mapsParam =
-        prop?.url_maps && prop.url_maps.includes("?q=")
-          ? prop.url_maps.split("?q=")[1]
+        urlMapsResolved && urlMapsResolved.includes("?q=")
+          ? urlMapsResolved.split("?q=")[1]
           : encodeURIComponent(address);
       const waBody = `wa.me/${advisorWa ?? "5215540203511"}`;
       const calParam =

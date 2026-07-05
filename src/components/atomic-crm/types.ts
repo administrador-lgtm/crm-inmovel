@@ -219,6 +219,14 @@ export type Visita = {
   gcal_event_id?: string | null;
   /** confirmada | cancelada — mirrored from the calendar event status. */
   estado?: string | null;
+  /** 'propia' | 'externa' — external visits carry a snapshot (no propiedades FK). */
+  propiedad_fuente?: string | null;
+  /** Snapshot title (external listings that aren't in propiedades). */
+  propiedad_nombre?: string | null;
+  /** Snapshot listing URL for external / "URL libre" visits. */
+  propiedad_url?: string | null;
+  /** Snapshot maps link for external visits. */
+  propiedad_url_maps?: string | null;
 } & Pick<RaRecord, "id">;
 
 /**
@@ -239,6 +247,10 @@ export type VisitaAgenda = {
   url_maps?: string | null;
   estado?: string | null;
   stage?: string | null;
+  /** External listing URL (null for own properties). */
+  propiedad_url?: string | null;
+  /** 'propia' | 'externa'. */
+  propiedad_fuente?: string | null;
 } & Pick<RaRecord, "id">;
 
 /**
