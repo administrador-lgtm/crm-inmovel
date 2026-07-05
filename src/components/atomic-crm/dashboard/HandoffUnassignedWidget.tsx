@@ -54,9 +54,10 @@ export const HandoffUnassignedWidget = () => {
   const [op, setOp] = useState<string>("all");
   const [prop, setProp] = useState<string>("all");
   const [zona, setZona] = useState<string>("all");
+  const [orden, setOrden] = useState<"recientes" | "antiguos">("recientes");
 
   const { data } = useGetList<HandoffRow>("dashboard_handoff_unassigned", {
-    sort: { field: "first_seen", order: "ASC" }, // oldest waiting first
+    sort: { field: "first_seen", order: "DESC" },
     pagination: { page: 1, perPage: 500 },
   });
   const rows = useMemo(() => data ?? [], [data]);
@@ -70,16 +71,24 @@ export const HandoffUnassignedWidget = () => {
     [rows],
   );
 
-  const filtered = useMemo(
-    () =>
-      rows.filter(
-        (r) =>
-          (op === "all" || (r.operacion ?? "") === op) &&
-          (prop === "all" || (r.desarrollo_activo ?? "") === prop) &&
-          (zona === "all" || (r.zona_interes ?? "") === zona),
-      ),
-    [rows, op, prop, zona],
-  );
+  const filtered = useMemo(() => {
+    const out = rows.filter(
+      (r) =>
+        (op === "all" || (r.operacion ?? "") === op) &&
+        (prop === "all" || (r.desarrollo_activo ?? "") === prop) &&
+        (zona === "all" || (r.zona_interes ?? "") === zona),
+    );
+    const dir = orden === "recientes" ? -1 : 1;
+    return out.sort(
+      (a, b) =>
+        dir *
+        ((a.first_seen ?? "") < (b.first_seen ?? "")
+          ? -1
+          : (a.first_seen ?? "") > (b.first_seen ?? "")
+            ? 1
+            : 0),
+    );
+  }, [rows, op, prop, zona, orden]);
 
   return (
     <Card>
@@ -89,9 +98,21 @@ export const HandoffUnassignedWidget = () => {
           <h2 className="text-sm font-semibold text-muted-foreground">
             Handoff-ready sin asignar
           </h2>
-          <span className="ml-auto text-xs text-muted-foreground">
-            {filtered.length} en cola
+          <span className="text-xs text-muted-foreground">
+            ({filtered.length})
           </span>
+          <Select
+            value={orden}
+            onValueChange={(v) => setOrden(v as "recientes" | "antiguos")}
+          >
+            <SelectTrigger className="ml-auto h-8 w-36 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recientes">Más recientes</SelectItem>
+              <SelectItem value="antiguos">Más antiguos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="mb-3 grid grid-cols-3 gap-2">
