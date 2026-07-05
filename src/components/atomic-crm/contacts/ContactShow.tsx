@@ -22,6 +22,7 @@ import { NoteCreate, NotesIterator, NotesIteratorMobile } from "../notes";
 import { NoteCreateSheet } from "../notes/NoteCreateSheet";
 import { ContactEditSheet } from "./ContactEditSheet";
 import { ContactStatusSelector } from "./ContactInputs";
+import { AsesorSelector } from "./AsesorSelector";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
 import { ContactBackgroundInfo } from "./ContactBackgroundInfo";
 import { PropertyMatchList } from "./PropertyMatchList";
@@ -165,6 +166,15 @@ const ContactShowContentMobile = () => {
                 <Separator />
                 <div className="mt-3">
                   <StageSelector />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {translate("crm.leads.advisor", { _: "Asesor" })}
+                </h3>
+                <Separator />
+                <div className="mt-3">
+                  <AsesorSelector />
                 </div>
               </div>
               <div>

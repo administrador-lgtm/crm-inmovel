@@ -4,6 +4,7 @@ import { DeleteButton } from "@/components/admin";
 import { ShowButton } from "@/components/admin/show-button";
 
 import { ContactStatusSelector } from "./ContactInputs";
+import { AsesorSelector } from "./AsesorSelector";
 import { StageControl } from "../leads/StageControl";
 import { LeadInfo } from "../leads/LeadInfo";
 import { ContactPersonalInfo } from "./ContactPersonalInfo";
@@ -33,6 +34,10 @@ export const ContactAside = ({ link = "edit" }: { link?: "edit" | "show" }) => {
         title={translate("crm.leads.stage", { _: "Etapa del lead" })}
       >
         <StageControl />
+      </AsideSection>
+
+      <AsideSection title={translate("crm.leads.advisor", { _: "Asesor" })}>
+        <AsesorSelector />
       </AsideSection>
 
       <AsideSection
