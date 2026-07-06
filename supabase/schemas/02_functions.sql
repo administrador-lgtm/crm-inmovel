@@ -755,3 +755,27 @@ begin
   return new;
 end;
 $function$
+
+
+CREATE OR REPLACE FUNCTION public.enforce_assigned_min_stage()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  if new.asesor_asignado is not null
+     and new.stage in ('S1', 'S2', 'S3', 'S4', 'S5', 'S6') then
+    if new.advisor_last_contact_at is not null then
+      if new.stage <> 'S6' then
+        new.stage := 'S6';
+        new.stage_changed_at := now();
+      end if;
+    else
+      if new.stage <> 'S5' then
+        new.stage := 'S5';
+        new.stage_changed_at := now();
+      end if;
+    end if;
+  end if;
+  return new;
+end;
+$function$

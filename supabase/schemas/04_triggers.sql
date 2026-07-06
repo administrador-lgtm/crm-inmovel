@@ -116,3 +116,11 @@ drop trigger if exists promote_stage_on_visit_trigger on public.visitas;
 create trigger promote_stage_on_visit_trigger
   after insert on public.visitas
   for each row execute function public.promote_stage_on_visit();
+
+
+-- Inmovel: assigned leads obey two rules (S5 handoff-enviado if no advisor contact,
+-- S6 asesor-aceptó once contacted). Runs last (name sorts after zz_sync_advisor_id).
+drop trigger if exists zzz_enforce_assigned_min_stage_trigger on public.contacts;
+create trigger zzz_enforce_assigned_min_stage_trigger
+  before insert or update on public.contacts
+  for each row execute function public.enforce_assigned_min_stage();
