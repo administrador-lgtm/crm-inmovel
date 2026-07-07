@@ -40,12 +40,13 @@ describe("ContactShow", () => {
       </StoryWrapper>,
     );
 
-    // ContactAside now renders two comboboxes (advisor selector + status
-    // selector), so a bare getByRole("combobox") is ambiguous. The status
-    // Radix trigger exposes its selected value as its accessible name, so we
-    // target it by name (Warm before the change, Hot after).
-    const statusCombobox = () =>
-      screen.getByRole("combobox", { name: /warm|hot/i });
+    // ContactAside now renders two comboboxes (the AsesorSelector advisor
+    // dropdown, then the status selector), so a bare getByRole("combobox") is
+    // ambiguous. Radix Select triggers have role="combobox", which per ARIA
+    // does not derive its accessible name from subtree text, so we can't match
+    // on the visible value. The advisor selector always renders first, so the
+    // status selector is the second (index 1) combobox in the aside.
+    const statusCombobox = () => screen.getByRole("combobox").nth(1);
 
     await expect.element(statusCombobox()).toHaveTextContent("Warm");
 
