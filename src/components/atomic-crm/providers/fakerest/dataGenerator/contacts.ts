@@ -82,7 +82,9 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
     const is_assigned = isPostHandoff;
     // Advisor owns the lead (S6+) but has never messaged it.
     const sin_contacto_asesor =
-      stageRank >= 5 && stage !== "descartado" && advisor_last_contact_at === null;
+      stageRank >= 5 &&
+      stage !== "descartado" &&
+      advisor_last_contact_at === null;
     // Assigned lead just accepted (S6) with no visit scheduled yet.
     const sin_visita = is_assigned && stage === "S6" && weightedBoolean(50);
     // Post-handoff lead with an ongoing two-way conversation (weighted).

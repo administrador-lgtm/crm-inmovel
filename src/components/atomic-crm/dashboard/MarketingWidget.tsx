@@ -90,7 +90,9 @@ export const MarketingWidget = () => {
               key={p.key}
               type="button"
               size="sm"
-              variant={!customActive && preset === p.key ? "default" : "outline"}
+              variant={
+                !customActive && preset === p.key ? "default" : "outline"
+              }
               onClick={() => pickPreset(p.key)}
             >
               {p.label}
