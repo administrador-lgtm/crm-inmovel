@@ -47,6 +47,25 @@ const CANAL_CHOICES = [
 
 const FUENTE_CHOICES = [{ id: "anuncio", name: "Anuncio" }];
 
+// Yes/No choices for the boolean triage flags (`is_assigned`,
+// `sin_contacto_asesor`, `sin_visita`, `conversacion_activa`). Ids are strings
+// because `<SelectInput>` emits the option value as a string; `parseBooleanFilter`
+// coerces them back to a real boolean so the value matches both the FakeRest
+// demo adapter (loose `==` against boolean columns) and the ra-data-postgrest
+// `eq` operator (`field=eq.true`).
+const SI_NO_CHOICES = [
+  { id: "true", name: "Sí" },
+  { id: "false", name: "No" },
+];
+
+/**
+ * Coerce a `<SelectInput>` string value into the boolean stored in the filter.
+ * An empty selection returns `undefined` so ra-core's `removeEmpty` drops the
+ * filter entirely — returning `false` would keep it as an active filter.
+ */
+const parseBooleanFilter = (value: string): boolean | undefined =>
+  value === "" || value == null ? undefined : value === "true";
+
 // Distinct developments and zones present in the data, ordered by frequency.
 // Static list (refresh if new developments/zones are added); kept as choices so
 // the filter offers a searchable dropdown instead of blind free text.
@@ -176,5 +195,33 @@ export const getLeadFilters = (
     key="motivo_descarte"
     source="motivo_descarte@ilike"
     label="Motivo de descarte"
+  />,
+  <SelectInput
+    key="is_assigned"
+    source="is_assigned"
+    label="Asignado"
+    choices={SI_NO_CHOICES}
+    parse={parseBooleanFilter}
+  />,
+  <SelectInput
+    key="sin_contacto_asesor"
+    source="sin_contacto_asesor"
+    label="Sin contacto del asesor"
+    choices={SI_NO_CHOICES}
+    parse={parseBooleanFilter}
+  />,
+  <SelectInput
+    key="sin_visita"
+    source="sin_visita"
+    label="Sin visita agendada"
+    choices={SI_NO_CHOICES}
+    parse={parseBooleanFilter}
+  />,
+  <SelectInput
+    key="conversacion_activa"
+    source="conversacion_activa"
+    label="Conversación activa"
+    choices={SI_NO_CHOICES}
+    parse={parseBooleanFilter}
   />,
 ];

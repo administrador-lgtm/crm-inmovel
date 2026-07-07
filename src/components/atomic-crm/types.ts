@@ -141,6 +141,17 @@ export type Contact = {
    * `contacts_summary`; the kanban card uses it to show a "has matches" badge.
    */
   match_count?: number;
+
+  // Boolean lead-triage flags derived in `contacts_summary` (read-only, used by
+  // the list/kanban filters and dashboard widgets — never written by the CRM).
+  /** True when an advisor owns the lead (`asesor_asignado` is set). */
+  is_assigned?: boolean;
+  /** Advisor-owned lead (S6+) the advisor has never contacted via Baileys. */
+  sin_contacto_asesor?: boolean;
+  /** Assigned lead in an early advisor stage with no visit scheduled yet. */
+  sin_visita?: boolean;
+  /** Post-handoff lead with a currently active two-way conversation. */
+  conversacion_activa?: boolean;
 } & Pick<RaRecord, "id">;
 
 export type Propiedad = {
