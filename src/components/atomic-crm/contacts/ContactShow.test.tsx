@@ -40,11 +40,16 @@ describe("ContactShow", () => {
       </StoryWrapper>,
     );
 
-    await expect
-      .element(screen.getByRole("combobox"))
-      .toHaveTextContent("Warm");
+    // ContactAside now renders two comboboxes (advisor selector + status
+    // selector), so a bare getByRole("combobox") is ambiguous. The status
+    // Radix trigger exposes its selected value as its accessible name, so we
+    // target it by name (Warm before the change, Hot after).
+    const statusCombobox = () =>
+      screen.getByRole("combobox", { name: /warm|hot/i });
 
-    await screen.getByRole("combobox").click();
+    await expect.element(statusCombobox()).toHaveTextContent("Warm");
+
+    await statusCombobox().click();
     await screen.getByRole("option", { name: /hot/i }).click();
 
     await expect
@@ -56,6 +61,6 @@ describe("ContactShow", () => {
       })
       .toBe("hot");
 
-    await expect.element(screen.getByRole("combobox")).toHaveTextContent("Hot");
+    await expect.element(statusCombobox()).toHaveTextContent("Hot");
   });
 });
