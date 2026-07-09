@@ -75,7 +75,9 @@ export const LeadsFollowupWidget = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos (asignados + sin asignar)</SelectItem>
+              <SelectItem value="all">
+                Todos (asignados + sin asignar)
+              </SelectItem>
               <SelectItem value="unassigned">Sin asignar</SelectItem>
               <SelectItem value="assigned">Asignados (todos)</SelectItem>
               {sales?.map((s) => (
@@ -94,7 +96,9 @@ export const LeadsFollowupWidget = () => {
             <span className="text-2xl font-semibold tabular-nums text-red-700">
               {sinContacto}
             </span>
-            <span className="text-xs text-red-700">Sin contacto del asesor</span>
+            <span className="text-xs text-red-700">
+              Sin contacto del asesor
+            </span>
           </Link>
           <Link
             to={href()}
