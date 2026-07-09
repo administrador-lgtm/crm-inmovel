@@ -289,7 +289,18 @@ select
     -- matcher join. Correlated scalar subquery — acceptable at this scale (~600
     -- matchable leads, <4000 properties).
     (select lmc.match_count::bigint from public.lead_match_counts lmc where lmc.lead_id = co.id) as match_count,
-    co.advisor_last_contact_at
+    co.advisor_last_contact_at,
+    -- Dashboard drill-down flags. These mirror the exact predicates of the
+    -- dashboard_followup view so a contact list filtered by one of these booleans
+    -- returns the same rows the dashboard counts. Appended at the end of the
+    -- select list so CREATE OR REPLACE VIEW can add them without reordering
+    -- existing columns.
+    (co.asesor_asignado is not null) as is_assigned,
+    -- Advisor-owned lead (S6+) with no advisor Baileys contact yet.
+    (co.stage in ('S6','S7','S8','S9','S10') and co.advisor_last_contact_at is null) as sin_contacto_asesor,
+    -- Assigned lead in S5/S6 with no visit scheduled yet.
+    (co.asesor_asignado is not null and co.stage in ('S5','S6')
+        and not exists (select 1 from public.visitas v where v.lead_id = co.id)) as sin_visita
 from public.contacts co
 left join public.propiedades prop on prop.id = co.desarrollo_activo
 group by co.id;

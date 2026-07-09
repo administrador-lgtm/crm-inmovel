@@ -30,7 +30,11 @@ const STAGES = defaultLeadStages.filter((s) => s.value !== "descartado");
 // so we drill by stage only — the widget's own count stays exact.)
 const contactsFilterHref = (stage: string, asesorId: string): string => {
   const filter: Record<string, unknown> = { stage };
-  if (asesorId !== "all" && asesorId !== "unassigned" && asesorId !== "assigned")
+  if (
+    asesorId !== "all" &&
+    asesorId !== "unassigned" &&
+    asesorId !== "assigned"
+  )
     filter.sales_id = asesorId;
   return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
 };
@@ -75,7 +79,9 @@ export const PipelineWidget = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos (asignados + sin asignar)</SelectItem>
+              <SelectItem value="all">
+                Todos (asignados + sin asignar)
+              </SelectItem>
               <SelectItem value="unassigned">Sin asignar</SelectItem>
               <SelectItem value="assigned">Asignados (todos)</SelectItem>
               {sales?.map((s) => (

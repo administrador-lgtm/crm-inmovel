@@ -40,11 +40,17 @@ describe("ContactShow", () => {
       </StoryWrapper>,
     );
 
-    await expect
-      .element(screen.getByRole("combobox"))
-      .toHaveTextContent("Warm");
+    // ContactAside now renders two comboboxes (the AsesorSelector advisor
+    // dropdown, then the status selector), so a bare getByRole("combobox") is
+    // ambiguous. Radix Select triggers have role="combobox", which per ARIA
+    // does not derive its accessible name from subtree text, so we can't match
+    // on the visible value. The advisor selector always renders first, so the
+    // status selector is the second (index 1) combobox in the aside.
+    const statusCombobox = () => screen.getByRole("combobox").nth(1);
 
-    await screen.getByRole("combobox").click();
+    await expect.element(statusCombobox()).toHaveTextContent("Warm");
+
+    await statusCombobox().click();
     await screen.getByRole("option", { name: /hot/i }).click();
 
     await expect
@@ -56,6 +62,6 @@ describe("ContactShow", () => {
       })
       .toBe("hot");
 
-    await expect.element(screen.getByRole("combobox")).toHaveTextContent("Hot");
+    await expect.element(statusCombobox()).toHaveTextContent("Hot");
   });
 });
