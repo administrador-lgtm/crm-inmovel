@@ -13,6 +13,7 @@ import {
 
 import { defaultLeadStages } from "../root/defaultConfiguration";
 import type { Sale } from "../types";
+import { contactsDrillHref } from "./drilldown";
 
 type PipelineRow = {
   id: string;
@@ -23,21 +24,6 @@ type PipelineRow = {
 
 /** Ordered funnel stages, excluding descartado (which the view already omits). */
 const STAGES = defaultLeadStages.filter((s) => s.value !== "descartado");
-
-// Use the SAME filter sources the contacts list registers (getLeadFilters):
-// `stage` and `sales_id`. This makes the applied filter show as a removable chip
-// instead of a hidden, sticky one. (unassigned/assigned have no registered filter,
-// so we drill by stage only — the widget's own count stays exact.)
-const contactsFilterHref = (stage: string, asesorId: string): string => {
-  const filter: Record<string, unknown> = { stage };
-  if (
-    asesorId !== "all" &&
-    asesorId !== "unassigned" &&
-    asesorId !== "assigned"
-  )
-    filter.sales_id = asesorId;
-  return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
-};
 
 /** Whether a pipeline row passes the advisor filter (all / unassigned / assigned / specific id). */
 const matchesAsesor = (rowAsesorId: number | null, filter: string): boolean => {
@@ -96,7 +82,7 @@ export const PipelineWidget = () => {
           {STAGES.map((s) => (
             <Link
               key={s.value}
-              to={contactsFilterHref(s.value, asesor)}
+              to={contactsDrillHref({ stage: s.value }, asesor)}
               className="flex min-w-[84px] flex-1 flex-col items-center rounded-md border p-2 hover:bg-accent"
             >
               <span className="text-xs text-muted-foreground">{s.value}</span>

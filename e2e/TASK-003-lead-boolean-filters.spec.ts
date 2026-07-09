@@ -1,9 +1,10 @@
 import { expect, test } from "./fixtures";
 
 /**
- * Boolean lead-triage filters registered in `getLeadFilters`. Verifies the four
- * new Yes/No filters (`is_assigned`, `sin_contacto_asesor`, `sin_visita`,
- * `conversacion_activa`) are offered in the Contacts list "Add filter" drawer.
+ * Boolean lead-triage filters registered in `getLeadFilters`. Verifies the
+ * three new Yes/No filters (`is_assigned`, `sin_contacto_asesor`, `sin_visita`)
+ * are offered in the Contacts list "Add filter" drawer. (`conversacion_activa`
+ * is deferred until its backend refresh table ships.)
  *
  * The test only opens the filter menu and asserts the labels are present —
  * applying the filters is intentionally out of scope here, since the derived
@@ -28,7 +29,7 @@ test.describe("lead boolean triage filters", () => {
     });
   });
 
-  test("offers the four boolean filters in the Add filter drawer", async ({
+  test("offers the boolean triage filters in the Add filter drawer", async ({
     page,
   }) => {
     await page.goto("http://localhost:5175/login");
@@ -51,9 +52,6 @@ test.describe("lead boolean triage filters", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("menuitemcheckbox", { name: "Sin visita agendada" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("menuitemcheckbox", { name: "Conversación activa" }),
     ).toBeVisible();
   });
 });

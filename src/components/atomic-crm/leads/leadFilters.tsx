@@ -48,7 +48,7 @@ const CANAL_CHOICES = [
 const FUENTE_CHOICES = [{ id: "anuncio", name: "Anuncio" }];
 
 // Yes/No choices for the boolean triage flags (`is_assigned`,
-// `sin_contacto_asesor`, `sin_visita`, `conversacion_activa`). Ids are strings
+// `sin_contacto_asesor`, `sin_visita`). Ids are strings
 // because `<SelectInput>` emits the option value as a string; `parseBooleanFilter`
 // coerces them back to a real boolean so the value matches both the FakeRest
 // demo adapter (loose `==` against boolean columns) and the ra-data-postgrest
@@ -217,11 +217,8 @@ export const getLeadFilters = (
     choices={SI_NO_CHOICES}
     parse={parseBooleanFilter}
   />,
-  <SelectInput
-    key="conversacion_activa"
-    source="conversacion_activa"
-    label="Conversación activa"
-    choices={SI_NO_CHOICES}
-    parse={parseBooleanFilter}
-  />,
+  // `conversacion_activa` (active Baileys conversation) is intentionally NOT
+  // registered yet: its contacts_summary column ships with the
+  // lead_conversacion_activa refresh table (deferred backend work). Registering
+  // it earlier would break the list query with an unknown-column error.
 ];

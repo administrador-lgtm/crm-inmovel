@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 
 import type { Sale } from "../types";
+import { contactsDrillHref } from "./drilldown";
 
 type FollowupRow = {
   id: number;
@@ -52,16 +53,10 @@ export const LeadsFollowupWidget = () => {
     return { sinContacto: sc, sinVisita: sv };
   }, [rows, asesor]);
 
-  // Only use filter sources the contacts list registers (sales_id), so the
-  // applied filter is a visible, removable chip — never a hidden sticky one.
-  // "Sin contacto"/"sin visita" aren't registered filters, so the drill lands on
-  // the advisor's leads; the exact number lives in the card.
-  const href = () => {
-    const filter: Record<string, unknown> = {};
-    if (asesor !== "all" && asesor !== "unassigned" && asesor !== "assigned")
-      filter.sales_id = asesor;
-    return `/contacts?filter=${encodeURIComponent(JSON.stringify(filter))}`;
-  };
+  // Each card drills into the exact set it counts: `sin_contacto_asesor` and
+  // `sin_visita` are registered filter sources (contacts_summary booleans that
+  // mirror dashboard_followup), so the landing list matches the card's number
+  // and every applied filter shows as a removable chip.
 
   return (
     <Card>
@@ -90,7 +85,7 @@ export const LeadsFollowupWidget = () => {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Link
-            to={href()}
+            to={contactsDrillHref({ sin_contacto_asesor: true }, asesor)}
             className="flex flex-col rounded-md border border-red-300 bg-red-50 p-3 hover:bg-red-100"
           >
             <span className="text-2xl font-semibold tabular-nums text-red-700">
@@ -101,7 +96,7 @@ export const LeadsFollowupWidget = () => {
             </span>
           </Link>
           <Link
-            to={href()}
+            to={contactsDrillHref({ sin_visita: true }, asesor)}
             className="flex flex-col rounded-md border border-amber-300 bg-amber-50 p-3 hover:bg-amber-100"
           >
             <span className="text-2xl font-semibold tabular-nums text-amber-700">
