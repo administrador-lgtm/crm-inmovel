@@ -68,6 +68,29 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
     const isPostHandoff = stageRank >= 5 || stage === "descartado";
     const telefono = phone_jsonb[0].number;
 
+    // Advisor-owned leads that the advisor has never contacted (no Baileys
+    // outbound) are flagged red on the kanban. In demo data, roughly half of
+    // post-handoff leads have an advisor contact; the rest stay null (red).
+    const advisor_last_contact_at =
+      isPostHandoff && stage !== "descartado" && weightedBoolean(50)
+        ? last_seen
+        : null;
+
+    // Boolean triage flags derived in `contacts_summary` (production). Faked
+    // here so the demo list/kanban boolean filters return coherent results.
+    // `is_assigned` mirrors `asesor_asignado` being set (post-handoff leads).
+    const is_assigned = isPostHandoff;
+    // Advisor owns the lead (S6+) but has never messaged it.
+    const sin_contacto_asesor =
+      stageRank >= 5 &&
+      stage !== "descartado" &&
+      advisor_last_contact_at === null;
+    // Assigned lead just accepted (S6) with no visit scheduled yet.
+    const sin_visita = is_assigned && stage === "S6" && weightedBoolean(50);
+    // Post-handoff lead with an ongoing two-way conversation (weighted).
+    const conversacion_activa =
+      isPostHandoff && stage !== "descartado" && weightedBoolean(40);
+
     return {
       id,
       first_name,
@@ -171,13 +194,12 @@ export const generateContacts = (db: Db, size = 500): Required<Contact>[] => {
       // Property Matcher count (real value comes from contacts_summary). Most
       // leads have no matches (~70%); the rest get a small handful.
       match_count: weightedBoolean(70) ? 0 : random.number({ min: 1, max: 8 }),
-      // Advisor-owned leads that the advisor has never contacted (no Baileys
-      // outbound) are flagged red on the kanban. In demo data, roughly half of
-      // post-handoff leads have an advisor contact; the rest stay null (red).
-      advisor_last_contact_at:
-        isPostHandoff && stage !== "descartado" && weightedBoolean(50)
-          ? last_seen
-          : null,
+      advisor_last_contact_at,
+      // Boolean triage flags (derived from `contacts_summary` in production).
+      is_assigned,
+      sin_contacto_asesor,
+      sin_visita,
+      conversacion_activa,
     };
   });
 };
