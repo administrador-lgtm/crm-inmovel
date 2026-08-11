@@ -141,7 +141,8 @@ create table public.propiedades (
     -- CRM lifecycle: draft | matchable | consultor_active | archived. The
     -- default preserves the sheet-sync status quo (sync-inserted rows stay
     -- fully visible); the CRM Create form stamps 'draft' explicitly.
-    lifecycle_status text not null default 'consultor_active',
+    lifecycle_status text not null default 'consultor_active'
+        check (lifecycle_status in ('draft', 'matchable', 'consultor_active', 'archived')),
     -- Ownership guard: true when the row was created in the CRM. The sheet_sync
     -- edge function skips crm_owned rows and RLS only allows writes on them,
     -- so Sheet-origin rows stay read-only in the CRM.

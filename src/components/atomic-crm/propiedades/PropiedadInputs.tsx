@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { required, useCanAccess } from "ra-core";
+import { required, useCanAccess, useRecordContext } from "ra-core";
 import { useWatch } from "react-hook-form";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { AttachmentField } from "../notes/AttachmentField";
+import type { Propiedad } from "../types";
 import {
   LIFECYCLE_CHOICES,
   LIFECYCLE_CHOICES_NON_ADMIN,
@@ -93,15 +94,26 @@ const PropiedadIdentityInputs = ({
  * (consultor_active). See adr/ADR-propiedades-crm-owned-guard.md
  */
 const LifecycleStatusInput = () => {
+  const record = useRecordContext<Propiedad>();
   const { canAccess: isAdmin } = useCanAccess({
     resource: "sales",
     action: "list",
   });
+  // Non-admins cannot grant consultor_active; when a property already has it,
+  // lock the field so they cannot apply a one-way downgrade only an admin
+  // could undo (and so the current value keeps a visible label).
+  const isLockedForNonAdmin =
+    !isAdmin && record?.lifecycle_status === "consultor_active";
   return (
     <SelectInput
       source="lifecycle_status"
       label="Estatus CRM"
-      choices={isAdmin ? LIFECYCLE_CHOICES : LIFECYCLE_CHOICES_NON_ADMIN}
+      choices={
+        isAdmin || isLockedForNonAdmin
+          ? LIFECYCLE_CHOICES
+          : LIFECYCLE_CHOICES_NON_ADMIN
+      }
+      readOnly={isLockedForNonAdmin}
     />
   );
 };
