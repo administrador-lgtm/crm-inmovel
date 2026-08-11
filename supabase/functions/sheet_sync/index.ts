@@ -47,12 +47,31 @@ async function runSync() {
   const leadRows = await readTab(SPREADSHEET_ID, "Leads", SHEETS_TOKEN);
   summary.leads = await syncLeads(supabaseAdmin, leadRows);
 
-  // 2. Propiedades — full reference upsert (keyed on id).
-  const propiedadRows = await readTab(
-    SPREADSHEET_ID,
-    "Propiedades",
-    SHEETS_TOKEN,
-  );
+  // 2. Propiedades — full reference upsert (keyed on id), EXCEPT CRM-owned
+  // rows: properties created in the CRM (crm_owned = true) are never
+  // overwritten by the Sheet mirror, same ownership idea as the lead stage
+  // frontier. See adr/ADR-propiedades-crm-owned-guard.md
+  const crmOwnedPropiedadIds = new Set<string>();
+  {
+    const PAGE = 1000;
+    let from = 0;
+    for (;;) {
+      const { data, error } = await supabaseAdmin
+        .from("propiedades")
+        .select("id")
+        .eq("crm_owned", true)
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      for (const row of data ?? []) {
+        crmOwnedPropiedadIds.add(String(row.id));
+      }
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+  }
+  const propiedadRows = (
+    await readTab(SPREADSHEET_ID, "Propiedades", SHEETS_TOKEN)
+  ).filter((row) => !crmOwnedPropiedadIds.has(String(row.id)));
   summary.propiedades = await upsertTable(
     supabaseAdmin,
     "propiedades",
