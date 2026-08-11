@@ -47,34 +47,106 @@ async function runSync() {
   const leadRows = await readTab(SPREADSHEET_ID, "Leads", SHEETS_TOKEN);
   summary.leads = await syncLeads(supabaseAdmin, leadRows);
 
-  // 2. Propiedades — full reference upsert (keyed on id).
-  const propiedadRows = await readTab(
-    SPREADSHEET_ID,
-    "Propiedades",
-    SHEETS_TOKEN,
-  );
+  // 2. Propiedades — full reference upsert (keyed on id), EXCEPT CRM-owned
+  // rows: properties created in the CRM (crm_owned = true) are never
+  // overwritten by the Sheet mirror, same ownership idea as the lead stage
+  // frontier. See adr/ADR-propiedades-crm-owned-guard.md
+  const crmOwnedPropiedadIds = new Set<string>();
+  {
+    const PAGE = 1000;
+    let from = 0;
+    for (;;) {
+      const { data, error } = await supabaseAdmin
+        .from("propiedades")
+        .select("id")
+        .eq("crm_owned", true)
+        .order("id")
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      for (const row of data ?? []) {
+        crmOwnedPropiedadIds.add(String(row.id));
+      }
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+  }
+  const propiedadRows = (
+    await readTab(SPREADSHEET_ID, "Propiedades", SHEETS_TOKEN)
+  ).filter((row) => !crmOwnedPropiedadIds.has(String(row.id)));
   summary.propiedades = await upsertTable(
     supabaseAdmin,
     "propiedades",
     "id",
     [
-      "id", "tipo", "nombre", "estatus", "operacion", "direccion", "colonia",
-      "alcaldia", "precio", "metros", "recamaras", "banos", "estacionamiento",
-      "pet_friendly", "argumento1", "argumento2", "argumento3", "lista_precios",
-      "url_anuncio", "url_maps", "tipos_unidades", "precios_por_tipo",
-      "caracteristicas", "amenidades", "argumentos_zona", "esquema_pago",
-      "creditos", "objeciones", "precio_desde", "precio_hasta", "m2_desde",
-      "m2_hasta", "recamaras_min", "recamaras_max", "unidades_disponibles",
-      "fecha_entrega", "enganche_minimo_pct", "features", "destacado",
-      "url_ficha", "codigo_fuente", "fuente", "broker_nombre", "broker_telefono",
-      "broker_wa", "comision", "activa", "orden", "fecha_carga", "account_name",
-      "account_id", "shared_commission", "status_days", "is_exclusive",
+      "id",
+      "tipo",
+      "nombre",
+      "estatus",
+      "operacion",
+      "direccion",
+      "colonia",
+      "alcaldia",
+      "precio",
+      "metros",
+      "recamaras",
+      "banos",
+      "estacionamiento",
+      "pet_friendly",
+      "argumento1",
+      "argumento2",
+      "argumento3",
+      "lista_precios",
+      "url_anuncio",
+      "url_maps",
+      "tipos_unidades",
+      "precios_por_tipo",
+      "caracteristicas",
+      "amenidades",
+      "argumentos_zona",
+      "esquema_pago",
+      "creditos",
+      "objeciones",
+      "precio_desde",
+      "precio_hasta",
+      "m2_desde",
+      "m2_hasta",
+      "recamaras_min",
+      "recamaras_max",
+      "unidades_disponibles",
+      "fecha_entrega",
+      "enganche_minimo_pct",
+      "features",
+      "destacado",
+      "url_ficha",
+      "codigo_fuente",
+      "fuente",
+      "broker_nombre",
+      "broker_telefono",
+      "broker_wa",
+      "comision",
+      "activa",
+      "orden",
+      "fecha_carga",
+      "account_name",
+      "account_id",
+      "shared_commission",
+      "status_days",
+      "is_exclusive",
       "share_type",
     ],
     new Set([
-      "precio", "metros", "recamaras", "banos", "estacionamiento",
-      "precio_desde", "precio_hasta", "m2_desde", "m2_hasta", "recamaras_min",
-      "recamaras_max", "orden",
+      "precio",
+      "metros",
+      "recamaras",
+      "banos",
+      "estacionamiento",
+      "precio_desde",
+      "precio_hasta",
+      "m2_desde",
+      "m2_hasta",
+      "recamaras_min",
+      "recamaras_max",
+      "orden",
     ]),
     new Set(["activa", "is_exclusive"]),
     propiedadRows,
@@ -141,17 +213,54 @@ async function runSync() {
     "nocnok_raw",
     "codigo",
     [
-      "codigo", "nocnok_id", "operacion", "precio", "category", "type",
-      "type_text", "recamaras", "full_bathrooms", "half_bathrooms", "m2",
-      "lot_size", "colonia", "alcaldia", "estado", "cp", "estacionamiento",
-      "year_built", "levels", "title", "url_ficha", "lat", "lon",
-      "account_name", "account_id", "account_plan", "shared_commission",
-      "is_exclusive", "share_type", "status_days", "status_date", "fotos",
-      "activa", "orden", "fecha_carga", "broker_tel", "broker_wa",
+      "codigo",
+      "nocnok_id",
+      "operacion",
+      "precio",
+      "category",
+      "type",
+      "type_text",
+      "recamaras",
+      "full_bathrooms",
+      "half_bathrooms",
+      "m2",
+      "lot_size",
+      "colonia",
+      "alcaldia",
+      "estado",
+      "cp",
+      "estacionamiento",
+      "year_built",
+      "levels",
+      "title",
+      "url_ficha",
+      "lat",
+      "lon",
+      "account_name",
+      "account_id",
+      "account_plan",
+      "shared_commission",
+      "is_exclusive",
+      "share_type",
+      "status_days",
+      "status_date",
+      "fotos",
+      "activa",
+      "orden",
+      "fecha_carga",
+      "broker_tel",
+      "broker_wa",
     ],
     new Set([
-      "precio", "recamaras", "full_bathrooms", "half_bathrooms", "m2",
-      "lot_size", "estacionamiento", "fotos", "orden",
+      "precio",
+      "recamaras",
+      "full_bathrooms",
+      "half_bathrooms",
+      "m2",
+      "lot_size",
+      "estacionamiento",
+      "fotos",
+      "orden",
     ]),
     new Set(["is_exclusive", "activa"]),
     nocnokRows,
@@ -184,12 +293,9 @@ Deno.serve(async (req: Request) => {
       error instanceof Error
         ? { message: error.message, stack: error.stack }
         : error;
-    return new Response(
-      JSON.stringify({ ok: false, error: detail }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ ok: false, error: detail }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

@@ -1,15 +1,35 @@
 import { useRecordContext } from "ra-core";
+import { CreateButton } from "@/components/admin/create-button";
 import { DataTable } from "@/components/admin/data-table";
+import { FilterButton } from "@/components/admin/filter-form";
 import { List } from "@/components/admin/list";
 import { SearchInput } from "@/components/admin/search-input";
+import { SelectInput } from "@/components/admin/select-input";
 import { Badge } from "@/components/ui/badge";
 
 import { TopToolbar } from "../layout/TopToolbar";
 import type { Propiedad } from "../types";
+import {
+  LIFECYCLE_CHOICES,
+  lifecycleBadgeVariant,
+  lifecycleLabel,
+} from "./propiedadLifecycle";
 
-const filters = [<SearchInput source="q" alwaysOn />];
+const filters = [
+  <SearchInput source="q" alwaysOn />,
+  <SelectInput
+    source="lifecycle_status"
+    label="Estatus CRM"
+    choices={LIFECYCLE_CHOICES}
+  />,
+];
 
-const PropiedadListActions = () => <TopToolbar />;
+const PropiedadListActions = () => (
+  <TopToolbar>
+    <FilterButton />
+    <CreateButton />
+  </TopToolbar>
+);
 
 /** Currency-formatted price; rent vs sale share the same column. */
 const PrecioField = () => {
@@ -43,6 +63,16 @@ const ActivaField = () => {
   );
 };
 
+const LifecycleField = () => {
+  const record = useRecordContext<Propiedad>();
+  if (!record?.lifecycle_status) return null;
+  return (
+    <Badge variant={lifecycleBadgeVariant(record.lifecycle_status)}>
+      {lifecycleLabel(record.lifecycle_status)}
+    </Badge>
+  );
+};
+
 export function PropiedadList() {
   return (
     <List
@@ -66,6 +96,9 @@ export function PropiedadList() {
         <DataTable.Col source="broker_nombre" />
         <DataTable.Col label="Estado">
           <ActivaField />
+        </DataTable.Col>
+        <DataTable.Col label="Estatus CRM">
+          <LifecycleField />
         </DataTable.Col>
       </DataTable>
     </List>

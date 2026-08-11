@@ -246,6 +246,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/propiedades/propiedadLifecycle.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/propiedades/index.ts",
           "type": "registry:component"
         },
@@ -255,6 +259,18 @@
         },
         {
           "path": "src/components/atomic-crm/propiedades/PropiedadList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadInputs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadEdit.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadCreate.tsx",
           "type": "registry:component"
         },
         {

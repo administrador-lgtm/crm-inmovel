@@ -8,6 +8,7 @@ import {
 } from "ra-core";
 import type {
   ContactNote,
+  Propiedad,
   RAFile,
   Sale,
   SalesFormData,
@@ -234,6 +235,17 @@ const lifeCycleCallbacks: ResourceCallbacks[] = [
     beforeSave: async (data: Sale, _, __) => {
       if (data.avatar) {
         await uploadToBucket(data.avatar);
+      }
+      return data;
+    },
+  },
+  {
+    resource: "propiedades",
+    beforeSave: async (data: Propiedad, _, __) => {
+      if (data.material_files) {
+        data.material_files = await Promise.all(
+          data.material_files.map((fi) => uploadToBucket(fi)),
+        );
       }
       return data;
     },

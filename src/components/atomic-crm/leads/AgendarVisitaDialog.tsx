@@ -111,6 +111,8 @@ export const AgendarVisitaDialog = ({
   const [submitting, setSubmitting] = useState(false);
 
   const { data: propiedades } = useGetList<Propiedad>("propiedades", {
+    // Archived properties are out of circulation — keep them out of the picker.
+    filter: { "lifecycle_status@neq": "archived" },
     sort: { field: "nombre", order: "ASC" },
     pagination: { page: 1, perPage: 300 },
   });

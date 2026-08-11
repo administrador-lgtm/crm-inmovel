@@ -146,8 +146,11 @@ becomes either gone or a **read-only export/dashboard** generated from Supabase
 
 ## Open decisions (resolve when we schedule this)
 
-1. **Property editing UX** — build CRUD in the CRM, or keep a Sheet-as-input just
-   for Propiedades? This is the main reason not to kill the Sheet wholesale.
+1. **Property editing UX** — **Resolved (2026-08): CRUD in the CRM.**
+   Propiedades Create/Edit shipped with a `crm_owned` ownership guard:
+   CRM-created rows are skipped by `sheet_sync` and are the only rows
+   writable under RLS; Sheet-origin rows stay read-only in the CRM until the
+   bot read-flip. See `adr/ADR-propiedades-crm-owned-guard.md`.
 2. **Bot data-access layer** — a thin Supabase client module in the bot, or go
    through a small API? Affects how invasive the bot changes are.
 3. **Cutover criteria per tab** — what parity check gates each read-flip.

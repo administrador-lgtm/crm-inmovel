@@ -201,7 +201,7 @@ export type Propiedad = {
   /** Drive folder with marketing material (own) or GDC CLIENTES EXTERNOS subfolder. */
   material_url?: string;
   codigo_fuente?: string;
-  fuente?: "manual" | "nocnok" | "broker_directo" | "bolsa";
+  fuente?: "manual" | "nocnok" | "broker_directo" | "bolsa" | "crm";
   broker_nombre?: string;
   broker_telefono?: string;
   broker_wa?: string;
@@ -216,6 +216,15 @@ export type Propiedad = {
   status_days?: string;
   is_exclusive?: boolean;
   share_type?: string;
+  // CRM lifecycle (see adr/ADR-propiedades-crm-owned-guard.md)
+  /** draft | matchable | consultor_active | archived. Drafts never match. */
+  lifecycle_status?: "draft" | "matchable" | "consultor_active" | "archived";
+  /** True when the row was created in the CRM; sheet_sync skips these rows. */
+  crm_owned?: boolean;
+  /** Advisor (sales.id) who created the property in the CRM. */
+  created_by?: Identifier;
+  /** Uploaded marketing material (Supabase Storage attachments). */
+  material_files?: RAFile[];
 };
 
 export type Visita = {
