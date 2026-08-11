@@ -90,6 +90,8 @@ candidates as (
         p.broker_nombre as broker_nombre
     from public.propiedades p
     where p.activa is not false
+      -- CRM lifecycle gate: draft and archived properties never match.
+      and p.lifecycle_status in ('matchable', 'consultor_active')
     union all
     -- Tier 2: qualified pool (NocNok), latest batch only
     select

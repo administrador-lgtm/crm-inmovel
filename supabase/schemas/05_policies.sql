@@ -41,8 +41,16 @@ create policy "Enable read access for authenticated users" on public.sales for s
 -- Tags
 
 -- Propiedades — shared inventory, readable by all authenticated users.
+-- Writes are limited to CRM-owned rows (crm_owned = true): Sheet-origin rows
+-- stay read-only in the CRM until the bot flips off the Sheet. The sheet_sync
+-- edge function runs as service_role and bypasses RLS.
+-- See adr/ADR-propiedades-crm-owned-guard.md
 create policy "Propiedades selectable by authenticated" on public.propiedades
   for select to authenticated using (true);
+create policy "Propiedades insertable when crm owned" on public.propiedades
+  for insert to authenticated with check (crm_owned = true);
+create policy "Propiedades updatable when crm owned" on public.propiedades
+  for update to authenticated using (crm_owned = true);
 
 -- Visitas — advisor-owned writes, team-wide reads. SELECT is intentionally
 -- loosened to any authenticated user so the Visits Agenda screen shows the whole

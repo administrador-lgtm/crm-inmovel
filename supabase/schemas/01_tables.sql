@@ -76,9 +76,11 @@ create table public.contacts (
 );
 
 -- Property inventory: own developments plus shared/broker (NocNok) listings.
--- Synced one-way from the Sheet Propiedades tab; read-only in the CRM.
+-- Sheet-origin rows are synced one-way from the Sheet Propiedades tab and stay
+-- read-only in the CRM; CRM-created rows (crm_owned = true) are editable and
+-- skipped by the sync. See adr/ADR-propiedades-crm-owned-guard.md
 create table public.propiedades (
-    id text primary key,
+    id text primary key default (gen_random_uuid())::text,
     tipo text not null,
     nombre text not null,
     estatus text,
@@ -135,7 +137,21 @@ create table public.propiedades (
     share_type text,
     -- Drive folder with marketing material: own properties point to a folder in
     -- the Inmovel Drive; GDC properties reference their CLIENTES EXTERNOS subfolder.
-    material_url text
+    material_url text,
+    -- CRM lifecycle: draft | matchable | consultor_active | archived. The
+    -- default preserves the sheet-sync status quo (sync-inserted rows stay
+    -- fully visible); the CRM Create form stamps 'draft' explicitly.
+    lifecycle_status text not null default 'consultor_active',
+    -- Ownership guard: true when the row was created in the CRM. The sheet_sync
+    -- edge function skips crm_owned rows and RLS only allows writes on them,
+    -- so Sheet-origin rows stay read-only in the CRM.
+    crm_owned boolean not null default false,
+    -- Advisor (sales.id) who created the property in the CRM. FK added after
+    -- the sales table below (forward reference).
+    created_by bigint,
+    -- Uploaded marketing material: array of RAFile objects stored in the
+    -- Supabase Storage "attachments" bucket (same shape as note attachments).
+    material_files jsonb
 );
 
 -- Advisor-recorded visit (CRM-owned; never touched by the sheet sync).
@@ -373,3 +389,6 @@ alter table public.contacts
 
 alter table public.visitas
     add constraint visitas_asesor_id_fkey foreign key (asesor_id) references public.sales(id);
+
+alter table public.propiedades
+    add constraint propiedades_created_by_fkey foreign key (created_by) references public.sales(id);
