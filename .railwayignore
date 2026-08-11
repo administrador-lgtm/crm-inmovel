@@ -1,0 +1,10 @@
+# Local operative scratch files — never part of the deployed app
+_*.mjs
+[A-Z]-*.mjs
+*convos.txt
+check-data.mjs
+.supabase-db-password.txt
+node_modules
+e2e
+docs
+adr
