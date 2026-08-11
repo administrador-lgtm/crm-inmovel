@@ -1,9 +1,16 @@
 # Migration Strategy: Google Sheet → Supabase as single source of truth
 
-**Status:** Proposed — agreed in principle, **not scheduled**. This document
-captures the direction so we stop re-deciding it ad hoc.
-**Last updated:** 2026-06-25
+**Status:** IN PROGRESS. Phase 1 (dual-write) live since ~2026-06-26. Phase 2
+(read-flip) started 2026-07-06 with the Anuncios table. Parity audit (2026-07-06)
+confirmed Supabase at full parity or better vs the Sheet — see the execution log
+in `~/inmovel/producto/output/decision-migracion-sheet-supabase-2026-06-25.md`.
+**Last updated:** 2026-07-07
 **Related:** `adr/ADR-TASK-013-sheet-sync-stage-frontier.md`
+
+> **Progress (2026-07-07):** Phase 0 ✅ · Phase 1 dual-write ✅ live · Phase 2
+> read-flip 🟡 in progress (Asesores partial, **Anuncios flipped** — bot reads
+> Supabase with Sheet fallback). Leads audited clean (0 coverage gaps, sync-owned
+> fields 100%), pending flip after letting Anuncios settle. Phase 3 ⬜.
 
 ---
 
