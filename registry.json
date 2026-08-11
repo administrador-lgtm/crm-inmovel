@@ -246,6 +246,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/propiedades/propiedadLifecycle.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/propiedades/index.ts",
           "type": "registry:component"
         },
@@ -255,6 +259,18 @@
         },
         {
           "path": "src/components/atomic-crm/propiedades/PropiedadList.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadInputs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadEdit.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/propiedades/PropiedadCreate.tsx",
           "type": "registry:component"
         },
         {
@@ -538,11 +554,31 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/dashboard/drilldown.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/dashboard/Welcome.tsx",
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/dashboard/VisitasProximasWidget.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/dashboard/PipelineWidget.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/dashboard/MobileDashboard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/dashboard/MarketingWidget.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/dashboard/LeadsFollowupWidget.tsx",
           "type": "registry:component"
         },
         {
@@ -554,6 +590,10 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/dashboard/HandoffUnassignedWidget.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/dashboard/DashboardActivityLog.tsx",
           "type": "registry:component"
         },
@@ -562,11 +602,19 @@
           "type": "registry:component"
         },
         {
+          "path": "src/components/atomic-crm/dashboard/ConversacionesActivasWidget.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "src/components/atomic-crm/contacts/index.tsx",
           "type": "registry:component"
         },
         {
           "path": "src/components/atomic-crm/contacts/contactModel.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/contacts/PropertyMatchList.tsx",
           "type": "registry:component"
         },
         {
@@ -631,6 +679,10 @@
         },
         {
           "path": "src/components/atomic-crm/contacts/Avatar.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/atomic-crm/contacts/AsesorSelector.tsx",
           "type": "registry:component"
         },
         {
