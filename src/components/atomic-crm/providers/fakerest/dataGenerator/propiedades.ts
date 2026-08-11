@@ -105,6 +105,12 @@ export const generatePropiedades = (_db: Db, size = 24): Propiedad[] => {
       status_days: "",
       is_exclusive: false,
       share_type: esPropia ? "" : "Network",
+      // CRM lifecycle defaults mirror sheet-origin rows (see 01_tables.sql):
+      // synced inventory is consultor_active and not CRM-owned.
+      lifecycle_status: "consultor_active",
+      crm_owned: false,
+      created_by: undefined,
+      material_files: undefined,
     };
   });
 };
