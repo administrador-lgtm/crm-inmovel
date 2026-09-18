@@ -150,19 +150,20 @@ grant all on table public.conversaciones to service_role;
 grant all on table public.anuncios to anon;
 grant all on table public.anuncios to authenticated;
 grant all on table public.anuncios to service_role;
-grant all on table public.nocnok_raw to anon;
+-- nocnok_raw / lamudi_raw hold external broker contact data (broker_tel,
+-- broker_wa). No anon grant: reachable only by service_role (the refresh writer)
+-- and authenticated CRM users via RLS. See migration secure_inventario_externo.
 grant all on table public.nocnok_raw to authenticated;
 grant all on table public.nocnok_raw to service_role;
-grant all on table public.lamudi_raw to anon;
 grant all on table public.lamudi_raw to authenticated;
 grant all on table public.lamudi_raw to service_role;
 grant all on table public.lead_match_profile to anon;
 grant all on table public.lead_match_profile to authenticated;
 grant all on table public.lead_match_profile to service_role;
-grant all on table public.inventario_externo to anon;
+-- inventario_externo(_colonias) are security_invoker views over the two raw
+-- tables above; no anon grant so the broker data is never reachable unauthenticated.
 grant all on table public.inventario_externo to authenticated;
 grant all on table public.inventario_externo to service_role;
-grant all on table public.inventario_externo_colonias to anon;
 grant all on table public.inventario_externo_colonias to authenticated;
 grant all on table public.inventario_externo_colonias to service_role;
 grant all on table public.propiedades_summary to anon;

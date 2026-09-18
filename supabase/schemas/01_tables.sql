@@ -272,7 +272,32 @@ create table public.nocnok_raw (
     orden numeric,
     fecha_carga text,
     broker_tel text,
-    broker_wa text
+    broker_wa text,
+    -- Demand-engine fields (2026-09): show properties to leads + market model.
+    bathrooms numeric,
+    category_text text,
+    operacion_text text,
+    price_text text,
+    relevancia numeric,
+    estatus text,
+    estado_id text,
+    colonia_id text,
+    alcaldia_id text,
+    street_name text,
+    exterior_number text,
+    ubicacion text,
+    is_development boolean default false,
+    is_presale boolean default false,
+    is_in_network boolean default false,
+    site_url text,
+    marketplace_url text,
+    shared_url text,
+    pictures text[] default '{}',
+    broker_certificacion text,
+    account_is_in_network boolean default false,
+    account_site_url text,
+    account_picture_url text,
+    raw jsonb
 );
 
 create table public.contact_notes (

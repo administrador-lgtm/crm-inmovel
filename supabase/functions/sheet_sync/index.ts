@@ -206,65 +206,11 @@ async function runSync() {
     anuncioRows,
   );
 
-  // 5. NocNok raw feed.
-  const nocnokRows = await readTab(SPREADSHEET_ID, "NocNok_Raw", SHEETS_TOKEN);
-  summary.nocnok_raw = await upsertTable(
-    supabaseAdmin,
-    "nocnok_raw",
-    "codigo",
-    [
-      "codigo",
-      "nocnok_id",
-      "operacion",
-      "precio",
-      "category",
-      "type",
-      "type_text",
-      "recamaras",
-      "full_bathrooms",
-      "half_bathrooms",
-      "m2",
-      "lot_size",
-      "colonia",
-      "alcaldia",
-      "estado",
-      "cp",
-      "estacionamiento",
-      "year_built",
-      "levels",
-      "title",
-      "url_ficha",
-      "lat",
-      "lon",
-      "account_name",
-      "account_id",
-      "account_plan",
-      "shared_commission",
-      "is_exclusive",
-      "share_type",
-      "status_days",
-      "status_date",
-      "fotos",
-      "activa",
-      "orden",
-      "fecha_carga",
-      "broker_tel",
-      "broker_wa",
-    ],
-    new Set([
-      "precio",
-      "recamaras",
-      "full_bathrooms",
-      "half_bathrooms",
-      "m2",
-      "lot_size",
-      "estacionamiento",
-      "fotos",
-      "orden",
-    ]),
-    new Set(["is_exclusive", "activa"]),
-    nocnokRows,
-  );
+  // 5. NocNok raw feed — RETIRED (2026-09).
+  // NocNok is no longer mirrored from the Sheet. The demand-engine ingest writes
+  // nocnok_raw directly from the NocNok API (inmovel/code/nocnok_refresh.js, wide
+  // schema incl. pictures[]/shared_url/raw). Re-enabling this block would clobber
+  // the fresh direct-write with the dying Sheet's stale rows every 2 min.
 
   return summary;
 }

@@ -13,6 +13,7 @@ alter table public.lead_propiedad enable row level security;
 alter table public.conversaciones enable row level security;
 alter table public.anuncios enable row level security;
 alter table public.nocnok_raw enable row level security;
+alter table public.lamudi_raw enable row level security;
 alter table public.lead_match_profile enable row level security;
 alter table public.configuration enable row level security;
 alter table public.favicons_excluded_domains enable row level security;
@@ -109,6 +110,8 @@ create policy "Lead match profile selectable for accessible leads" on public.lea
 create policy "Anuncios selectable by authenticated" on public.anuncios
   for select to authenticated using (true);
 create policy "Nocnok selectable by authenticated" on public.nocnok_raw
+  for select to authenticated using (true);
+create policy "Lamudi selectable by authenticated" on public.lamudi_raw
   for select to authenticated using (true);
 
 -- Configuration (admin-only for writes)
